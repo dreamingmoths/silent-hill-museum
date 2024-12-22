@@ -194,7 +194,7 @@ export default class SerializableModel {
     [];
   private globalAddedBonePairs = new Map<number, number>();
   private boneSpaceMatrices = new Map<number, Matrix4>();
-  private inverseTransposeBoneSpaceMatrices = new Map<number, Matrix4>();
+  private transposeBoneSpaceMatrices = new Map<number, Matrix4>();
 
   // TODO: pass these into the worker from localStorage
   private lastTextureId = TEXTURE_ID_SPACE_START;
@@ -739,8 +739,7 @@ export default class SerializableModel {
     const boneIndices = meshGeometry.attributes.skinIndex?.array;
     const boneWeights = meshGeometry.attributes.skinWeight?.array;
     const boneSpaceMatrices = this.boneSpaceMatrices;
-    const inverseTransposeBoneSpaceMatrices =
-      this.inverseTransposeBoneSpaceMatrices;
+    const transposeBoneSpaceMatrices = this.transposeBoneSpaceMatrices;
     const globalAddedBonePairs = this.globalAddedBonePairs;
     const localAddedBonePairs = new Map<number, number>();
 
@@ -800,7 +799,7 @@ export default class SerializableModel {
             : bonemapCollapseTarget;
         const boneAndPairs: number[] = [targetBone];
         let objectSpaceMatrix;
-        let inverseTransposeBoneSpaceMatrix;
+        let transposeBoneSpaceMatrix;
         mesh.skeleton.bones[sourceBone].updateMatrixWorld();
         const transform =
           model.modelData.initialMatrices[
@@ -808,15 +807,15 @@ export default class SerializableModel {
           ] ?? model.modelData.initialMatrices[bonemapCollapseTarget];
         objectSpaceMatrix = transformationMatrixToMat4(transform).invert();
         boneSpaceMatrices.set(targetBone, objectSpaceMatrix);
-        inverseTransposeBoneSpaceMatrix = new Matrix4()
+        transposeBoneSpaceMatrix = new Matrix4()
           .extractRotation(transformationMatrixToMat4(transform))
           .transpose();
-        this.inverseTransposeBoneSpaceMatrices.set(
+        this.transposeBoneSpaceMatrices.set(
           targetBone,
-          inverseTransposeBoneSpaceMatrix
+          transposeBoneSpaceMatrix
         );
         vector.applyMatrix4(objectSpaceMatrix);
-        normalVector.applyMatrix4(inverseTransposeBoneSpaceMatrix);
+        normalVector.applyMatrix4(transposeBoneSpaceMatrix);
         [vertexData.x, vertexData.y, vertexData.z] = [
           vector.x,
           vector.y,
@@ -958,27 +957,28 @@ export default class SerializableModel {
         }
       } else {
         let objectSpaceMatrix = boneSpaceMatrices.get(bonemapCollapseTarget);
-        let inverseTransposeBoneSpaceMatrix =
-          inverseTransposeBoneSpaceMatrices.get(bonemapCollapseTarget);
-        if (!objectSpaceMatrix || !inverseTransposeBoneSpaceMatrix) {
+        let transposeBoneSpaceMatrix = transposeBoneSpaceMatrices.get(
+          bonemapCollapseTarget
+        );
+        if (!objectSpaceMatrix || !transposeBoneSpaceMatrix) {
           objectSpaceMatrix = transformationMatrixToMat4(
             model.modelData.initialMatrices[bonemapCollapseTarget]
           ).invert();
           boneSpaceMatrices.set(bonemapCollapseTarget, objectSpaceMatrix);
-          inverseTransposeBoneSpaceMatrix = new Matrix4()
+          transposeBoneSpaceMatrix = new Matrix4()
             .extractRotation(
               transformationMatrixToMat4(
                 model.modelData.initialMatrices[bonemapCollapseTarget]
               )
             )
             .transpose();
-          this.inverseTransposeBoneSpaceMatrices.set(
+          this.transposeBoneSpaceMatrices.set(
             bonemapCollapseTarget,
-            inverseTransposeBoneSpaceMatrix
+            transposeBoneSpaceMatrix
           );
         }
         vector.applyMatrix4(objectSpaceMatrix);
-        normalVector.applyMatrix4(inverseTransposeBoneSpaceMatrix);
+        normalVector.applyMatrix4(transposeBoneSpaceMatrix);
         [vertexData.x, vertexData.y, vertexData.z] = [
           vector.x,
           vector.y,
