@@ -801,22 +801,20 @@ export default class SerializableModel {
         const boneAndPairs: number[] = [targetBone];
         let objectSpaceMatrix;
         let inverseTransposeBoneSpaceMatrix;
-        if (!objectSpaceMatrix || !inverseTransposeBoneSpaceMatrix) {
-          mesh.skeleton.bones[sourceBone].updateMatrixWorld();
-          const transform =
-            model.modelData.initialMatrices[
-              targetBone ?? bonemapCollapseTarget
-            ] ?? model.modelData.initialMatrices[bonemapCollapseTarget];
-          objectSpaceMatrix = transformationMatrixToMat4(transform).invert();
-          boneSpaceMatrices.set(targetBone, objectSpaceMatrix);
-          inverseTransposeBoneSpaceMatrix = new Matrix4()
-            .extractRotation(transformationMatrixToMat4(transform))
-            .transpose();
-          this.inverseTransposeBoneSpaceMatrices.set(
-            targetBone,
-            inverseTransposeBoneSpaceMatrix
-          );
-        }
+        mesh.skeleton.bones[sourceBone].updateMatrixWorld();
+        const transform =
+          model.modelData.initialMatrices[
+            targetBone ?? bonemapCollapseTarget
+          ] ?? model.modelData.initialMatrices[bonemapCollapseTarget];
+        objectSpaceMatrix = transformationMatrixToMat4(transform).invert();
+        boneSpaceMatrices.set(targetBone, objectSpaceMatrix);
+        inverseTransposeBoneSpaceMatrix = new Matrix4()
+          .extractRotation(transformationMatrixToMat4(transform))
+          .transpose();
+        this.inverseTransposeBoneSpaceMatrices.set(
+          targetBone,
+          inverseTransposeBoneSpaceMatrix
+        );
         vector.applyMatrix4(objectSpaceMatrix);
         normalVector.applyMatrix4(inverseTransposeBoneSpaceMatrix);
         [vertexData.x, vertexData.y, vertexData.z] = [
