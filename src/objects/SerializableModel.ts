@@ -772,9 +772,9 @@ export default class SerializableModel {
         vector.z,
       ];
       const normalVector = new Vector3(
-        meshNormals[vertexIndex] * MIN_SIGNED_INT,
-        meshNormals[vertexIndex + 1] * MIN_SIGNED_INT,
-        meshNormals[vertexIndex + 2] * MIN_SIGNED_INT
+        meshNormals[vertexIndex],
+        meshNormals[vertexIndex + 1],
+        meshNormals[vertexIndex + 2]
       );
       vertexData.normals = [normalVector.x, normalVector.y, normalVector.z];
       vertexData.alignment = 0;
@@ -800,7 +800,8 @@ export default class SerializableModel {
             : bonemapCollapseTarget;
         const boneAndPairs: number[] = [targetBone];
         let objectSpaceMatrix;
-        if (!objectSpaceMatrix) {
+        let inverseTransposeBoneSpaceMatrix;
+        if (!objectSpaceMatrix || !inverseTransposeBoneSpaceMatrix) {
           mesh.skeleton.bones[sourceBone].updateMatrixWorld();
           const transform =
             model.modelData.initialMatrices[
@@ -808,21 +809,27 @@ export default class SerializableModel {
             ] ?? model.modelData.initialMatrices[bonemapCollapseTarget];
           objectSpaceMatrix = transformationMatrixToMat4(transform).invert();
           boneSpaceMatrices.set(targetBone, objectSpaceMatrix);
+          inverseTransposeBoneSpaceMatrix = new Matrix4()
+            .extractRotation(transformationMatrixToMat4(transform))
+            .transpose();
           this.inverseTransposeBoneSpaceMatrices.set(
             targetBone,
-            new Matrix4()
-              .extractRotation(transformationMatrixToMat4(transform))
-              .transpose()
+            inverseTransposeBoneSpaceMatrix
           );
         }
         vector.applyMatrix4(objectSpaceMatrix);
-        normalVector.applyMatrix4(objectSpaceMatrix);
+        normalVector.applyMatrix4(inverseTransposeBoneSpaceMatrix);
         [vertexData.x, vertexData.y, vertexData.z] = [
           vector.x,
           vector.y,
           vector.z,
         ];
-        vertexData.normals = [normalVector.x, normalVector.y, normalVector.z];
+        vertexData.normals = [
+          normalVector.x * MIN_SIGNED_INT,
+          normalVector.y * MIN_SIGNED_INT,
+          normalVector.z * MIN_SIGNED_INT,
+        ];
+
         for (let pairIndex = 1; pairIndex <= 3; pairIndex++) {
           const parent = targetBone;
           let child = bonemap[boneIndices[skinIndex + pairIndex]];
@@ -962,7 +969,9 @@ export default class SerializableModel {
           boneSpaceMatrices.set(bonemapCollapseTarget, objectSpaceMatrix);
           inverseTransposeBoneSpaceMatrix = new Matrix4()
             .extractRotation(
-              transformationMatrixToMat4(model.modelData.initialMatrices[0])
+              transformationMatrixToMat4(
+                model.modelData.initialMatrices[bonemapCollapseTarget]
+              )
             )
             .transpose();
           this.inverseTransposeBoneSpaceMatrices.set(
@@ -977,7 +986,11 @@ export default class SerializableModel {
           vector.y,
           vector.z,
         ];
-        vertexData.normals = [normalVector.x, normalVector.y, normalVector.z];
+        vertexData.normals = [
+          normalVector.x * MIN_SIGNED_INT,
+          normalVector.y * MIN_SIGNED_INT,
+          normalVector.z * MIN_SIGNED_INT,
+        ];
         vertexData.boneWeight0 = 1;
         vertexData.boneWeight1 = 0;
         vertexData.boneWeight2 = 0;
