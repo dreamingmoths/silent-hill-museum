@@ -39,8 +39,12 @@ export default class EditorState {
       backfaceCulling: clientState.uiParams["Render Side"] !== "DoubleSide",
       materialIndices: sharedSerializationData.materialIndices,
       textureIndices: sharedSerializationData.textureIndices,
-      textureIdStart: sharedSerializationData.textureIdStart,
-      spriteIdStart: sharedSerializationData.spriteIdStart,
+      textureIdStart:
+        sharedSerializationData.textureIdStart ??
+        (parseInt(localStorage.getItem("lastTextureId") ?? "") || undefined),
+      spriteIdStart:
+        sharedSerializationData.spriteIdStart ??
+        (parseInt(localStorage.getItem("lastSpriteId") ?? "") || undefined),
       autoscale: this.editorParams["Auto-Scale"],
       flipY: this.editorParams["Flip Y"],
       bonemapType: this.editorParams["Bonemap Method"],
