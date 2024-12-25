@@ -66,6 +66,8 @@ export type ModelParams = {
   renderTransparentPrimitives: boolean;
   materialIndices?: number[];
   textureIndices?: number[];
+  textureIdStart?: number;
+  spriteIdStart?: number;
 
   bonemap?: Bonemap;
   bonemapType: BonemapType;
@@ -195,10 +197,6 @@ export default class SerializableModel {
   private globalAddedBonePairs = new Map<number, number>();
   private boneSpaceMatrices = new Map<number, Matrix4>();
   private transposeBoneSpaceMatrices = new Map<number, Matrix4>();
-
-  // TODO: pass these into the worker from localStorage
-  private lastTextureId = TEXTURE_ID_SPACE_START;
-  private lastSpriteId = SPRITE_ID_SPACE_START;
 
   /* diff machinery */
   private totalSizeDiff = 0;
@@ -664,6 +662,10 @@ export default class SerializableModel {
         textureIndices: this.textureIndices,
       });
     }
+    this.sendToShared({
+      textureIdStart: this.params.textureIdStart,
+      spriteIdStart: this.params.spriteIdStart,
+    });
   }
 
   private createTransparentPrimitive() {
@@ -1218,7 +1220,6 @@ export default class SerializableModel {
       textureMetadata.mainTextureIds.push(textureId);
       newSpriteHeader.spriteId = 0;
       pair.spriteId = spriteId;
-      console.log(textureContainer);
     } else {
       // mdl already had a texture container here, so just modify it
       const textureMetadata = model.modelData.textureMetadata;
@@ -1267,33 +1268,12 @@ export default class SerializableModel {
 
   private generateTextureIds() {
     logger.debug("Generating a new texture ID!");
-    let textureId: number;
-    let spriteId: number;
-    if (typeof localStorage !== "undefined") {
-      // local storage is available, so use this to avoid collisions
-      let lastTextureId =
-        parseInt(localStorage.getItem("lastTextureId") ?? "0") ||
-        this.lastTextureId;
-      let lastSpriteId =
-        parseInt(localStorage.getItem("lastSpriteId") ?? "0") ||
-        this.lastSpriteId;
-      if (!lastTextureId) {
-        textureId = TEXTURE_ID_SPACE_START;
-      } else {
-        textureId = ++lastTextureId;
-      }
-      if (!lastSpriteId) {
-        spriteId = SPRITE_ID_SPACE_START;
-      } else {
-        spriteId = ++lastSpriteId;
-      }
-      localStorage.setItem("lastTextureId", textureId.toString());
-      localStorage.setItem("lastSpriteId", spriteId.toString());
-    } else {
-      // unavailable, just store at start of unreserved space i suppose
-      textureId = this.lastTextureId++;
-      spriteId = this.lastSpriteId++;
-    }
+
+    this.params.textureIdStart ??= TEXTURE_ID_SPACE_START;
+    this.params.spriteIdStart ??= SPRITE_ID_SPACE_START;
+    const textureId = this.params.textureIdStart++;
+    const spriteId = this.params.spriteIdStart++;
+
     return { textureId, spriteId };
   }
 
