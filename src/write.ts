@@ -30,6 +30,8 @@ export type SharedSerializationData = {
   bonemap?: Bonemap;
   materialIndices?: number[];
   textureIndices?: number[];
+  textureIdStart?: number;
+  spriteIdStart?: number;
 };
 export type Bonemap = Record<number, number>;
 
@@ -94,6 +96,16 @@ export const onReceiveSharedData = (
   if (sharedData.materialIndices && sharedData.textureIndices) {
     sharedSerializationData.materialIndices = sharedData.materialIndices;
     sharedSerializationData.textureIndices = sharedData.textureIndices;
+  }
+
+  const { textureIdStart: textureId, spriteIdStart: spriteId } = sharedData;
+  if (textureId && spriteId) {
+    sharedSerializationData.textureIdStart = textureId;
+    sharedSerializationData.spriteIdStart = spriteId;
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("lastTextureId", textureId.toString());
+      localStorage.setItem("lastSpriteId", spriteId.toString());
+    }
   }
 };
 
