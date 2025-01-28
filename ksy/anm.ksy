@@ -9,27 +9,22 @@ meta:
     - mdl
 
 doc: |
-  Anm is the proprietary 3D animation format of Silent Hill 2 (PC). It describes
-  rotations and translations that are applied to the bones of a model.
+  Anm is the proprietary 3D animation format of Silent Hill 2 (PC). It
+  describes rotations and translations that are applied to the bones of a
+  model.
+  Parsing an animation requires knowing the structure of the model's skeleton,
+  so the model must be provided to the parser.
 
 params:
   - id: model
     type: mdl
+    doc: The model that the animation will be applied to.
 
 seq:
   - id: blocks
-    type: >
-      block([
-        model.model_data.skeleton_tree[((_index % (model.model_data.bone_count / 8 + (model.model_data.bone_count & 7 == 0 ? 0 : 1))) * 8) % model.model_data.bone_count] == 255 ? 1 : 0,
-        model.model_data.skeleton_tree[(((_index % (model.model_data.bone_count / 8 + (model.model_data.bone_count & 7 == 0 ? 0 : 1))) * 8) + 1) % model.model_data.bone_count] == 255 ? 1 : 0,
-        model.model_data.skeleton_tree[(((_index % (model.model_data.bone_count / 8 + (model.model_data.bone_count & 7 == 0 ? 0 : 1))) * 8) + 2) % model.model_data.bone_count] == 255 ? 1 : 0,
-        model.model_data.skeleton_tree[(((_index % (model.model_data.bone_count / 8 + (model.model_data.bone_count & 7 == 0 ? 0 : 1))) * 8) + 3) % model.model_data.bone_count] == 255 ? 1 : 0,
-        model.model_data.skeleton_tree[(((_index % (model.model_data.bone_count / 8 + (model.model_data.bone_count & 7 == 0 ? 0 : 1))) * 8) + 4) % model.model_data.bone_count] == 255 ? 1 : 0,
-        model.model_data.skeleton_tree[(((_index % (model.model_data.bone_count / 8 + (model.model_data.bone_count & 7 == 0 ? 0 : 1))) * 8) + 5) % model.model_data.bone_count] == 255 ? 1 : 0,
-        model.model_data.skeleton_tree[(((_index % (model.model_data.bone_count / 8 + (model.model_data.bone_count & 7 == 0 ? 0 : 1))) * 8) + 6) % model.model_data.bone_count] == 255 ? 1 : 0,
-        model.model_data.skeleton_tree[(((_index % (model.model_data.bone_count / 8 + (model.model_data.bone_count & 7 == 0 ? 0 : 1))) * 8) + 7) % model.model_data.bone_count] == 255 ? 1 : 0
-      ])
+    type: block(model, _index)
     repeat: eos
+    doc: A repeating series of groups of 8 transforms.
 
 types:
   none:
@@ -238,7 +233,7 @@ types:
         doc: A number 0-7 that identifies the type of a transform within a block.
       - id: flag
         type: b1
-        doc: Function unknown.
+        doc: Function unknown, but the game does read and store this value.
     enums:
       transform_type:
         0: none
@@ -257,11 +252,12 @@ types:
       the last block in a frame should be padded with "none" entries as
       necessary.
     params:
-      - id: root_flags
-        type: bytes
-        doc: |
-          An array of flags (0 = false, 1 = true) indicating which, if any,
-          transforms in the block correspond to root nodes of the skeleton.
+      - id: model
+        type: mdl
+        doc: The model that the animation applies to.
+      - id: block_index
+        type: u4
+        doc: The index of this block within the file.
     seq:
       - id: header
         type: transform_header
@@ -272,7 +268,23 @@ types:
           the type of the next transform in the block.
       - id: transforms
         type:
-          switch-on: '[header[_index].type, root_flags[_index]].as<bytes>'
+          switch-on: >
+            [
+              header[_index].type,
+              model.model_data.skeleton_tree[
+                (
+                  (
+                    (
+                      block_index % (
+                        model.model_data.bone_count / 8 + (
+                          model.model_data.bone_count & 7 == 0 ? 0 : 1
+                        )
+                      )
+                    ) * 8
+                  ) + _index
+                ) % model.model_data.bone_count
+              ] == 255 ? 1 : 0
+            ].as<bytes>
           cases:
             '[0, 0]': none
             '[0, 1]': none
@@ -295,4 +307,5 @@ types:
         doc: |
           A 3D transformation to be applied to a bone of a model. The exact
           fields and interpretation of a particular transform depends on the
-          transform type specified in the block header.
+          transform type specified in the block header and whether the bone
+          that the transform applies to is a root node of the skeleton or not.
