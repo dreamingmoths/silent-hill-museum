@@ -10,7 +10,7 @@ meta:
 
 doc: |
   Anm is the proprietary 3D animation format of Silent Hill 2 (PC). It describes
-  rotations and translations that are applied to the bones of a model.model_data.
+  rotations and translations that are applied to the bones of a model.
 
 params:
   - id: model
@@ -293,6 +293,6 @@ types:
         repeat: expr
         repeat-expr: 8
         doc: |
-          A 3D transformation to be applied to a bone of a model.model_data. The exact
+          A 3D transformation to be applied to a bone of a model. The exact
           fields and interpretation of a particular transform depends on the
           transform type specified in the block header.
