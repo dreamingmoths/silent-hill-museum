@@ -261,13 +261,28 @@ types:
     seq:
       - id: header
         type: transform_header
-        repeat: expr
+        repeat: expr1
         repeat-expr: 8
         doc: |
           A 32-bit field where each nibble, in little-endian order, identifies
           the type of the next transform in the block.
       - id: transforms
         type:
+          # the transform type depends on the type ID from the header and
+          # whether the transform applies to a root bone or not. to determine
+          # the latter, we need to index into the skeleton tree, but the
+          # last block in a frame is padded with empty transforms to make each
+          # frame occupy a whole number of blocks, so we can't use the block
+          # and transform indexes directly. instead, we calculate the number
+          # of blocks per frame, take the block index modulo that number so we
+          # loop back to the beginning of the tree after each frame, then
+          # multiply by the block size and add the transform index to get
+          # the skeleton index. lastly, we use the skeleton index modulo the
+          # bone count because the indexes of the padding transforms in the
+          # final block of a frame would otherwise exceed the length of the
+          # skeleton tree. the actual value of the root flag calculated in this
+          # case is irrelevant because the padding transforms are always zero
+          # bytes regardless.
           switch-on: >
             [
               header[_index].type,
@@ -276,11 +291,9 @@ types:
                   (
                     (
                       block_index % (
-                        model.model_data.bone_count / 8 + (
-                          model.model_data.bone_count & 7 == 0 ? 0 : 1
-                        )
+                        ((model.model_data.bone_count + 7) & 0xF8) >> 3
                       )
-                    ) * 8
+                    ) << 3
                   ) + _index
                 ) % model.model_data.bone_count
               ] == 255 ? 1 : 0
