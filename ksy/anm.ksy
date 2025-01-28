@@ -261,7 +261,7 @@ types:
     seq:
       - id: header
         type: transform_header
-        repeat: expr1
+        repeat: expr
         repeat-expr: 8
         doc: |
           A 32-bit field where each nibble, in little-endian order, identifies
