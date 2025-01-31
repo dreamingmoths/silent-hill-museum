@@ -29,7 +29,9 @@ const decodeFloat16 = (binary: number) => {
 
 test("fuzz conversion", () => {
   const RANGE = 0x7bff;
-  for (let i = 0; i < 8888; i++) {
+  const TRIALS = 88888;
+
+  for (let i = 0; i < TRIALS; i++) {
     const n = Math.round(Math.random() * RANGE);
     const expected = decodeFloat16(n);
     const actual = constructHalfFloat(n);
@@ -40,4 +42,23 @@ test("fuzz conversion", () => {
     }
     expect(Math.abs(expected)).toBeCloseTo(actual);
   }
+});
+
+test("benchmark", () => {
+  const RANGE = 0x7bff;
+  const TRIALS = 88888;
+
+  console.time("native js");
+  for (let i = 0; i < TRIALS; i++) {
+    const n = Math.round(Math.random() * RANGE);
+    decodeFloat16(n);
+  }
+  console.timeEnd("native js");
+
+  console.time("kaitai");
+  for (let i = 0; i < TRIALS; i++) {
+    const n = Math.round(Math.random() * RANGE);
+    constructHalfFloat(n);
+  }
+  console.timeEnd("kaitai");
 });
