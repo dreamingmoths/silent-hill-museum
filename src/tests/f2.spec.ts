@@ -30,7 +30,7 @@ const decodeFloat16 = (binary: number) => {
 test("fuzz conversion", () => {
   const RANGE = 0x7bff;
   for (let i = 0; i < 8888; i++) {
-    const n = Math.random() * RANGE;
+    const n = Math.round(Math.random() * RANGE);
     const expected = decodeFloat16(n);
     const actual = constructHalfFloat(n);
     if (!Number.isFinite(expected)) {
