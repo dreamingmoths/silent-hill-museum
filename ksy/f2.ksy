@@ -36,13 +36,13 @@ instances:
     value: 0.00006103515625 * (fraction.as<f4> / 0x400)
 
   special_value:
-    value: "fraction == 0 ? nan : infinity"
+    value: "fraction == 0 ? infinity : nan"
 
   infinity:
-    value: 0 # no ♾️ in kaitai?
+    value: 1 / 0 # ♾️
 
   nan:
-    value: 0 # no 🫓 in kaitai? 🍞
+    value: 0 / 0 # 🫓
 
   abs_value:
     value: |
