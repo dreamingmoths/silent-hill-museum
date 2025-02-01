@@ -95,8 +95,7 @@ test("fuzz conversion", () => {
     const expected = Float16.fromBytes(n);
     const actual = Float16.fromBinaryFile(f);
     if (!Number.isFinite(expected)) {
-      // this implementation doesn't handle infinity/NaN properly
-      expect(actual).toEqual(0);
+      expect(expected).toEqual(actual);
       continue;
     }
     expect(Math.abs(expected), `for ${n}`).toBeCloseTo(actual);
