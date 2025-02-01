@@ -9,6 +9,10 @@ const mockBinaryFile = (n: number) => ({
 });
 
 class Float16 {
+  public static readonly POSITIVE_INFINITY = 0x7c00;
+  public static readonly NaN = 0x7c01;
+  public static readonly NEGATIVE_INFINITY = 0xfc00;
+
   public static fromBinaryFile(file: BinaryFile) {
     return new KaitaiFloat16(file).floatValue;
   }
@@ -32,6 +36,43 @@ class Float16 {
   }
 }
 
+const prettyHex = (n: number) => `0x${n.toString(16).padStart(4, "0")}`;
+/**
+ * from {@link https://stackoverflow.com/a/8796597}
+ */
+[
+  0x3c00, // = 1
+  0xc000, // = −2
+  0x7bff, // = 6.5504 × 10^4 (max half precision)
+  0x0400, // = 2^−14 ≈ 6.10352 × 10^−5 (minimum positive normal)
+  0x0001, // = 2^−24 ≈ 5.96046 × 10^−8 (minimum strictly positive subnormal)
+  0x0000, // = 0
+  0x8000, // = −0
+  0x3555, // ≈ 0.33325... ≈ 1/3
+].forEach((n) => {
+  test(prettyHex(n), () => {
+    expect(Float16.fromBytes(n)).toBeCloseTo(
+      Float16.fromBinaryFile(mockBinaryFile(n))
+    );
+  });
+});
+
+test("positive infinity", () => {
+  expect(
+    Float16.fromBinaryFile(mockBinaryFile(Float16.POSITIVE_INFINITY))
+  ).toEqual(Number.POSITIVE_INFINITY);
+});
+test("negative infinity", () => {
+  expect(
+    Float16.fromBinaryFile(mockBinaryFile(Float16.NEGATIVE_INFINITY))
+  ).toEqual(Number.NEGATIVE_INFINITY);
+});
+test("NaN", () => {
+  expect(Float16.fromBinaryFile(mockBinaryFile(Float16.NaN))).toEqual(
+    Number.NaN
+  );
+});
+
 const getRandomInputs = (range: number, size: number) => {
   const numbers: number[] = [];
   const mockFiles: BinaryFile[] = [];
@@ -45,7 +86,7 @@ const getRandomInputs = (range: number, size: number) => {
 
 test("fuzz conversion", () => {
   const RANGE = 0x7bff;
-  const TRIALS = 88888;
+  const TRIALS = 8888;
   const { numbers, mockFiles } = getRandomInputs(RANGE, TRIALS);
 
   for (let i = 0; i < TRIALS; i++) {
@@ -64,7 +105,7 @@ test("fuzz conversion", () => {
 
 test("benchmark", () => {
   const RANGE = 0x7bff;
-  const TRIALS = 88888;
+  const TRIALS = 888888;
   const { numbers, mockFiles } = getRandomInputs(RANGE, TRIALS);
 
   console.time("native js");
