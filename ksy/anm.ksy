@@ -7,6 +7,7 @@ meta:
   bit-endian: le
   imports:
     - mdl
+    - f2
 
 doc: |
   Anm is the proprietary 3D animation format of Silent Hill 2 (PC). It
@@ -61,14 +62,13 @@ types:
 
   translation16:
     doc: A 3D translation described with 16-bit floating point values.
-    # unfortunately, Kaitai doesn't support 16-bit floats
     seq:
       - id: x
-        size: 2
+        type: f2
       - id: y
-        size: 2
+        type: f2
       - id: z
-        size: 2
+        type: f2
 
   translation16_padded:
     doc: |
@@ -76,15 +76,15 @@ types:
       padded to 32 bits.
     seq:
       - id: x
-        size: 2
+        type: f2
       - id: x_pad
         size: 2
       - id: y
-        size: 2
+        type: f2
       - id: y_pad
         size: 2
       - id: z
-        size: 2
+        type: f2
       - id: z_pad
         size: 2
 
@@ -258,6 +258,10 @@ types:
       - id: block_index
         type: u4
         doc: The index of this block within the file.
+    instances:
+      # round bone count up to a multiple of the block size
+      num_transforms_per_frame:
+        value: (model.model_data.bone_count + 7) & 0xF8
     seq:
       - id: header
         type: transform_header
@@ -273,28 +277,22 @@ types:
           # the latter, we need to index into the skeleton tree, but the
           # last block in a frame is padded with empty transforms to make each
           # frame occupy a whole number of blocks, so we can't use the block
-          # and transform indexes directly. instead, we calculate the number
-          # of blocks per frame, take the block index modulo that number so we
-          # loop back to the beginning of the tree after each frame, then
-          # multiply by the block size and add the transform index to get
-          # the skeleton index. lastly, we use the skeleton index modulo the
-          # bone count because the indexes of the padding transforms in the
-          # final block of a frame would otherwise exceed the length of the
-          # skeleton tree. the actual value of the root flag calculated in this
-          # case is irrelevant because the padding transforms are always zero
-          # bytes regardless.
+          # and transform indexes directly. instead, we round the number of
+          # bones up to the nearest multiple of the block size, take the block
+          # index times the block size modulo that number so we loop back to
+          # the beginning of the tree after each frame, then add the transform
+          # index to get the skeleton index. lastly, we use the skeleton index
+          # modulo the bone count because the indexes of the padding transforms
+          # in the final block of a frame would otherwise exceed the length of
+          # the skeleton tree. the actual value of the root flag calculated in
+          # this case is irrelevant because the padding transforms are always
+          # zero bytes regardless.
           switch-on: >
             [
               header[_index].type,
               model.model_data.skeleton_tree[
                 (
-                  (
-                    (
-                      block_index % (
-                        ((model.model_data.bone_count + 7) & 0xF8) >> 3
-                      )
-                    ) << 3
-                  ) + _index
+                  (block_index << 3) % num_transforms_per_frame + _index
                 ) % model.model_data.bone_count
               ] == 255 ? 1 : 0
             ].as<bytes>
