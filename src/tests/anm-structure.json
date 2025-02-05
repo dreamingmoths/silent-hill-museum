@@ -1,0 +1,156 @@
+{
+  "chr": {
+    "oni": [
+      "oni.anm"
+    ],
+    "edi": [
+      "lll_edi.anm",
+      "p_edi.anm"
+    ],
+    "mkn": [
+      "mkn.anm",
+      "mkn_311.anm"
+    ],
+    "mar": [
+      "lll_mar.anm",
+      "lll_mar_back.anm",
+      "p_hhh_mar.anm"
+    ],
+    "xoo": [
+      "xoo.anm"
+    ],
+    "scu": [
+      "scu.anm"
+    ],
+    "boat": [
+      "boat.anm"
+    ],
+    "mry": [
+      "p_mry.anm"
+    ],
+    "pap": [
+      "pap.anm"
+    ],
+    "wp": [
+      "jms_weapon.anm"
+    ],
+    "red": [
+      "red.anm",
+      "red_wlk.anm"
+    ],
+    "ike": [
+      "ike.anm"
+    ],
+    "agl": [
+      "p_agl.anm"
+    ],
+    "item": [
+      "b_nik.anm",
+      "p_b_piz.anm",
+      "p_i_colt.anm",
+      "p_i_letter.anm",
+      "pxx.anm"
+    ],
+    "bos": [
+      "bos.anm"
+    ],
+    "lau": [
+      "p_lau.anm"
+    ],
+    "arm": [
+      "arm.anm"
+    ],
+    "tyu": [
+      "tyu.anm"
+    ],
+    "jms": [
+      "jms_basic1.anm",
+      "jms_basic1_1.anm",
+      "jms_basic1_2.anm",
+      "jms_basic2_1.anm",
+      "jms_basic2_2.anm",
+      "jms_basic3.anm",
+      "jms_basic3_1.anm",
+      "jms_basic3_2.anm",
+      "jms_basic4.anm",
+      "jms_basic5.anm",
+      "jms_boat.anm",
+      "jms_stg_apart_e1f.anm",
+      "jms_stg_apart_e2f.anm",
+      "jms_stg_apart_e3fe.anm",
+      "jms_stg_apart_e3fw.anm",
+      "jms_stg_apart_out.anm",
+      "jms_stg_apart_stair.anm",
+      "jms_stg_apart_w1f.anm",
+      "jms_stg_apart_w2f.anm",
+      "jms_stg_bowling.anm",
+      "jms_stg_delusion_2.anm",
+      "jms_stg_delusion_3.anm",
+      "jms_stg_eddie_boss.anm",
+      "jms_stg_end_dog.anm",
+      "jms_stg_end_maria.anm",
+      "jms_stg_end_rebirth.anm",
+      "jms_stg_end_recovery.anm",
+      "jms_stg_end_suicide.anm",
+      "jms_stg_forest.anm",
+      "jms_stg_heaven_night.anm",
+      "jms_stg_hospital_1f_f.anm",
+      "jms_stg_hospital_1fe_b.anm",
+      "jms_stg_hospital_1fw_b.anm",
+      "jms_stg_hospital_2f_b.anm",
+      "jms_stg_hospital_2f_f.anm",
+      "jms_stg_hospital_3f_b.anm",
+      "jms_stg_hospital_3f_f.anm",
+      "jms_stg_hospital_bf_b.anm",
+      "jms_stg_hospital_pass.anm",
+      "jms_stg_hospital_rf_f.anm",
+      "jms_stg_hotel_1f_b.anm",
+      "jms_stg_hotel_1f_f.anm",
+      "jms_stg_hotel_2f_b.anm",
+      "jms_stg_hotel_2f_f.anm",
+      "jms_stg_hotel_3f_b.anm",
+      "jms_stg_hotel_3f_f.anm",
+      "jms_stg_hotel_bf_b.anm",
+      "jms_stg_hotel_bf_f.anm",
+      "jms_stg_hotel_fire.anm",
+      "jms_stg_labyrinth_e.anm",
+      "jms_stg_labyrinth_n.anm",
+      "jms_stg_labyrinth_w.anm",
+      "jms_stg_lake.anm",
+      "jms_stg_ovservation.anm",
+      "jms_stg_prison_bf.anm",
+      "jms_stg_prison_n.anm",
+      "jms_stg_prison_s.anm",
+      "jms_stg_society.anm",
+      "jms_stg_tgs_trial.anm",
+      "jms_stg_to_heaven.anm",
+      "jms_stg_toilet.anm",
+      "jms_stg_town_east.anm",
+      "jms_stg_town_west.anm",
+      "jms_wp_hand.anm",
+      "jms_wp_kaku.anm",
+      "jms_wpcsaw.anm",
+      "jms_wphand.anm",
+      "jms_wpkaku.anm",
+      "jms_wpnata.anm",
+      "jms_wpnone.anm",
+      "jms_wppipe.anm",
+      "jms_wprifl.anm",
+      "jms_wpshot.anm",
+      "jms_wpsp.anm"
+    ],
+    "nse": [
+      "nse.anm"
+    ]
+  },
+  "chr2": {
+    "mar": [
+      "xmar_wpcolt.anm",
+      "xmar_wpknif.anm",
+      "xmar_wpnone.anm"
+    ],
+    "wp": [
+      "mar_weapon.anm"
+    ]
+  }
+}
