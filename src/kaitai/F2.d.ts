@@ -2,8 +2,12 @@
 
 declare class F2 {
   constructor(io: any, parent?: any, root?: any);
-  __type: 'F2';
+  __type: "F2";
   _io: any;
+  _read: () => void;
+  _fetchInstances: () => void;
+  _write__seq: (_io: KaitaiStream) => void;
+  _writeBackChildStreams: () => void;
 
   absValue: number;
   exponent: number;
@@ -25,7 +29,7 @@ declare class F2 {
 declare namespace F2 {
   class Pow2 {
     constructor(io: any, parent?: any, root?: any);
-    __type: 'Pow2';
+    __type: "Pow2";
     _io: any;
 
     val: number;
