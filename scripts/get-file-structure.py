@@ -7,11 +7,11 @@ def get_files_by_extension(directory, extension):
         result = {}
         
         items = os.listdir(directory)
-        has_files = any(item.endswith(extension) and os.stat(os.path.join(directory, item)).st_size > 0 for item in items)
+        has_files = any(extension in item and os.stat(os.path.join(directory, item)).st_size > 0 for item in items)
         
         if not any(os.path.isdir(os.path.join(directory, item)) for item in items):
             # If the directory contains only files, return a list of files
-            return sorted([item for item in items if item.endswith(extension) and os.stat(os.path.join(directory, item)).st_size > 0])
+            return sorted([item for item in items if extension in item and os.stat(os.path.join(directory, item)).st_size > 0])
         
         for item in items:
             item_path = os.path.join(directory, item)

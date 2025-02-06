@@ -1,49 +1,18 @@
 {
   "chr": {
-    "oni": [
-      "oni.anm"
-    ],
-    "edi": [
-      "lll_edi.anm",
-      "p_edi.anm"
-    ],
-    "mkn": [
-      "mkn.anm",
-      "mkn_311.anm"
-    ],
-    "mar": [
-      "lll_mar.anm",
-      "lll_mar_back.anm",
-      "p_hhh_mar.anm"
-    ],
-    "xoo": [
-      "xoo.anm"
-    ],
-    "scu": [
-      "scu.anm"
-    ],
-    "boat": [
-      "boat.anm"
-    ],
-    "mry": [
-      "p_mry.anm"
-    ],
-    "pap": [
-      "pap.anm"
-    ],
-    "wp": [
-      "jms_weapon.anm"
-    ],
-    "red": [
-      "red.anm",
-      "red_wlk.anm"
-    ],
-    "ike": [
-      "ike.anm"
-    ],
-    "agl": [
-      "p_agl.anm"
-    ],
+    "oni": ["oni.anm"],
+    "edi": ["lll_edi.anm", "p_edi.anm"],
+    "mkn": ["mkn.anm", "mkn_311.anm"],
+    "mar": ["lll_mar.anm", "lll_mar_back.anm", "p_hhh_mar.anm"],
+    "xoo": ["xoo.anm"],
+    "scu": ["scu.anm"],
+    "boat": ["boat.anm"],
+    "mry": ["p_mry.anm"],
+    "pap": ["pap.anm"],
+    "wp": ["jms_weapon.anm", "jms_weapon.anm_b"],
+    "red": ["red.anm", "red_wlk.anm"],
+    "ike": ["ike.anm"],
+    "agl": ["p_agl.anm"],
     "item": [
       "b_nik.anm",
       "p_b_piz.anm",
@@ -51,18 +20,10 @@
       "p_i_letter.anm",
       "pxx.anm"
     ],
-    "bos": [
-      "bos.anm"
-    ],
-    "lau": [
-      "p_lau.anm"
-    ],
-    "arm": [
-      "arm.anm"
-    ],
-    "tyu": [
-      "tyu.anm"
-    ],
+    "bos": ["bos.anm"],
+    "lau": ["p_lau.anm"],
+    "arm": ["arm.anm"],
+    "tyu": ["tyu.anm"],
     "jms": [
       "jms_basic1.anm",
       "jms_basic1_1.anm",
@@ -130,8 +91,10 @@
       "jms_wp_hand.anm",
       "jms_wp_kaku.anm",
       "jms_wpcsaw.anm",
+      "jms_wpcsaw.anm_b",
       "jms_wphand.anm",
       "jms_wpkaku.anm",
+      "jms_wpkaku.anm_bak",
       "jms_wpnata.anm",
       "jms_wpnone.anm",
       "jms_wppipe.anm",
@@ -139,18 +102,10 @@
       "jms_wpshot.anm",
       "jms_wpsp.anm"
     ],
-    "nse": [
-      "nse.anm"
-    ]
+    "nse": ["nse.anm"]
   },
   "chr2": {
-    "mar": [
-      "xmar_wpcolt.anm",
-      "xmar_wpknif.anm",
-      "xmar_wpnone.anm"
-    ],
-    "wp": [
-      "mar_weapon.anm"
-    ]
+    "mar": ["xmar_wpcolt.anm", "xmar_wpknif.anm", "xmar_wpnone.anm"],
+    "wp": ["mar_weapon.anm"]
   }
 }
