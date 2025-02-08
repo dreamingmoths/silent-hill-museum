@@ -629,57 +629,57 @@ var Anm = (function () {
       this._root = _root;
     }
     Rotation.prototype._read = function () {
-      this.x = this._io.readS2le();
-      this.y = this._io.readS2le();
-      this.z = this._io.readS2le();
+      this.xInt = this._io.readS2le();
+      this.yInt = this._io.readS2le();
+      this.zInt = this._io.readS2le();
     };
 
     Rotation.prototype._fetchInstances = function () {};
 
     Rotation.prototype._write__seq = function (io) {
       this._io = io;
-      this._io.writeS2le(this.x);
-      this._io.writeS2le(this.y);
-      this._io.writeS2le(this.z);
+      this._io.writeS2le(this.xInt);
+      this._io.writeS2le(this.yInt);
+      this._io.writeS2le(this.zInt);
     };
 
     Rotation.prototype._check = function () {};
-    Object.defineProperty(Rotation.prototype, "xReal", {
+    Object.defineProperty(Rotation.prototype, "x", {
       set: function (v) {
-        this._m_xReal = v;
+        this._m_x = v;
       },
       get: function () {
-        if (this._m_xReal !== undefined) return this._m_xReal;
-        this._m_xReal = this.x / 4096.0;
-        return this._m_xReal;
+        if (this._m_x !== undefined) return this._m_x;
+        this._m_x = this.xInt / 4096.0;
+        return this._m_x;
       },
     });
 
-    Rotation.prototype._invalidate_xReal = function () {};
-    Object.defineProperty(Rotation.prototype, "yReal", {
+    Rotation.prototype._invalidate_x = function () {};
+    Object.defineProperty(Rotation.prototype, "y", {
       set: function (v) {
-        this._m_yReal = v;
+        this._m_y = v;
       },
       get: function () {
-        if (this._m_yReal !== undefined) return this._m_yReal;
-        this._m_yReal = this.y / 4096.0;
-        return this._m_yReal;
+        if (this._m_y !== undefined) return this._m_y;
+        this._m_y = this.yInt / 4096.0;
+        return this._m_y;
       },
     });
 
-    Rotation.prototype._invalidate_yReal = function () {};
-    Object.defineProperty(Rotation.prototype, "zReal", {
+    Rotation.prototype._invalidate_y = function () {};
+    Object.defineProperty(Rotation.prototype, "z", {
       set: function (v) {
-        this._m_zReal = v;
+        this._m_z = v;
       },
       get: function () {
-        if (this._m_zReal !== undefined) return this._m_zReal;
-        this._m_zReal = this.z / 4096.0;
-        return this._m_zReal;
+        if (this._m_z !== undefined) return this._m_z;
+        this._m_z = this.zInt / 4096.0;
+        return this._m_z;
       },
     });
 
-    Rotation.prototype._invalidate_zReal = function () {};
+    Rotation.prototype._invalidate_z = function () {};
 
     return Rotation;
   })());
@@ -1595,71 +1595,71 @@ var Anm = (function () {
       this._root = _root;
     }
     Axis.prototype._read = function () {
-      this.x = this._io.readS2le();
-      this.y = this._io.readS2le();
-      this.z = this._io.readS2le();
-      this.w = this._io.readS2le();
+      this.xInt = this._io.readS2le();
+      this.yInt = this._io.readS2le();
+      this.zInt = this._io.readS2le();
+      this.wInt = this._io.readS2le();
     };
 
     Axis.prototype._fetchInstances = function () {};
 
     Axis.prototype._write__seq = function (io) {
       this._io = io;
-      this._io.writeS2le(this.x);
-      this._io.writeS2le(this.y);
-      this._io.writeS2le(this.z);
-      this._io.writeS2le(this.w);
+      this._io.writeS2le(this.xInt);
+      this._io.writeS2le(this.yInt);
+      this._io.writeS2le(this.zInt);
+      this._io.writeS2le(this.wInt);
     };
 
     Axis.prototype._check = function () {};
-    Object.defineProperty(Axis.prototype, "xReal", {
+    Object.defineProperty(Axis.prototype, "x", {
       set: function (v) {
-        this._m_xReal = v;
+        this._m_x = v;
       },
       get: function () {
-        if (this._m_xReal !== undefined) return this._m_xReal;
-        this._m_xReal = this.x / 32768.0;
-        return this._m_xReal;
+        if (this._m_x !== undefined) return this._m_x;
+        this._m_x = this.xInt / 32768.0;
+        return this._m_x;
       },
     });
 
-    Axis.prototype._invalidate_xReal = function () {};
-    Object.defineProperty(Axis.prototype, "yReal", {
+    Axis.prototype._invalidate_x = function () {};
+    Object.defineProperty(Axis.prototype, "y", {
       set: function (v) {
-        this._m_yReal = v;
+        this._m_y = v;
       },
       get: function () {
-        if (this._m_yReal !== undefined) return this._m_yReal;
-        this._m_yReal = this.y / 32768.0;
-        return this._m_yReal;
+        if (this._m_y !== undefined) return this._m_y;
+        this._m_y = this.yInt / 32768.0;
+        return this._m_y;
       },
     });
 
-    Axis.prototype._invalidate_yReal = function () {};
-    Object.defineProperty(Axis.prototype, "zReal", {
+    Axis.prototype._invalidate_y = function () {};
+    Object.defineProperty(Axis.prototype, "z", {
       set: function (v) {
-        this._m_zReal = v;
+        this._m_z = v;
       },
       get: function () {
-        if (this._m_zReal !== undefined) return this._m_zReal;
-        this._m_zReal = this.z / 32768.0;
-        return this._m_zReal;
+        if (this._m_z !== undefined) return this._m_z;
+        this._m_z = this.zInt / 32768.0;
+        return this._m_z;
       },
     });
 
-    Axis.prototype._invalidate_zReal = function () {};
-    Object.defineProperty(Axis.prototype, "wReal", {
+    Axis.prototype._invalidate_z = function () {};
+    Object.defineProperty(Axis.prototype, "w", {
       set: function (v) {
-        this._m_wReal = v;
+        this._m_w = v;
       },
       get: function () {
-        if (this._m_wReal !== undefined) return this._m_wReal;
-        this._m_wReal = this.w / 32768.0;
-        return this._m_wReal;
+        if (this._m_w !== undefined) return this._m_w;
+        this._m_w = this.wInt / 32768.0;
+        return this._m_w;
       },
     });
 
-    Axis.prototype._invalidate_wReal = function () {};
+    Axis.prototype._invalidate_w = function () {};
 
     return Axis;
   })());
@@ -1734,5 +1734,4 @@ var Anm = (function () {
 
   return Anm;
 })();
-
 export default Anm;

@@ -76,10 +76,6 @@ export const loadAnimationFromUrl = async (
   if (url in animationCache) {
     return animationCache[url];
   }
-  if (!url.endsWith(".anm")) {
-    logger.warn("Cannot load files other than .anm.");
-    return undefined;
-  }
   const bytes = await fetchRawBytes(url);
   if (bytes.byteLength === 0) {
     logger.warn("File is empty.");
