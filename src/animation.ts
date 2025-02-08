@@ -27,7 +27,6 @@ export const createAnimationTracks = (
 ) => {
   const boneInfo: BoneInfo[] = [];
   const anmTypes = new Set<any>();
-  let skipThisFrame = true; // ???
 
   const blocks = animation.blocks;
   const model = animation.model;
@@ -39,11 +38,7 @@ export const createAnimationTracks = (
       const boneIndex =
         (((i << 3) % block.numTransformsPerFrame) + j) %
         model.modelData.boneCount;
-      if (boneIndex === 0) {
-        // ignore every other frame?
-        skipThisFrame = !skipThisFrame;
-      }
-      if (skipThisFrame) {
+      if (!block.header[j].flag) {
         continue;
       }
       boneInfo[boneIndex] ??= {
