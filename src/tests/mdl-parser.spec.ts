@@ -1,6 +1,6 @@
 import path from "path";
 import { expect, test } from "vitest";
-import { loadModel } from "../load";
+import { loadModelFromUrl } from "../load";
 import { globby } from "globby";
 import SilentHillModel from "../kaitai/Mdl";
 import { transformationMatrixToMat4 } from "../utils";
@@ -27,13 +27,13 @@ const loadModelWithCache = async (file: string) => {
     return modelCache[file];
   }
 
-  const model = await loadModel(file);
+  const model = await loadModelFromUrl(file);
   modelCache[file] = { model };
   return model;
 };
 
 test("should parse all models without error", async () => {
-  const inputDir = path.join(__dirname, "../../public/mdl");
+  const inputDir = path.join(__dirname, "../../public/data");
   const files = await globby([`${inputDir}/**/*.mdl`]);
 
   for (const file of files) {

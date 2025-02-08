@@ -1,104 +1,120 @@
 import { describe, expect, test } from "vitest";
 
-import fs from "fs";
+import SilentHillModel from "../kaitai/Mdl";
+import SilentHillAnimation from "../kaitai/Anm";
+
+import anmFileStructure from "../assets/anm-structure.json";
+import { anmToMdlAssoc } from "../animation";
+import { destructureIndex, fileArray } from "../files";
+import { loadAnimationFromUrl, loadModelFromUrl } from "../load";
 import path from "path";
-
-import KaitaiStream from "../kaitai/runtime/KaitaiStream";
-import Mdl from "../kaitai/Mdl";
-import Anm from "../kaitai/Anm";
-
-import anmFileStructure from "./anm-structure.json";
 
 const lfshStructure = anmFileStructure.chr;
 const bfawStructure = anmFileStructure.chr2;
+const demoLfshStructure = anmFileStructure.demo;
+const demoBfawStructure = anmFileStructure.demo2;
+
 const lfshFolders = Object.keys(
   lfshStructure
 ) as (keyof typeof lfshStructure)[];
+const bfawFolders = Object.keys(
+  bfawStructure
+) as (keyof typeof bfawStructure)[];
+const demoLfshFolders = Object.keys(
+  demoLfshStructure
+) as (keyof typeof demoLfshStructure)[];
+const demoBfawFolders = Object.keys(
+  demoBfawStructure
+) as (keyof typeof demoBfawStructure)[];
 
 const map: {
-  [folder: string]: { [filename: string]: { mdl: Buffer; anm: Buffer } };
+  [folder: string]: {
+    [filename: string]: { anmPath: string; mdlPath: string };
+  };
 } = {};
 
 lfshFolders.forEach((folderName) => {
   map[folderName] = {};
   lfshStructure[folderName].forEach((filename) => {
-    let mdlPath: string;
-    switch (folderName) {
-      case "jms":
-        mdlPath = "jms/lll_jms.mdl";
-        break;
-
-      case "wp":
-        mdlPath = "wp/wp_csaw.mdl";
-        break;
-
-      case "mar":
-      case "edi":
-        mdlPath = filename.startsWith("p_")
-          ? `${folderName}/hhh_${folderName}.mdl`
-          : `${folderName}/lll_${folderName}.mdl`;
-        break;
-
-      case "item":
-        mdlPath =
-          "item/" +
-          (filename.startsWith("p_")
-            ? filename.replace("p_", "")
-            : filename
-          ).replace(".anm", ".mdl");
-        break;
-
-      default:
-        mdlPath = `${folderName}/${folderName}.mdl`;
-    }
+    let mdlPath: string = anmToMdlAssoc(filename, folderName);
 
     map[folderName][filename] = {
-      mdl: fs.readFileSync(
-        path.join(__dirname, `../../public/mdl/chr/${mdlPath}`)
-      ),
-      anm: fs.readFileSync(
-        path.join(__dirname, `../../public/mdl/chr/${folderName}/${filename}`)
-      ),
+      mdlPath: `../../public/data/chr/${mdlPath}`,
+      anmPath: `../../public/data/chr/${folderName}/${filename}`,
+    };
+  });
+});
+bfawFolders.forEach((folderName) => {
+  bfawStructure[folderName].forEach((filename) => {
+    const mdlSubpath =
+      folderName === "mar" ? "mar/lxx_mar.mdl" : "wp/rwp_chinanife.mdl";
+    map[folderName][filename] = {
+      mdlPath: `../../public/data/chr2/${mdlSubpath}`,
+      anmPath: `../../public/data/chr2/${folderName}/${filename}`,
     };
   });
 });
 
-(["mar", "wp"] as const).forEach((folderName) => {
-  bfawStructure[folderName].forEach((filename) => {
-    const mdlPath =
-      folderName === "mar" ? "mar/lxx_mar.mdl" : "wp/rwp_chinanife.mdl";
-    map[folderName][filename] = {
-      mdl: fs.readFileSync(
-        path.join(__dirname, `../../public/mdl/chr2/${mdlPath}`)
-      ),
-      anm: fs.readFileSync(
-        path.join(__dirname, `../../public/mdl/chr2/${folderName}/${filename}`)
-      ),
+demoLfshFolders.forEach((folderName) => {
+  const mapKey = "[demo] " + folderName;
+  map[mapKey] ??= {};
+  demoLfshStructure[folderName].forEach((filename) => {
+    const index = fileArray.findIndex(
+      (value) =>
+        value.includes(".mdl") && filename.split(".")[0] === value.split(".")[0]
+    );
+    if (index < 0) {
+      return;
+    }
+    const [folder, subfolder, name] = destructureIndex(index);
+    const mdlPath = `../../public/data/${folder}/${subfolder}/${name}`;
+    const anmPath = `../../public/data/demo/${folderName}/${filename}`;
+    map[mapKey][filename] = {
+      mdlPath,
+      anmPath,
+    };
+  });
+});
+demoBfawFolders.forEach((folderName) => {
+  const mapKey = "[demo] " + folderName;
+  map[mapKey] ??= {};
+  demoBfawStructure[folderName].forEach((filename) => {
+    const index = fileArray.findIndex(
+      (value) =>
+        value.includes(".mdl") && filename.split(".")[0] === value.split(".")[0]
+    );
+    if (index < 0) {
+      return;
+    }
+    const [folder, subfolder, name] = destructureIndex(index);
+    map[mapKey][filename] = {
+      mdlPath: `../../public/data/${folder}/${subfolder}/${name}`,
+      anmPath: `../../public/data/demo2/${folderName}/${filename}`,
     };
   });
 });
 
 for (const [folderName, fileMap] of Object.entries(map)) {
   describe(folderName, () => {
-    for (const name in fileMap) {
-      let anm: Anm | undefined = undefined;
-      let error: unknown | undefined = undefined;
-      try {
-        const mdl = new Mdl(new KaitaiStream(fileMap[name].mdl));
-        mdl._read();
-        anm = new Anm(
-          new KaitaiStream(fileMap[name].anm),
-          undefined,
-          undefined,
-          mdl
-        );
-        anm._read();
-        anm._fetchInstances();
-      } catch (e) {
-        console.log(e);
-        error = e;
-      }
-      test(name, () => {
+    for (const filename in fileMap) {
+      test(filename, async () => {
+        let mdl: SilentHillModel | undefined = undefined;
+        let anm: SilentHillAnimation | undefined = undefined;
+        let error: unknown | undefined = undefined;
+        const { mdlPath, anmPath } = fileMap[filename];
+        try {
+          mdl = await loadModelFromUrl(path.join(__dirname, mdlPath));
+          if (mdl === undefined) {
+            throw new Error(`${fileMap[filename].mdlPath} failed to load`);
+          }
+          anm = await loadAnimationFromUrl(path.join(__dirname, anmPath), mdl);
+          anm?._read();
+          anm?._fetchInstances();
+        } catch (e) {
+          error = e;
+          console.log(filename, e);
+        }
+        expect(mdl).toBeDefined();
         expect(anm).toBeDefined();
         expect(error).toBeUndefined();
       });
