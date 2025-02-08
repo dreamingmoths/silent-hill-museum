@@ -77,7 +77,7 @@ declare namespace Anm {
      * transform type specified in the block header and whether the bone
      * that the transform applies to is a root node of the skeleton or not.
      */
-    transforms:
+    transforms: (
       | Anm.None
       | Anm.None
       | Anm.Rotation
@@ -94,7 +94,8 @@ declare namespace Anm {
       | Anm.InterpolatedIsometry32
       | Anm.Identity
       | Anm.Identity
-      | undefined[];
+      | undefined
+    )[];
 
     /**
      * The model that the animation applies to.

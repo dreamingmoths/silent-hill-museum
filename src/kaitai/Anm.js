@@ -784,13 +784,17 @@ var Anm = (function () {
     }
     Block.prototype._read = function () {
       this.header = [];
-      for (var i = 0; i < 8; i++) {
+      var i = 0;
+      do {
         var _t_header = new TransformHeader(this._io, this, this._root);
         _t_header._read();
-        this.header.push(_t_header);
-      }
+        var _ = _t_header;
+        this.header.push(_);
+        i++;
+      } while (!(i == 8 || this._io.isEof()));
       this.transforms = [];
-      for (var i = 0; i < 8; i++) {
+      var i = 0;
+      do {
         {
           var on = new Uint8Array([
             this.header[i].type,
@@ -809,11 +813,13 @@ var Anm = (function () {
           if (KaitaiStream.byteArrayCompare(on, [7, 0]) == 0) {
             var _t_transforms = new Identity(this._io, this, this._root);
             _t_transforms._read();
-            this.transforms.push(_t_transforms);
+            var _ = _t_transforms;
+            this.transforms.push(_);
           } else if (KaitaiStream.byteArrayCompare(on, [2, 0]) == 0) {
             var _t_transforms = new Isometry16(this._io, this, this._root);
             _t_transforms._read();
-            this.transforms.push(_t_transforms);
+            var _ = _t_transforms;
+            this.transforms.push(_);
           } else if (KaitaiStream.byteArrayCompare(on, [4, 0]) == 0) {
             var _t_transforms = new IsometryWithAxis16(
               this._io,
@@ -821,7 +827,8 @@ var Anm = (function () {
               this._root
             );
             _t_transforms._read();
-            this.transforms.push(_t_transforms);
+            var _ = _t_transforms;
+            this.transforms.push(_);
           } else if (KaitaiStream.byteArrayCompare(on, [3, 0]) == 0) {
             var _t_transforms = new RotationWithAxis(
               this._io,
@@ -829,11 +836,13 @@ var Anm = (function () {
               this._root
             );
             _t_transforms._read();
-            this.transforms.push(_t_transforms);
+            var _ = _t_transforms;
+            this.transforms.push(_);
           } else if (KaitaiStream.byteArrayCompare(on, [7, 1]) == 0) {
             var _t_transforms = new Identity(this._io, this, this._root);
             _t_transforms._read();
-            this.transforms.push(_t_transforms);
+            var _ = _t_transforms;
+            this.transforms.push(_);
           } else if (KaitaiStream.byteArrayCompare(on, [4, 1]) == 0) {
             var _t_transforms = new IsometryWithAxis32(
               this._io,
@@ -841,15 +850,18 @@ var Anm = (function () {
               this._root
             );
             _t_transforms._read();
-            this.transforms.push(_t_transforms);
+            var _ = _t_transforms;
+            this.transforms.push(_);
           } else if (KaitaiStream.byteArrayCompare(on, [0, 0]) == 0) {
             var _t_transforms = new None(this._io, this, this._root);
             _t_transforms._read();
-            this.transforms.push(_t_transforms);
+            var _ = _t_transforms;
+            this.transforms.push(_);
           } else if (KaitaiStream.byteArrayCompare(on, [2, 1]) == 0) {
             var _t_transforms = new Isometry32(this._io, this, this._root);
             _t_transforms._read();
-            this.transforms.push(_t_transforms);
+            var _ = _t_transforms;
+            this.transforms.push(_);
           } else if (KaitaiStream.byteArrayCompare(on, [5, 1]) == 0) {
             var _t_transforms = new IsometryWithAxis16Padded(
               this._io,
@@ -857,15 +869,18 @@ var Anm = (function () {
               this._root
             );
             _t_transforms._read();
-            this.transforms.push(_t_transforms);
+            var _ = _t_transforms;
+            this.transforms.push(_);
           } else if (KaitaiStream.byteArrayCompare(on, [1, 0]) == 0) {
             var _t_transforms = new Rotation(this._io, this, this._root);
             _t_transforms._read();
-            this.transforms.push(_t_transforms);
+            var _ = _t_transforms;
+            this.transforms.push(_);
           } else if (KaitaiStream.byteArrayCompare(on, [1, 1]) == 0) {
             var _t_transforms = new Rotation(this._io, this, this._root);
             _t_transforms._read();
-            this.transforms.push(_t_transforms);
+            var _ = _t_transforms;
+            this.transforms.push(_);
           } else if (KaitaiStream.byteArrayCompare(on, [5, 0]) == 0) {
             var _t_transforms = new IsometryWithAxis16(
               this._io,
@@ -873,7 +888,8 @@ var Anm = (function () {
               this._root
             );
             _t_transforms._read();
-            this.transforms.push(_t_transforms);
+            var _ = _t_transforms;
+            this.transforms.push(_);
           } else if (KaitaiStream.byteArrayCompare(on, [6, 0]) == 0) {
             var _t_transforms = new InterpolatedIsometry16(
               this._io,
@@ -881,7 +897,8 @@ var Anm = (function () {
               this._root
             );
             _t_transforms._read();
-            this.transforms.push(_t_transforms);
+            var _ = _t_transforms;
+            this.transforms.push(_);
           } else if (KaitaiStream.byteArrayCompare(on, [3, 1]) == 0) {
             var _t_transforms = new RotationWithAxis(
               this._io,
@@ -889,11 +906,13 @@ var Anm = (function () {
               this._root
             );
             _t_transforms._read();
-            this.transforms.push(_t_transforms);
+            var _ = _t_transforms;
+            this.transforms.push(_);
           } else if (KaitaiStream.byteArrayCompare(on, [0, 1]) == 0) {
             var _t_transforms = new None(this._io, this, this._root);
             _t_transforms._read();
-            this.transforms.push(_t_transforms);
+            var _ = _t_transforms;
+            this.transforms.push(_);
           } else if (KaitaiStream.byteArrayCompare(on, [6, 1]) == 0) {
             var _t_transforms = new InterpolatedIsometry32(
               this._io,
@@ -901,10 +920,12 @@ var Anm = (function () {
               this._root
             );
             _t_transforms._read();
-            this.transforms.push(_t_transforms);
+            var _ = _t_transforms;
+            this.transforms.push(_);
           }
         }
-      }
+        i++;
+      } while (!(i == 8 || this._io.isEof()));
     };
 
     Block.prototype._fetchInstances = function () {
@@ -968,6 +989,14 @@ var Anm = (function () {
       this._io = io;
       for (let i = 0; i < this.header.length; i++) {
         this.header[i]._write__seq(this._io);
+        var _ = this.header[i];
+        if (((i == 8 || this._io.isEof()) != i) == this.header.length - 1) {
+          throw new KaitaiStream.ConsistencyError(
+            "header",
+            i == 8 || this._io.isEof(),
+            i == this.header.length - 1
+          );
+        }
       }
       for (let i = 0; i < this.transforms.length; i++) {
         {
@@ -1019,15 +1048,23 @@ var Anm = (function () {
             this.transforms[i]._write__seq(this._io);
           }
         }
+        var _ = this.transforms[i];
+        if (((i == 8 || this._io.isEof()) != i) == this.transforms.length - 1) {
+          throw new KaitaiStream.ConsistencyError(
+            "transforms",
+            i == 8 || this._io.isEof(),
+            i == this.transforms.length - 1
+          );
+        }
       }
     };
 
     Block.prototype._check = function () {
-      if (this.header.length != 8) {
+      if (this.header.length == 0) {
         throw new KaitaiStream.ConsistencyError(
           "header",
           this.header.length,
-          8
+          0
         );
       }
       for (let i = 0; i < this.header.length; i++) {
@@ -1046,11 +1083,11 @@ var Anm = (function () {
           );
         }
       }
-      if (this.transforms.length != 8) {
+      if (this.transforms.length == 0) {
         throw new KaitaiStream.ConsistencyError(
           "transforms",
           this.transforms.length,
-          8
+          0
         );
       }
       for (let i = 0; i < this.transforms.length; i++) {
@@ -1697,6 +1734,5 @@ var Anm = (function () {
 
   return Anm;
 })();
-var _;
 
 export default Anm;
