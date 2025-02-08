@@ -255,7 +255,6 @@ const readFile = (file: File, callback: (buffer: ArrayBuffer) => void) => {
 
 export const readCustomStruct = (buffer: ArrayBuffer) => {
   const model = loadModelFromBytes(buffer);
-  model._read();
   clientState.setCustomModel({
     model,
     contents: new Uint8Array(buffer),

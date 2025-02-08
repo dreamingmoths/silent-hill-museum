@@ -227,8 +227,6 @@ export default class SerializableModel {
     sendToShared?: SendToShared
   ) {
     const model = loadModelFromBytes(fileContents);
-    model._read();
-    model._fetchInstances();
     Object.assign(this.params, params);
 
     this.validateModel(model);
