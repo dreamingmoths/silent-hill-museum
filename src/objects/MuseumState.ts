@@ -53,6 +53,7 @@ export default class MuseumState {
       ...(modelSplit as Parameters<typeof constructIndex>)
     );
     this.setFileIndex(this.defaultStartIndex);
+    this.uiParams.Animation = this.suggestAnimationPath();
     this.updateUiFromState();
   }
 
@@ -342,10 +343,10 @@ export default class MuseumState {
       }
       const mdl = anmToMdlAssoc(
         name,
-        clientState.folder === "favorites" ? undefined : searchFolder,
+        this.folder === "favorites" ? undefined : searchFolder,
         isDemo
       );
-      if (mdl === `${clientState.folder}/${clientState.file}`) {
+      if (mdl === `${this.folder}/${this.file}`) {
         anmFile = name;
         break;
       }
@@ -354,10 +355,10 @@ export default class MuseumState {
       anmFile && anmFolder
         ? `/data/${rootFolder}/${anmFolder}/${anmFile}`
         : undefined;
-    if (clientState.file === "inu.mdl") {
+    if (this.file === "inu.mdl") {
       path = "/data/demo/inu/inu.anm";
     }
-    if (clientState.file === "lll_jms.mdl") {
+    if (this.file === "lll_jms.mdl") {
       path = "/data/demo/anahori/lll_jms.anm";
     }
 
@@ -368,7 +369,7 @@ export default class MuseumState {
     Scenario: this.rootFolder === "chr" ? "Main Scenario" : "Born From A Wish",
     Folder: this.folder,
     Filename: this.file,
-    Animation: "demo/inu/inu.anm" as string | undefined,
+    Animation: this.suggestAnimationPath() as string | undefined,
     "Edit Mode ✨": this.mode === "edit",
     "Texture Viewer 👀": false,
     "Lock To Folder": true,
