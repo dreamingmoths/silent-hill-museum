@@ -189,56 +189,17 @@ export const processAnimationTransform = (
   if (transform === undefined) {
     return false;
   }
-  // if ("translation" in transform) {
-  //   translate(boneInfo, transform.translation);
-  // } else if ("translationStart" in transform) {
-  //   translateInterpolated(boneInfo, transform);
-  // }
-  // if ("axis" in transform) {
-  //   rotateAxisAngle(boneInfo, transform);
-  // } else if ("rotation" in transform) {
-  //   rotateEuler(boneInfo, transform.rotation);
-  // } else if (transform instanceof SilentHillAnimation.Rotation) {
-  //   rotateEuler(boneInfo, transform);
-  // }
-  // advanceFrame(boneInfo);
-  // // return;
-  if (transform instanceof SilentHillAnimation.Isometry32) {
+  if ("translation" in transform) {
     translate(boneInfo, transform.translation);
-    rotateEuler(boneInfo, transform.rotation);
-  } else if (transform instanceof SilentHillAnimation.Isometry16) {
-    translate(boneInfo, transform.translation);
-    rotateEuler(boneInfo, transform.rotation);
-  } else if (transform instanceof SilentHillAnimation.IsometryWithAxis16) {
-    translate(boneInfo, transform.translation);
-    rotateAxisAngle(boneInfo, transform);
-  } else if (
-    transform instanceof SilentHillAnimation.IsometryWithAxis16Padded
-  ) {
-    translate(boneInfo, transform.translation);
-    rotateAxisAngle(boneInfo, transform);
-  } else if (transform instanceof SilentHillAnimation.IsometryWithAxis32) {
-    translate(boneInfo, transform.translation);
-    rotateAxisAngle(boneInfo, transform);
-  } else if (
-    transform instanceof SilentHillAnimation.InterpolatedIsometry32 ||
-    transform instanceof SilentHillAnimation.InterpolatedIsometry16
-  ) {
-    console.log("interpolated isometry!");
+  } else if ("translationStart" in transform) {
     translateInterpolated(boneInfo, transform);
+  }
+  if ("axis" in transform) {
     rotateAxisAngle(boneInfo, transform);
-  } else if (transform instanceof SilentHillAnimation.RotationWithAxis) {
-    rotateAxisAngle(boneInfo, transform);
-  } else if (
-    transform instanceof SilentHillAnimation.None ||
-    transform instanceof SilentHillAnimation.Identity
-  ) {
-    // do nothing
+  } else if ("rotation" in transform) {
+    rotateEuler(boneInfo, transform.rotation);
   } else if (transform instanceof SilentHillAnimation.Rotation) {
     rotateEuler(boneInfo, transform);
-  } else {
-    console.log(transform);
-    throw new Error("unhandled transform type");
   }
   advanceFrame(boneInfo);
 };
