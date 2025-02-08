@@ -30,5 +30,5 @@ __pycache__
 
 # Project-specific
 kaitai_struct_compiler
-public/mdl
+public/data
 !src/wasm/**/dist
