@@ -265,8 +265,8 @@ types:
     seq:
       - id: header
         type: transform_header
-        repeat: expr
-        repeat-expr: 8
+        repeat: until
+        repeat-until: _index == 8 or _io.eof
         doc: |
           A 32-bit field where each nibble, in little-endian order, identifies
           the type of the next transform in the block.
@@ -313,8 +313,8 @@ types:
             '[6, 1]': interpolated_isometry32
             '[7, 0]': identity
             '[7, 1]': identity
-        repeat: expr
-        repeat-expr: 8
+        repeat: until
+        repeat-until: _index == 8 or _io.eof
         doc: |
           A 3D transformation to be applied to a bone of a model. The exact
           fields and interpretation of a particular transform depends on the
