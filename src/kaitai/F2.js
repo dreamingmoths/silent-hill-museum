@@ -114,7 +114,9 @@ var F2 = (function () {
       },
     });
 
-    Pow2.prototype._invalidate_val = function () {};
+    Pow2.prototype._invalidate_val = function () {
+      delete this._m_val;
+    };
 
     return Pow2;
   })());
@@ -129,7 +131,9 @@ var F2 = (function () {
     },
   });
 
-  F2.prototype._invalidate_specialValue = function () {};
+  F2.prototype._invalidate_specialValue = function () {
+    delete this._m_specialValue;
+  };
   Object.defineProperty(F2.prototype, "subnormalValue", {
     set: function (v) {
       this._m_subnormalValue = v;
@@ -141,7 +145,9 @@ var F2 = (function () {
     },
   });
 
-  F2.prototype._invalidate_subnormalValue = function () {};
+  F2.prototype._invalidate_subnormalValue = function () {
+    delete this._m_subnormalValue;
+  };
   Object.defineProperty(F2.prototype, "infinity", {
     set: function (v) {
       this._m_infinity = v;
@@ -153,7 +159,9 @@ var F2 = (function () {
     },
   });
 
-  F2.prototype._invalidate_infinity = function () {};
+  F2.prototype._invalidate_infinity = function () {
+    delete this._m_infinity;
+  };
   Object.defineProperty(F2.prototype, "exponent", {
     set: function (v) {
       this._m_exponent = v;
@@ -165,7 +173,9 @@ var F2 = (function () {
     },
   });
 
-  F2.prototype._invalidate_exponent = function () {};
+  F2.prototype._invalidate_exponent = function () {
+    delete this._m_exponent;
+  };
   Object.defineProperty(F2.prototype, "nan", {
     set: function (v) {
       this._m_nan = v;
@@ -177,7 +187,9 @@ var F2 = (function () {
     },
   });
 
-  F2.prototype._invalidate_nan = function () {};
+  F2.prototype._invalidate_nan = function () {
+    delete this._m_nan;
+  };
   Object.defineProperty(F2.prototype, "sign", {
     set: function (v) {
       this._m_sign = v;
@@ -189,7 +201,9 @@ var F2 = (function () {
     },
   });
 
-  F2.prototype._invalidate_sign = function () {};
+  F2.prototype._invalidate_sign = function () {
+    delete this._m_sign;
+  };
   Object.defineProperty(F2.prototype, "absValue", {
     set: function (v) {
       this._m_absValue = v;
@@ -205,7 +219,9 @@ var F2 = (function () {
     },
   });
 
-  F2.prototype._invalidate_absValue = function () {};
+  F2.prototype._invalidate_absValue = function () {
+    delete this._m_absValue;
+  };
   Object.defineProperty(F2.prototype, "powExp", {
     set: function (v) {
       this._m_powExp = v;
@@ -226,7 +242,7 @@ var F2 = (function () {
     this.powExp._write__seq(this._io);
   };
 
-  F2.prototype._checkpowExp = function () {
+  F2.prototype._check_powExp = function () {
     this._should_write_powExp = false;
     if (this.powExp._root !== this._root) {
       throw new KaitaiStream.ConsistencyError(
@@ -261,7 +277,9 @@ var F2 = (function () {
     },
   });
 
-  F2.prototype._invalidate_floatValue = function () {};
+  F2.prototype._invalidate_floatValue = function () {
+    delete this._m_floatValue;
+  };
   Object.defineProperty(F2.prototype, "offsetExp", {
     set: function (v) {
       this._m_offsetExp = v;
@@ -273,7 +291,9 @@ var F2 = (function () {
     },
   });
 
-  F2.prototype._invalidate_offsetExp = function () {};
+  F2.prototype._invalidate_offsetExp = function () {
+    delete this._m_offsetExp;
+  };
   Object.defineProperty(F2.prototype, "normalValue", {
     set: function (v) {
       this._m_normalValue = v;
@@ -285,7 +305,9 @@ var F2 = (function () {
     },
   });
 
-  F2.prototype._invalidate_normalValue = function () {};
+  F2.prototype._invalidate_normalValue = function () {
+    delete this._m_normalValue;
+  };
   Object.defineProperty(F2.prototype, "isSubnormal", {
     set: function (v) {
       this._m_isSubnormal = v;
@@ -297,7 +319,9 @@ var F2 = (function () {
     },
   });
 
-  F2.prototype._invalidate_isSubnormal = function () {};
+  F2.prototype._invalidate_isSubnormal = function () {
+    delete this._m_isSubnormal;
+  };
   Object.defineProperty(F2.prototype, "fraction", {
     set: function (v) {
       this._m_fraction = v;
@@ -309,7 +333,9 @@ var F2 = (function () {
     },
   });
 
-  F2.prototype._invalidate_fraction = function () {};
+  F2.prototype._invalidate_fraction = function () {
+    delete this._m_fraction;
+  };
   Object.defineProperty(F2.prototype, "isSpecial", {
     set: function (v) {
       this._m_isSpecial = v;
@@ -321,7 +347,9 @@ var F2 = (function () {
     },
   });
 
-  F2.prototype._invalidate_isSpecial = function () {};
+  F2.prototype._invalidate_isSpecial = function () {
+    delete this._m_isSpecial;
+  };
 
   return F2;
 })();

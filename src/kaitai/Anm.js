@@ -575,30 +575,30 @@ var Anm = (function () {
       this._root = _root;
     }
     Translation16Padded.prototype._read = function () {
-      this.x = new F2(this._io, this, null);
-      this.x._read();
+      this.x16 = new F2(this._io, this, null);
+      this.x16._read();
       this.xPad = this._io.readBytes(2);
-      this.y = new F2(this._io, this, null);
-      this.y._read();
+      this.y16 = new F2(this._io, this, null);
+      this.y16._read();
       this.yPad = this._io.readBytes(2);
-      this.z = new F2(this._io, this, null);
-      this.z._read();
+      this.z16 = new F2(this._io, this, null);
+      this.z16._read();
       this.zPad = this._io.readBytes(2);
     };
 
     Translation16Padded.prototype._fetchInstances = function () {
-      this.x._fetchInstances();
-      this.y._fetchInstances();
-      this.z._fetchInstances();
+      this.x16._fetchInstances();
+      this.y16._fetchInstances();
+      this.z16._fetchInstances();
     };
 
     Translation16Padded.prototype._write__seq = function (io) {
       this._io = io;
-      this.x._write__seq(this._io);
+      this.x16._write__seq(this._io);
       this._io.writeBytes(this.xPad);
-      this.y._write__seq(this._io);
+      this.y16._write__seq(this._io);
       this._io.writeBytes(this.yPad);
-      this.z._write__seq(this._io);
+      this.z16._write__seq(this._io);
       this._io.writeBytes(this.zPad);
     };
 
@@ -612,6 +612,48 @@ var Anm = (function () {
       if (this.zPad.length != 2) {
         throw new KaitaiStream.ConsistencyError("z_pad", this.zPad.length, 2);
       }
+    };
+    Object.defineProperty(Translation16Padded.prototype, "x", {
+      set: function (v) {
+        this._m_x = v;
+      },
+      get: function () {
+        if (this._m_x !== undefined) return this._m_x;
+        this._m_x = this.x16.floatValue;
+        return this._m_x;
+      },
+    });
+
+    Translation16Padded.prototype._invalidate_x = function () {
+      delete this._m_x;
+    };
+    Object.defineProperty(Translation16Padded.prototype, "y", {
+      set: function (v) {
+        this._m_y = v;
+      },
+      get: function () {
+        if (this._m_y !== undefined) return this._m_y;
+        this._m_y = this.y16.floatValue;
+        return this._m_y;
+      },
+    });
+
+    Translation16Padded.prototype._invalidate_y = function () {
+      delete this._m_y;
+    };
+    Object.defineProperty(Translation16Padded.prototype, "z", {
+      set: function (v) {
+        this._m_z = v;
+      },
+      get: function () {
+        if (this._m_z !== undefined) return this._m_z;
+        this._m_z = this.z16.floatValue;
+        return this._m_z;
+      },
+    });
+
+    Translation16Padded.prototype._invalidate_z = function () {
+      delete this._m_z;
     };
 
     return Translation16Padded;
@@ -655,7 +697,9 @@ var Anm = (function () {
       },
     });
 
-    Rotation.prototype._invalidate_x = function () {};
+    Rotation.prototype._invalidate_x = function () {
+      delete this._m_x;
+    };
     Object.defineProperty(Rotation.prototype, "y", {
       set: function (v) {
         this._m_y = v;
@@ -667,7 +711,9 @@ var Anm = (function () {
       },
     });
 
-    Rotation.prototype._invalidate_y = function () {};
+    Rotation.prototype._invalidate_y = function () {
+      delete this._m_y;
+    };
     Object.defineProperty(Rotation.prototype, "z", {
       set: function (v) {
         this._m_z = v;
@@ -679,7 +725,9 @@ var Anm = (function () {
       },
     });
 
-    Rotation.prototype._invalidate_z = function () {};
+    Rotation.prototype._invalidate_z = function () {
+      delete this._m_z;
+    };
 
     return Rotation;
   })());
@@ -1363,7 +1411,9 @@ var Anm = (function () {
       },
     });
 
-    Block.prototype._invalidate_numTransformsPerFrame = function () {};
+    Block.prototype._invalidate_numTransformsPerFrame = function () {
+      delete this._m_numTransformsPerFrame;
+    };
 
     /**
      * A 32-bit field where each nibble, in little-endian order, identifies
@@ -1623,7 +1673,9 @@ var Anm = (function () {
       },
     });
 
-    Axis.prototype._invalidate_x = function () {};
+    Axis.prototype._invalidate_x = function () {
+      delete this._m_x;
+    };
     Object.defineProperty(Axis.prototype, "y", {
       set: function (v) {
         this._m_y = v;
@@ -1635,7 +1687,9 @@ var Anm = (function () {
       },
     });
 
-    Axis.prototype._invalidate_y = function () {};
+    Axis.prototype._invalidate_y = function () {
+      delete this._m_y;
+    };
     Object.defineProperty(Axis.prototype, "z", {
       set: function (v) {
         this._m_z = v;
@@ -1647,7 +1701,9 @@ var Anm = (function () {
       },
     });
 
-    Axis.prototype._invalidate_z = function () {};
+    Axis.prototype._invalidate_z = function () {
+      delete this._m_z;
+    };
     Object.defineProperty(Axis.prototype, "w", {
       set: function (v) {
         this._m_w = v;
@@ -1659,7 +1715,9 @@ var Anm = (function () {
       },
     });
 
-    Axis.prototype._invalidate_w = function () {};
+    Axis.prototype._invalidate_w = function () {
+      delete this._m_w;
+    };
 
     return Axis;
   })());
@@ -1698,28 +1756,70 @@ var Anm = (function () {
       this._root = _root;
     }
     Translation16.prototype._read = function () {
-      this.x = new F2(this._io, this, null);
-      this.x._read();
-      this.y = new F2(this._io, this, null);
-      this.y._read();
-      this.z = new F2(this._io, this, null);
-      this.z._read();
+      this.x16 = new F2(this._io, this, null);
+      this.x16._read();
+      this.y16 = new F2(this._io, this, null);
+      this.y16._read();
+      this.z16 = new F2(this._io, this, null);
+      this.z16._read();
     };
 
     Translation16.prototype._fetchInstances = function () {
-      this.x._fetchInstances();
-      this.y._fetchInstances();
-      this.z._fetchInstances();
+      this.x16._fetchInstances();
+      this.y16._fetchInstances();
+      this.z16._fetchInstances();
     };
 
     Translation16.prototype._write__seq = function (io) {
       this._io = io;
-      this.x._write__seq(this._io);
-      this.y._write__seq(this._io);
-      this.z._write__seq(this._io);
+      this.x16._write__seq(this._io);
+      this.y16._write__seq(this._io);
+      this.z16._write__seq(this._io);
     };
 
     Translation16.prototype._check = function () {};
+    Object.defineProperty(Translation16.prototype, "x", {
+      set: function (v) {
+        this._m_x = v;
+      },
+      get: function () {
+        if (this._m_x !== undefined) return this._m_x;
+        this._m_x = this.x16.floatValue;
+        return this._m_x;
+      },
+    });
+
+    Translation16.prototype._invalidate_x = function () {
+      delete this._m_x;
+    };
+    Object.defineProperty(Translation16.prototype, "y", {
+      set: function (v) {
+        this._m_y = v;
+      },
+      get: function () {
+        if (this._m_y !== undefined) return this._m_y;
+        this._m_y = this.y16.floatValue;
+        return this._m_y;
+      },
+    });
+
+    Translation16.prototype._invalidate_y = function () {
+      delete this._m_y;
+    };
+    Object.defineProperty(Translation16.prototype, "z", {
+      set: function (v) {
+        this._m_z = v;
+      },
+      get: function () {
+        if (this._m_z !== undefined) return this._m_z;
+        this._m_z = this.z16.floatValue;
+        return this._m_z;
+      },
+    });
+
+    Translation16.prototype._invalidate_z = function () {
+      delete this._m_z;
+    };
 
     return Translation16;
   })());

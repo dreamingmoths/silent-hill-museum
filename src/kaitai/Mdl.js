@@ -2,8 +2,6 @@
 
 import KaitaiStream from "./runtime/KaitaiStream";
 
-var _;
-
 /**
  * Mdl is the proprietary 3D model format of Silent Hill 2 (PC). It describes
  * geometry, textures, skeleton data, and more. This structure does not describe
@@ -45,7 +43,7 @@ var Mdl = (function () {
     this._should_write_textureData = this.textureData__to_write;
     var _io__raw_header = new KaitaiStream(new ArrayBuffer(64));
     this._io.addChildStream(_io__raw_header);
-    var _pos2 = this._io.pos;
+    _pos2 = this._io.pos;
     this._io.seek(this._io.pos + 64);
     const handler = (parent) => {
       this._raw_header = _io__raw_header.toByteArray();
@@ -782,7 +780,9 @@ var Mdl = (function () {
       },
     });
 
-    Model.prototype._invalidate_clusterNodePaddingAmount = function () {};
+    Model.prototype._invalidate_clusterNodePaddingAmount = function () {
+      delete this._m_clusterNodePaddingAmount;
+    };
     Object.defineProperty(Model.prototype, "junkPadding", {
       set: function (v) {
         this._m_junkPadding = v;
@@ -969,7 +969,9 @@ var Mdl = (function () {
       },
     });
 
-    Model.prototype._invalidate_clusterNodeNormalsOffset = function () {};
+    Model.prototype._invalidate_clusterNodeNormalsOffset = function () {
+      delete this._m_clusterNodeNormalsOffset;
+    };
 
     /**
      * Morph targets for facial animation.
@@ -1106,7 +1108,9 @@ var Mdl = (function () {
       },
     });
 
-    Model.prototype._invalidate_clusterNodesHaveNormals = function () {};
+    Model.prototype._invalidate_clusterNodesHaveNormals = function () {
+      delete this._m_clusterNodesHaveNormals;
+    };
     Object.defineProperty(Model.prototype, "clusters", {
       set: function (v) {
         this._m_clusters = v;
@@ -1719,7 +1723,7 @@ var Mdl = (function () {
         new ArrayBuffer(this.primitiveHeaderSize - 4)
       );
       this._io.addChildStream(_io__raw_body);
-      var _pos2 = this._io.pos;
+      _pos2 = this._io.pos;
       this._io.seek(this._io.pos + (this.primitiveHeaderSize - 4));
       const handler = (parent) => {
         this._raw_body = _io__raw_body.toByteArray();
@@ -2356,7 +2360,7 @@ var Mdl = (function () {
         new ArrayBuffer(this.bonePairsCount * 2)
       );
       this._io.addChildStream(_io__raw__m_bonePairIndices);
-      var _pos2 = this._io.pos;
+      _pos2 = this._io.pos;
       this._io.seek(this._io.pos + this.bonePairsCount * 2);
       const handler = (parent) => {
         this._raw__m_bonePairIndices =
@@ -2433,7 +2437,7 @@ var Mdl = (function () {
         new ArrayBuffer(this.textureIndexCount * 2)
       );
       this._io.addChildStream(_io__raw__m_textureIndices);
-      var _pos2 = this._io.pos;
+      _pos2 = this._io.pos;
       this._io.seek(this._io.pos + this.textureIndexCount * 2);
       const handler = (parent) => {
         this._raw__m_textureIndices = _io__raw__m_textureIndices.toByteArray();
@@ -2758,7 +2762,7 @@ var Mdl = (function () {
           new ArrayBuffer(this.transparentPrimitiveHeaderSize - 4)
         );
         this._io.addChildStream(_io__raw_body);
-        var _pos2 = this._io.pos;
+        _pos2 = this._io.pos;
         this._io.seek(this._io.pos + (this.transparentPrimitiveHeaderSize - 4));
         const handler = (parent) => {
           this._raw_body = _io__raw_body.toByteArray();
@@ -3277,7 +3281,7 @@ var Mdl = (function () {
         )
       );
       this._io.addChildStream(_io__raw_triangleIndices);
-      var _pos2 = this._io.pos;
+      _pos2 = this._io.pos;
       this._io.seek(
         this._io.pos +
           ((this._root.modelData.vertexDataOffset >
@@ -3544,7 +3548,7 @@ var Mdl = (function () {
           )
         );
         this._io.addChildStream(_io__raw__m_transparentTriangleIndices);
-        var _pos2 = this._io.pos;
+        _pos2 = this._io.pos;
         this._io.seek(
           this._io.pos +
             (this._root.modelData.transparentVertexDataOffset -
@@ -3933,7 +3937,7 @@ var Mdl = (function () {
         new ArrayBuffer(this._io.size - this._io.pos)
       );
       this._io.addChildStream(_io__raw__m_textureData);
-      var _pos2 = this._io.pos;
+      _pos2 = this._io.pos;
       this._io.seek(this._io.pos + (this._io.size - this._io.pos));
       const handler = (parent) => {
         this._raw__m_textureData = _io__raw__m_textureData.toByteArray();
@@ -3980,4 +3984,6 @@ var Mdl = (function () {
 
   return Mdl;
 })();
+var _;
+
 export default Mdl;
