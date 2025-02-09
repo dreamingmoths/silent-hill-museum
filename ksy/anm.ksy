@@ -63,30 +63,44 @@ types:
   translation16:
     doc: A 3D translation described with 16-bit floating point values.
     seq:
-      - id: x
+      - id: x_16
         type: f2
-      - id: y
+      - id: y_16
         type: f2
-      - id: z
+      - id: z_16
         type: f2
+    instances:
+      x:
+        value: x_16.float_value
+      y:
+        value: y_16.float_value
+      z:
+        value: z_16.float_value
 
   translation16_padded:
     doc: |
       A 3D translation described with 16-bit floating point values which are
       padded to 32 bits.
     seq:
-      - id: x
+      - id: x_16
         type: f2
       - id: x_pad
         size: 2
-      - id: y
+      - id: y_16
         type: f2
       - id: y_pad
         size: 2
-      - id: z
+      - id: z_16
         type: f2
       - id: z_pad
         size: 2
+    instances:
+      x:
+        value: x_16.float_value
+      y:
+        value: y_16.float_value
+      z:
+        value: z_16.float_value
 
   axis:
     doc: |
