@@ -10,7 +10,7 @@ import SilentHillModel from "./Mdl";
  * so the model must be provided to the parser.
  */
 declare class Anm {
-  constructor(io: any, parent?: any, root?: any, model?: SilentHillModel);
+  constructor(io: any, parent?: any, root?: any);
   __type: "Anm";
   _io: any;
   _read: () => void;
@@ -26,7 +26,7 @@ declare class Anm {
   /**
    * The model that the animation will be applied to.
    */
-  model: SilentHillModel;
+  model: Mdl;
 }
 
 /**
@@ -40,14 +40,14 @@ declare namespace Anm {
     __type: "Axis";
     _io: any;
 
-    wReal: number;
-    xReal: number;
-    yReal: number;
-    zReal: number;
+    w: number;
     x: number;
     y: number;
     z: number;
-    w: number;
+    xInt: number;
+    yInt: number;
+    zInt: number;
+    wInt: number;
   }
 }
 
@@ -79,20 +79,15 @@ declare namespace Anm {
      */
     transforms: (
       | Anm.None
-      | Anm.None
-      | Anm.Rotation
       | Anm.Rotation
       | Anm.Isometry16
       | Anm.Isometry32
       | Anm.RotationWithAxis
-      | Anm.RotationWithAxis
       | Anm.IsometryWithAxis16
       | Anm.IsometryWithAxis32
-      | Anm.IsometryWithAxis16
       | Anm.IsometryWithAxis16Padded
       | Anm.InterpolatedIsometry16
       | Anm.InterpolatedIsometry32
-      | Anm.Identity
       | Anm.Identity
       | undefined
     )[];
@@ -100,7 +95,7 @@ declare namespace Anm {
     /**
      * The model that the animation applies to.
      */
-    model: SilentHillModel;
+    model: Mdl;
 
     /**
      * The index of this block within the file.
@@ -259,12 +254,12 @@ declare namespace Anm {
     __type: "Rotation";
     _io: any;
 
-    xReal: number;
-    yReal: number;
-    zReal: number;
     x: number;
     y: number;
     z: number;
+    xInt: number;
+    yInt: number;
+    zInt: number;
   }
 }
 
@@ -330,9 +325,12 @@ declare namespace Anm {
     __type: "Translation16";
     _io: any;
 
-    x: F2;
-    y: F2;
-    z: F2;
+    x: number;
+    y: number;
+    z: number;
+    x16: F2;
+    y16: F2;
+    z16: F2;
   }
 }
 
@@ -346,11 +344,14 @@ declare namespace Anm {
     __type: "Translation16Padded";
     _io: any;
 
-    x: F2;
+    x: number;
+    y: number;
+    z: number;
+    x16: F2;
     xPad: Uint8Array;
-    y: F2;
+    y16: F2;
     yPad: Uint8Array;
-    z: F2;
+    z16: F2;
     zPad: Uint8Array;
   }
 }
