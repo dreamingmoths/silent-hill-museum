@@ -133,15 +133,7 @@ const translate = (
     | SilentHillAnimation.Translation16Padded
     | SilentHillAnimation.Translation32
 ) => {
-  if (translation instanceof SilentHillAnimation.Translation32) {
-    boneInfo.position.push(translation.x, translation.y, translation.z);
-  } else {
-    boneInfo.position.push(
-      translation.x.floatValue,
-      translation.y.floatValue,
-      translation.z.floatValue
-    );
-  }
+  boneInfo.position.push(translation.x, translation.y, translation.z);
   positionTimestamp(boneInfo);
 };
 const translateInterpolated = (
@@ -150,20 +142,11 @@ const translateInterpolated = (
     | SilentHillAnimation.InterpolatedIsometry16
     | SilentHillAnimation.InterpolatedIsometry32
 ) => {
-  // ???
-  if (transform instanceof SilentHillAnimation.InterpolatedIsometry32) {
-    boneInfo.position.push(
-      transform.translationEnd.x,
-      transform.translationEnd.y,
-      transform.translationEnd.z
-    );
-  } else {
-    boneInfo.position.push(
-      transform.translationEnd.x.floatValue,
-      transform.translationEnd.y.floatValue,
-      transform.translationEnd.z.floatValue
-    );
-  }
+  boneInfo.position.push(
+    transform.translationEnd.x,
+    transform.translationEnd.y,
+    transform.translationEnd.z
+  );
   positionTimestamp(boneInfo);
 };
 const rotationTimestamp = (boneInfo: BoneInfo) => {
