@@ -10,7 +10,12 @@ import SilentHillModel from "./Mdl";
  * so the model must be provided to the parser.
  */
 declare class Anm {
-  constructor(io: any, parent?: any, root?: any);
+  constructor(
+    io: any,
+    parent: any | undefined,
+    root: any | undefined,
+    model: SilentHillModel
+  );
   __type: "Anm";
   _io: any;
   _read: () => void;

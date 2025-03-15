@@ -440,7 +440,7 @@ let helper: SkeletonHelper | undefined;
 
 const clock = new Clock();
 let group = new Group();
-let lastIndex = clientState.getFileIndex();
+let lastIndex = -1;
 
 const editor = new EditMode();
 
@@ -832,6 +832,23 @@ const render = () => {
     folderInput.options(clientState.getPossibleFolders());
     fileInput.options(clientState.getPossibleFilenames());
     anmFile.setValue(clientState.suggestAnimationPath());
+    anmFile.options(
+      clientState.getAllAnimationPaths().filter((path) => {
+        const isDemo = path.includes("demo");
+
+        const [_, folder, filename] = path.split("/");
+        const isFavorite =
+          clientState.folder === "favorites" &&
+          filename.includes(clientState.file.replace(".mdl", ""));
+
+        return (
+          (isDemo &&
+            filename.includes(clientState.file.replace(".mdl", ".anm"))) ||
+          (!isDemo && clientState.folder === folder) ||
+          isFavorite
+        );
+      })
+    );
 
     disposeResources(lightGroup);
     lightGroup = undefined;

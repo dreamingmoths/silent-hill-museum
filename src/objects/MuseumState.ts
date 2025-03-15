@@ -358,8 +358,8 @@ export default class MuseumState {
     if (this.file === "inu.mdl") {
       path = "/data/demo/inu/inu.anm";
     }
-    if (this.file === "lll_jms.mdl") {
-      path = "/data/demo/anahori/lll_jms.anm";
+    if (this.file === "agl.mdl") {
+      path = "/data/demo/fire_agl/agl.anm";
     }
 
     return path;
