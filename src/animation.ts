@@ -2,10 +2,10 @@ import {
   Euler,
   Quaternion,
   VectorKeyframeTrack,
-  InterpolateSmooth,
   QuaternionKeyframeTrack,
   Skeleton,
   Bone,
+  InterpolateLinear,
 } from "three";
 import SilentHillAnimation from "./kaitai/Anm";
 
@@ -34,11 +34,12 @@ export const createAnimationTracks = (
   for (let i = 0; i < blocks.length; i++) {
     const block: SilentHillAnimation.Block = blocks[i];
 
-    for (let j = 0; j < 8; j += 1) {
-      const boneIndex =
-        (((i << 3) % block.numTransformsPerFrame) + j) %
-        model.modelData.boneCount;
-      if (!block.header[j].flag) {
+    for (let j = 0; j < 8; j++) {
+      const boneIndex = ((i << 3) % block.numTransformsPerFrame) + j;
+      if (boneIndex >= model.modelData.boneCount) {
+        continue;
+      }
+      if (block.header[j] === undefined) {
         continue;
       }
       boneInfo[boneIndex] ??= {
@@ -52,7 +53,6 @@ export const createAnimationTracks = (
       };
       const transform = block.transforms[j];
       if (transform === undefined) {
-        break;
       }
       if (!anmTypes.has(block.header[j].type)) {
         const typeName =
@@ -78,14 +78,15 @@ export const createAnimationTracks = (
             `.bones[${index}].position`,
             positionTimes,
             position,
-            InterpolateSmooth
+            InterpolateLinear
           )
         : undefined,
       rotation.length
         ? new QuaternionKeyframeTrack(
             `.bones[${index}].quaternion`,
             rotationTimes,
-            rotation
+            rotation,
+            InterpolateLinear
           )
         : undefined,
     ])
@@ -105,27 +106,6 @@ const rotateEuler = (
   boneInfo.rotation.push(quat.x, quat.y, quat.z, quat.w);
   rotationTimestamp(boneInfo);
 };
-const rotateAxisAngle = (
-  boneInfo: BoneInfo,
-  transform:
-    | SilentHillAnimation.IsometryWithAxis16
-    | SilentHillAnimation.IsometryWithAxis16Padded
-    | SilentHillAnimation.IsometryWithAxis32
-    | SilentHillAnimation.InterpolatedIsometry16
-    | SilentHillAnimation.InterpolatedIsometry32
-    | SilentHillAnimation.RotationWithAxis
-) => {
-  const quat = new Quaternion().setFromAxisAngle(
-    {
-      x: transform.axis.x,
-      y: transform.axis.y,
-      z: transform.axis.z,
-    },
-    transform.angle / 32768.0
-  );
-  boneInfo.rotation.push(quat.x, quat.y, quat.z, quat.w);
-  rotationTimestamp(boneInfo);
-};
 const translate = (
   boneInfo: BoneInfo,
   translation:
@@ -134,19 +114,6 @@ const translate = (
     | SilentHillAnimation.Translation32
 ) => {
   boneInfo.position.push(translation.x, translation.y, translation.z);
-  positionTimestamp(boneInfo);
-};
-const translateInterpolated = (
-  boneInfo: BoneInfo,
-  transform:
-    | SilentHillAnimation.InterpolatedIsometry16
-    | SilentHillAnimation.InterpolatedIsometry32
-) => {
-  boneInfo.position.push(
-    transform.translationEnd.x,
-    transform.translationEnd.y,
-    transform.translationEnd.z
-  );
   positionTimestamp(boneInfo);
 };
 const rotationTimestamp = (boneInfo: BoneInfo) => {
@@ -167,18 +134,21 @@ export const processAnimationTransform = (
   if (transform === undefined) {
     return false;
   }
-  if ("translation" in transform) {
+  if ("translation" in transform && !("axis" in transform)) {
     translate(boneInfo, transform.translation);
-  } else if ("translationStart" in transform) {
-    translateInterpolated(boneInfo, transform);
-  }
-  if ("axis" in transform) {
-    rotateAxisAngle(boneInfo, transform);
-  } else if ("rotation" in transform) {
     rotateEuler(boneInfo, transform.rotation);
-  } else if (transform instanceof SilentHillAnimation.Rotation) {
-    rotateEuler(boneInfo, transform);
+  } else if (boneInfo.position.length) {
+    boneInfo.position.push(...boneInfo.position.slice(-3));
+    positionTimestamp(boneInfo);
   }
+
+  if (transform instanceof SilentHillAnimation.Rotation) {
+    rotateEuler(boneInfo, transform);
+  } else if (boneInfo.rotation.length) {
+    boneInfo.rotation.push(...boneInfo.rotation.slice(-4));
+    rotationTimestamp(boneInfo);
+  }
+
   advanceFrame(boneInfo);
 };
 
