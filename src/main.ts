@@ -193,6 +193,17 @@ fileInput.onFinishChange((file: (typeof possibleFilenames)[number]) => {
 dataGuiFolder.open();
 
 const controlsGuiFolder = gui.addFolder("Controls");
+gui.onOpenClose(() => {
+  console.log(gui);
+  if (!isMobileLayout) {
+    return;
+  }
+  if (gui._closed) {
+    quickAccess.show();
+  } else {
+    quickAccess.hide();
+  }
+});
 const editModeButton = controlsGuiFolder
   .add(clientState.uiParams, "Edit Mode ✨")
   .listen()
@@ -343,6 +354,7 @@ camera.position.z = 5;
 const prefersReducedMotion = !!window.matchMedia(
   `(prefers-reduced-motion: reduce)`
 );
+let isMobileLayout = false;
 const onWindowResize = () => {
   const width = appContainer.offsetWidth;
   const height = appContainer.offsetHeight;
@@ -350,11 +362,13 @@ const onWindowResize = () => {
   camera.updateProjectionMatrix();
   renderer.setSize(width, height);
   if (!gui._closed && width < 700) {
+    isMobileLayout = true;
     gui.close();
     textureViewerButton.hide();
     editModeButton.hide();
     clientState.setMode("viewing");
   } else if (width > 700 && gui._closed) {
+    isMobileLayout = false;
     if (prefersReducedMotion) {
       gui.openAnimated();
     } else {
@@ -736,6 +750,8 @@ const render = () => {
         const transparentAction = mixer.clipAction(clip, transparentMesh);
         transparentAction.play();
       }
+    } else {
+      quickAccess.hide();
     }
 
     const maxBoneSelection = (modelSkeleton?.bones.length ?? 1) - 1;

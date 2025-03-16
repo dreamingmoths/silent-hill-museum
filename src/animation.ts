@@ -52,8 +52,6 @@ export const createAnimationTracks = (
         frameDuration: 5,
       };
       const transform = block.transforms[j];
-      if (transform === undefined) {
-      }
       if (!anmTypes.has(block.header[j].type)) {
         const typeName =
           SilentHillAnimation.TransformHeader.TransformType[
@@ -64,6 +62,11 @@ export const createAnimationTracks = (
         );
       }
       anmTypes.add(block.header[j].type);
+      // if (block.header[j].type > 2) {
+      //   // stop when we reach an invalid transform type
+      //   i = blocks.length;
+      //   break;
+      // }
       processAnimationTransform(transform, boneInfo[boneIndex]);
     }
   }
@@ -128,13 +131,10 @@ const advanceFrame = (boneInfo: BoneInfo) => {
 
 type AnimationTransform = SilentHillAnimation.Block["transforms"][number];
 export const processAnimationTransform = (
-  transform: AnimationTransform,
+  transform: AnimationTransform | undefined,
   boneInfo: BoneInfo
 ) => {
-  if (transform === undefined) {
-    return false;
-  }
-  if ("translation" in transform && !("axis" in transform)) {
+  if (transform && "translation" in transform && !("axis" in transform)) {
     translate(boneInfo, transform.translation);
     rotateEuler(boneInfo, transform.rotation);
   } else if (boneInfo.position.length) {

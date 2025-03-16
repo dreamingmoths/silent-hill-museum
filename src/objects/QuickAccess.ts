@@ -53,10 +53,19 @@ export default class QuickAccess {
     return div;
   }
 
+  public hide() {
+    this.container.style.display = "none";
+  }
+
+  public show() {
+    this.container.style.display = "flex";
+  }
+
   public useAnimationVisualizer(action: AnimationAction, clip: AnimationClip) {
     const progressBar = this.animationProgressBar;
     const canUseTranslateX = CSS.supports("transform", "translateX(50cqi)");
     const quickAccess = this;
+    this.show();
 
     function animate() {
       const duration = clip.duration;

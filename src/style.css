@@ -235,7 +235,6 @@ ol {
 #sidebar-container {
   width: 250px;
   max-width: 250px;
-  min-width: 250px;
   position: absolute;
   top: 0;
   left: 0;
@@ -530,8 +529,8 @@ div.struct-visualizer {
 }
 
 .quick-access-toolbar {
-  width: 60%;
-  height: 3.5rem;
+  width: 90%;
+  height: 2.5rem;
   /* background: repeating-linear-gradient(
     90deg,
     #1f1f1f,
@@ -547,7 +546,7 @@ div.struct-visualizer {
     0 3.5px 6px hsla(230, 13%, 9%, 0.09);
 
   gap: 0.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
   align-self: center;
   border-radius: 1rem;
   overflow: hidden;
@@ -583,5 +582,23 @@ div.struct-visualizer {
     max-width: 0;
     min-width: 0;
     display: none;
+  }
+
+  #sidebar-wrapper,
+  #ui-container {
+    width: 0;
+    flex: none;
+  }
+
+  .quick-access-toolbar {
+    max-width: 70%;
+    height: 2.5rem;
+  }
+}
+
+@media all and (min-width: 700px) {
+  body.viewing #sidebar-wrapper {
+    width: 155px;
+    flex: none;
   }
 }
