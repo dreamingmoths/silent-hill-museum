@@ -406,6 +406,7 @@ export default class MuseumState {
     "Render Opaque": true,
     "Render Transparent": true,
     "Skeleton Mode": this.glVersion === 2,
+    "Show All Hand Poses": false,
     "Visualize Skeleton": false,
     "Visualize Normals": false,
 
