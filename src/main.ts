@@ -63,7 +63,6 @@ import {
   initializeModals,
   showContentWarningModal,
   showNotSupportedModal,
-  toggleWithBackground,
 } from "./modals";
 import { chrFolders, MuseumFile } from "./files";
 import GUI from "lil-gui";
@@ -78,6 +77,8 @@ import { editorState } from "./objects/EditorState";
 import Gizmo from "./objects/Gizmo";
 import SilentHillAnimation from "./kaitai/Anm";
 import { createAnimationTracks } from "./animation";
+import QuickAccess from "./objects/QuickAccess";
+import "./style.css";
 
 const appContainer = document.getElementById("app");
 if (!(appContainer instanceof HTMLDivElement)) {
@@ -87,6 +88,11 @@ const uiContainer = document.getElementById("ui-container");
 if (!(uiContainer instanceof HTMLDivElement)) {
   throw Error("The UI container was not found!");
 }
+const quickAccessContainer = document.querySelector(".quick-access");
+if (!(quickAccessContainer instanceof HTMLDivElement)) {
+  throw Error("The quick access coontainer was not found!");
+}
+const quickAccess = new QuickAccess(quickAccessContainer);
 
 initializeModals();
 acceptModelDrop(appContainer);
@@ -94,7 +100,6 @@ acceptModelDrop(appContainer);
 const params = new URLSearchParams(window.location.search);
 const bypassAboutModal = params.get("bypass-modal");
 if (!bypassAboutModal && localStorage.getItem("visited") === null) {
-  toggleWithBackground("aboutModal", true);
   localStorage.setItem("visited", "true");
 }
 
@@ -437,6 +442,7 @@ originalTransformGizmo.setOnDrag(disableOrbitControls);
 originalTransformGizmo.setOnStopDrag(enableOrbitControls);
 
 let helper: SkeletonHelper | undefined;
+let animationVisualizerThreadId: number = -1;
 
 const clock = new Clock();
 let group = new Group();
@@ -573,7 +579,17 @@ const render = () => {
     }
 
     const opaqueGeometry = clientState.uiParams["Render Opaque"]
-      ? createGeometry(model, 0)
+      ? createGeometry(
+          model,
+          0,
+          !clientState.uiParams["Show All Hand Poses"]
+            ? clientState.folder === "jms"
+              ? [0, 3, 14]
+              : clientState.folder === "mar"
+              ? [0, 3, 6]
+              : undefined
+            : undefined
+        )
       : undefined;
 
     let modelSkeleton: Skeleton | undefined = undefined;
@@ -707,6 +723,14 @@ const render = () => {
 
       const opaqueAction = mixer.clipAction(clip);
       opaqueAction.play();
+
+      if (animationVisualizerThreadId >= 0) {
+        cancelAnimationFrame(animationVisualizerThreadId);
+      }
+      animationVisualizerThreadId = quickAccess.useAnimationVisualizer(
+        opaqueAction,
+        clip
+      );
 
       if (opaqueMesh && transparentMesh) {
         const transparentAction = mixer.clipAction(clip, transparentMesh);

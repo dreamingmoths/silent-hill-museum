@@ -198,6 +198,13 @@ export const exportCanvas = (
   save(base64, filename);
 };
 
+export const createDiv = (parent: HTMLElement, className: string) => {
+  const element = document.createElement("div");
+  element.className = className;
+  parent.appendChild(element);
+  return element;
+};
+
 const exporter = new GLTFExporter();
 type GltfCallback = (gltf: ArrayBuffer | { [key: string]: any }) => void;
 export function exportModel(object: Object3D, filename: string): void;
