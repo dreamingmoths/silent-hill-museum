@@ -833,13 +833,32 @@ var Anm = (function () {
     Block.prototype._read = function () {
       this.header = [];
       var i = 0;
+
+      var allZeros = true;
+      var reset = false;
+
       do {
         var _t_header = new TransformHeader(this._io, this, this._root);
         _t_header._read();
+        if (
+          !reset &&
+          i === 4 &&
+          _t_header.type !== 0 &&
+          allZeros &&
+          (this.blockIndex << 3) % this.numTransformsPerFrame === 0
+        ) {
+          i = 0;
+          this.header = [];
+          reset = true;
+        }
+        if (_t_header.type !== 0) {
+          allZeros = false;
+        }
         var _ = _t_header;
         this.header.push(_);
         i++;
       } while (!(i == 8 || this._io.isEof()));
+
       this.transforms = [];
       var i = 0;
       do {
