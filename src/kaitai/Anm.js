@@ -843,15 +843,16 @@ var Anm = (function () {
         if (
           !reset &&
           i === 4 &&
-          _t_header.type !== 0 &&
+          (_t_header.type !== 0 || _t_header.flag) &&
           allZeros &&
           (this.blockIndex << 3) % this.numTransformsPerFrame === 0
         ) {
           i = 0;
           this.header = [];
           reset = true;
+          console.log(`Reset on block ${this.blockIndex}`);
         }
-        if (_t_header.type !== 0) {
+        if (_t_header.type !== 0 || _t_header.flag) {
           allZeros = false;
         }
         var _ = _t_header;
