@@ -3,6 +3,7 @@ import {
   chrFolders,
   constructIndex,
   destructureIndex,
+  fileArray,
   fileStructure,
   MuseumFile,
   travelAlongLevel,
@@ -20,8 +21,10 @@ import { Object3D, Vector3 } from "three";
 import TextureViewer, { TextureViewerStates } from "./TextureViewer";
 import { editorState } from "./EditorState";
 import { renderStructToContainer } from "../visualize-struct";
+import { anmToMdlAssoc } from "../animation";
+import anmList from "../assets/anm-list.json";
 
-export const START_INDEX = constructIndex("chr", "favorites", "org.mdl");
+export const START_INDEX = constructIndex("chr", "favorites", "inu.mdl");
 const START_PATH_ARRAY = destructureIndex(START_INDEX);
 export const FilePath = {
   RootFolder: 0,
@@ -50,6 +53,7 @@ export default class MuseumState {
       ...(modelSplit as Parameters<typeof constructIndex>)
     );
     this.setFileIndex(this.defaultStartIndex);
+    this.uiParams.Animation = this.suggestAnimationPath();
     this.updateUiFromState();
   }
 
@@ -114,7 +118,7 @@ export default class MuseumState {
   }
 
   public get fullPath() {
-    return `/mdl/${clientState.rootFolder}/${clientState.folder}/${clientState.file}`;
+    return `/data/${clientState.rootFolder}/${clientState.folder}/${clientState.file}`;
   }
 
   public nextFile() {
@@ -283,10 +287,92 @@ export default class MuseumState {
     });
   }
 
+  public getAllAnimationPaths() {
+    // silly stuff, temporary
+    let rootFolder = "";
+    let anmFolder: string = "";
+    const list: string[] = [];
+    for (const name of anmList) {
+      if (
+        name === "demo" ||
+        name === "demo2" ||
+        name === "chr" ||
+        name === "chr2"
+      ) {
+        rootFolder = name;
+      }
+      if (!name.includes(".anm")) {
+        anmFolder = name;
+        continue;
+      }
+      list.push(`${rootFolder}/${anmFolder}/${name}`);
+    }
+    return list;
+  }
+
+  public suggestAnimationPath() {
+    let rootFolder = "";
+    let anmFile: string = "";
+    let anmFolder: string = "";
+    let isDemo = false;
+    for (const name of anmList) {
+      if (
+        name === "demo" ||
+        name === "demo2" ||
+        name === "chr" ||
+        name === "chr2"
+      ) {
+        rootFolder = name;
+      }
+      if (!name.includes(".anm")) {
+        if (name.includes("demo")) {
+          isDemo = true;
+        }
+        anmFolder = name;
+        continue;
+      }
+      let searchFolder = anmFolder;
+      if (isDemo) {
+        const index = fileArray.findIndex(
+          (value) => value === name.replace(".anm", ".mdl")
+        );
+        if (index >= 0) {
+          const [_, subfolder, __] = destructureIndex(index);
+          searchFolder = subfolder;
+        }
+      }
+      const mdl = anmToMdlAssoc(
+        name,
+        this.folder === "favorites" ? undefined : searchFolder,
+        isDemo
+      );
+      if (mdl === `${this.folder}/${this.file}`) {
+        anmFile = name;
+        break;
+      }
+    }
+    let path =
+      anmFile && anmFolder
+        ? `/data/${rootFolder}/${anmFolder}/${anmFile}`
+        : undefined;
+    if (this.file === "inu.mdl") {
+      path = "/data/demo/inu/inu.anm";
+    }
+    if (this.file === "agl.mdl") {
+      path = "/data/demo/fire_agl/agl.anm";
+    }
+    if (this.file === "hhh_jms.mdl") {
+      path = "/data/demo/sankaku1/hhh_jms.anm";
+    }
+
+    return path;
+  }
+
   public uiParams = {
     Scenario: this.rootFolder === "chr" ? "Main Scenario" : "Born From A Wish",
     Folder: this.folder,
     Filename: this.file,
+    Animation: this.suggestAnimationPath() as string | undefined,
     "Edit Mode ✨": this.mode === "edit",
     "Texture Viewer 👀": false,
     "Lock To Folder": true,
@@ -323,6 +409,7 @@ export default class MuseumState {
     "Render Opaque": true,
     "Render Transparent": true,
     "Skeleton Mode": this.glVersion === 2,
+    "Show All Hand Poses": false,
     "Visualize Skeleton": false,
     "Visualize Normals": false,
 

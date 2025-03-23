@@ -7,7 +7,11 @@ import {
   MaterialType,
   MaterialView,
 } from "./model";
-import { loadModel, loadModelFromBytes } from "./load";
+import {
+  loadAnimationFromUrl,
+  loadModelFromUrl,
+  loadModelFromBytes,
+} from "./load";
 import {
   cameraFix,
   clientState,
@@ -46,6 +50,8 @@ import {
   Bone,
   RepeatWrapping,
   ClampToEdgeWrapping,
+  AnimationClip,
+  AnimationMixer,
 } from "three";
 import {
   OrbitControls,
@@ -57,7 +63,6 @@ import {
   initializeModals,
   showContentWarningModal,
   showNotSupportedModal,
-  toggleWithBackground,
 } from "./modals";
 import { chrFolders, MuseumFile } from "./files";
 import GUI from "lil-gui";
@@ -70,6 +75,10 @@ import EditMode, { consoleGui } from "./edit-mode";
 import { TextureViewerStates } from "./objects/TextureViewer";
 import { editorState } from "./objects/EditorState";
 import Gizmo from "./objects/Gizmo";
+import SilentHillAnimation from "./kaitai/Anm";
+import { createAnimationTracks } from "./animation";
+import QuickAccess from "./objects/QuickAccess";
+import "./style.css";
 
 const appContainer = document.getElementById("app");
 if (!(appContainer instanceof HTMLDivElement)) {
@@ -79,6 +88,11 @@ const uiContainer = document.getElementById("ui-container");
 if (!(uiContainer instanceof HTMLDivElement)) {
   throw Error("The UI container was not found!");
 }
+const quickAccessContainer = document.querySelector(".quick-access");
+if (!(quickAccessContainer instanceof HTMLDivElement)) {
+  throw Error("The quick access coontainer was not found!");
+}
+const quickAccess = new QuickAccess(quickAccessContainer);
 
 initializeModals();
 acceptModelDrop(appContainer);
@@ -86,7 +100,6 @@ acceptModelDrop(appContainer);
 const params = new URLSearchParams(window.location.search);
 const bypassAboutModal = params.get("bypass-modal");
 if (!bypassAboutModal && localStorage.getItem("visited") === null) {
-  toggleWithBackground("aboutModal", true);
   localStorage.setItem("visited", "true");
 }
 
@@ -122,6 +135,12 @@ const fileInput = dataGuiFolder.add(
   "Filename",
   possibleFilenames
 );
+const anmFile = dataGuiFolder.add(
+  clientState.uiParams,
+  "Animation",
+  clientState.getAllAnimationPaths()
+);
+anmFile.onFinishChange(() => render());
 dataGuiFolder
   .add(clientState.uiParams, "Lock To Folder")
   .onFinishChange(() => {
@@ -174,6 +193,17 @@ fileInput.onFinishChange((file: (typeof possibleFilenames)[number]) => {
 dataGuiFolder.open();
 
 const controlsGuiFolder = gui.addFolder("Controls");
+gui.onOpenClose(() => {
+  console.log(gui);
+  if (!isMobileLayout) {
+    return;
+  }
+  if (gui._closed) {
+    quickAccess.show();
+  } else {
+    quickAccess.hide();
+  }
+});
 const editModeButton = controlsGuiFolder
   .add(clientState.uiParams, "Edit Mode ✨")
   .listen()
@@ -324,6 +354,7 @@ camera.position.z = 5;
 const prefersReducedMotion = !!window.matchMedia(
   `(prefers-reduced-motion: reduce)`
 );
+let isMobileLayout = false;
 const onWindowResize = () => {
   const width = appContainer.offsetWidth;
   const height = appContainer.offsetHeight;
@@ -331,11 +362,13 @@ const onWindowResize = () => {
   camera.updateProjectionMatrix();
   renderer.setSize(width, height);
   if (!gui._closed && width < 700) {
+    isMobileLayout = true;
     gui.close();
     textureViewerButton.hide();
     editModeButton.hide();
     clientState.setMode("viewing");
   } else if (width > 700 && gui._closed) {
+    isMobileLayout = false;
     if (prefersReducedMotion) {
       gui.openAnimated();
     } else {
@@ -423,10 +456,11 @@ originalTransformGizmo.setOnDrag(disableOrbitControls);
 originalTransformGizmo.setOnStopDrag(enableOrbitControls);
 
 let helper: SkeletonHelper | undefined;
+let animationVisualizerThreadId: number = -1;
 
 const clock = new Clock();
 let group = new Group();
-let lastIndex = clientState.getFileIndex();
+let lastIndex = -1;
 
 const editor = new EditMode();
 
@@ -458,7 +492,8 @@ const render = () => {
 
   const modelCallback = (
     model: SilentHillModel | undefined,
-    cleanupResources = true
+    cleanupResources = true,
+    animation?: SilentHillAnimation
   ) => {
     logger.debug("Parsed model structure", model);
     scene.clear();
@@ -558,11 +593,21 @@ const render = () => {
     }
 
     const opaqueGeometry = clientState.uiParams["Render Opaque"]
-      ? createGeometry(model, 0)
+      ? createGeometry(
+          model,
+          0,
+          !clientState.uiParams["Show All Hand Poses"]
+            ? clientState.folder === "jms"
+              ? [0, 3, 14]
+              : clientState.folder === "mar"
+              ? [0, 3, 6]
+              : undefined
+            : undefined
+        )
       : undefined;
 
     let modelSkeleton: Skeleton | undefined = undefined;
-    let opaqueMesh: SkinnedMesh | Mesh;
+    let opaqueMesh: SkinnedMesh | Mesh | undefined;
     if (opaqueGeometry) {
       opaqueGeometry.name = `${clientState.file}-opaque`;
 
@@ -572,7 +617,7 @@ const render = () => {
 
         opaqueMesh = new SkinnedMesh(opaqueGeometry, opaqueMaterial);
         rootBoneIndices.forEach((boneIndex) =>
-          opaqueMesh.add(skeleton.bones[boneIndex])
+          opaqueMesh?.add(skeleton.bones[boneIndex])
         );
         (opaqueMesh as SkinnedMesh).bind(skeleton);
         modelSkeleton = skeleton;
@@ -598,7 +643,7 @@ const render = () => {
     const transparentGeometry = clientState.uiParams["Render Transparent"]
       ? createGeometry(model, 1)
       : undefined;
-    let transparentMesh: SkinnedMesh | Mesh;
+    let transparentMesh: SkinnedMesh | Mesh | undefined;
     if (transparentGeometry) {
       transparentGeometry.name = `${clientState.file}-transparent`;
 
@@ -612,7 +657,7 @@ const render = () => {
           const { skeleton, rootBoneIndices } = createSkeleton(model);
           modelSkeleton = skeleton;
           rootBoneIndices.forEach((boneIndex) =>
-            transparentMesh.add(skeleton.bones[boneIndex])
+            transparentMesh?.add(skeleton.bones[boneIndex])
           );
         }
         bindSkeletonToTransparentGeometry(model, transparentGeometry);
@@ -678,6 +723,37 @@ const render = () => {
       modelSkeleton?.bones[8]?.rotateZ(Math.PI / 2);
     }
 
+    const mesh = opaqueMesh ?? transparentMesh;
+    let mixer: AnimationMixer | undefined;
+    if (animation && mesh && modelSkeleton) {
+      mixer = new AnimationMixer(mesh);
+
+      const tracks = createAnimationTracks(animation, modelSkeleton);
+      const clip = new AnimationClip(
+        clientState.file.replace(".mdl", ".anm"),
+        -1,
+        tracks
+      );
+
+      const opaqueAction = mixer.clipAction(clip);
+      opaqueAction.play();
+
+      if (animationVisualizerThreadId >= 0) {
+        cancelAnimationFrame(animationVisualizerThreadId);
+      }
+      animationVisualizerThreadId = quickAccess.useAnimationVisualizer(
+        opaqueAction,
+        clip
+      );
+
+      if (opaqueMesh && transparentMesh) {
+        const transparentAction = mixer.clipAction(clip, transparentMesh);
+        transparentAction.play();
+      }
+    } else {
+      quickAccess.hide();
+    }
+
     const maxBoneSelection = (modelSkeleton?.bones.length ?? 1) - 1;
     boneSelector.max(maxBoneSelection);
     if (maxBoneSelection === 0) {
@@ -711,6 +787,7 @@ const render = () => {
         return;
       }
       const delta = clock.getDelta() * 120; // targeting 120 fps
+      mixer?.update(delta);
       modelTransformGizmo.render(
         clientState.getMode() === "edit" &&
           editorState.editorParams["Model Controls"],
@@ -794,6 +871,24 @@ const render = () => {
     folderInput.setValue(clientState.folder);
     folderInput.options(clientState.getPossibleFolders());
     fileInput.options(clientState.getPossibleFilenames());
+    anmFile.setValue(clientState.suggestAnimationPath());
+    anmFile.options(
+      clientState.getAllAnimationPaths().filter((path) => {
+        const isDemo = path.includes("demo");
+
+        const [_, folder, filename] = path.split("/");
+        const isFavorite =
+          clientState.folder === "favorites" &&
+          filename.includes(clientState.file.replace(".mdl", ""));
+
+        return (
+          (isDemo &&
+            filename.includes(clientState.file.replace(".mdl", ".anm"))) ||
+          (!isDemo && clientState.folder === folder) ||
+          isFavorite
+        );
+      })
+    );
 
     disposeResources(lightGroup);
     lightGroup = undefined;
@@ -821,7 +916,7 @@ const render = () => {
       editorState.editorParams["Show Original"] &&
       !editorState.cachedOriginalModel
     ) {
-      loadModel(clientState.fullPath).then((original) => {
+      loadModelFromUrl(clientState.fullPath).then((original) => {
         const cachedOriginalModel = modelCallback(original);
         if (cachedOriginalModel) {
           cachedOriginalModel.parent = null;
@@ -858,9 +953,22 @@ const render = () => {
     }
     return;
   }
-  loadModel(clientState.fullPath).then((model) => {
+  loadModelFromUrl(clientState.fullPath).then(async (model) => {
     clientState.setCurrentViewerModel(model);
-    modelCallback(model);
+
+    let anm: SilentHillAnimation | undefined;
+    if (model !== undefined) {
+      const path = clientState.uiParams.Animation;
+      if (path) {
+        anm = await loadAnimationFromUrl(
+          !path.startsWith("/data/") ? `/data/${path}` : path,
+          model
+        );
+      }
+      console.log(path, "path");
+    }
+
+    modelCallback(model, undefined, anm);
   });
 };
 render();

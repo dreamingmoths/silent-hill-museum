@@ -70,6 +70,7 @@ export default class TextureViewer {
     if (this.state !== TextureViewerStates.Inactive) {
       this.guiWindow.classList.add("hover");
     }
+    this.renderTextures();
   }
 
   public attachToGuiWindow() {
@@ -94,7 +95,9 @@ export default class TextureViewer {
 
   public attach(object: Object3D) {
     this.currentObject = object;
-    this.renderTextures();
+    if (this.state === TextureViewerStates.Active) {
+      this.renderTextures();
+    }
   }
 
   public renderTextures() {

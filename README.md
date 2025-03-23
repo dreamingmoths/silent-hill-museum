@@ -32,7 +32,7 @@ git clone https://github.com/laura-a-n-n/silent-hill-museum.git
 cd silent-hill-museum
 ```
 
-2. In `public`, make a new folder called `mdl` and copy `data/chr` and `data/chr2` from Silent Hill 2 into it.
+2. Copy the `data` folder from Silent Hill 2 into the `public` directory of this repository.
 
 3. Install the dependencies.
 

@@ -36,19 +36,19 @@ types:
       A 3D rotation described by Euler angles. Each angle is a 16-bit
       fixed-point real number with a 12-bit fraction.
     seq:
-      - id: x
+      - id: x_int
         type: s2
-      - id: y
+      - id: y_int
         type: s2
-      - id: z
+      - id: z_int
         type: s2
     instances:
-      x_real:
-        value: x / 4096.0
-      y_real:
-        value: y / 4096.0
-      z_real:
-        value: z / 4096.0
+      x:
+        value: x_int / 4096.0
+      y:
+        value: y_int / 4096.0
+      z:
+        value: z_int / 4096.0
 
   translation32:
     doc: A 3D translation described with 32-bit floating point values.
@@ -63,30 +63,44 @@ types:
   translation16:
     doc: A 3D translation described with 16-bit floating point values.
     seq:
-      - id: x
+      - id: x_16
         type: f2
-      - id: y
+      - id: y_16
         type: f2
-      - id: z
+      - id: z_16
         type: f2
+    instances:
+      x:
+        value: x_16.float_value
+      y:
+        value: y_16.float_value
+      z:
+        value: z_16.float_value
 
   translation16_padded:
     doc: |
       A 3D translation described with 16-bit floating point values which are
       padded to 32 bits.
     seq:
-      - id: x
+      - id: x_16
         type: f2
       - id: x_pad
         size: 2
-      - id: y
+      - id: y_16
         type: f2
       - id: y_pad
         size: 2
-      - id: z
+      - id: z_16
         type: f2
       - id: z_pad
         size: 2
+    instances:
+      x:
+        value: x_16.float_value
+      y:
+        value: y_16.float_value
+      z:
+        value: z_16.float_value
 
   axis:
     doc: |
@@ -94,23 +108,23 @@ types:
       16-bit signed integer representing a value in the range [-1, 1) (i.e.
       divide the integer value by 32768).
     seq:
-      - id: x
+      - id: x_int
         type: s2
-      - id: y
+      - id: y_int
         type: s2
-      - id: z
+      - id: z_int
         type: s2
-      - id: w
+      - id: w_int
         type: s2
     instances:
-      x_real:
-        value: x / 32768.0
-      y_real:
-        value: y / 32768.0
-      z_real:
-        value: z / 32768.0
-      w_real:
-        value: w / 32768.0
+      x:
+        value: x_int / 32768.0
+      y:
+        value: y_int / 32768.0
+      z:
+        value: z_int / 32768.0
+      w:
+        value: w_int / 32768.0
 
   isometry32:
     doc: A rotation followed by a translation using 32-bit floating point.
@@ -265,8 +279,8 @@ types:
     seq:
       - id: header
         type: transform_header
-        repeat: expr
-        repeat-expr: 8
+        repeat: until
+        repeat-until: _index == 8 or _io.eof
         doc: |
           A 32-bit field where each nibble, in little-endian order, identifies
           the type of the next transform in the block.
@@ -313,8 +327,8 @@ types:
             '[6, 1]': interpolated_isometry32
             '[7, 0]': identity
             '[7, 1]': identity
-        repeat: expr
-        repeat-expr: 8
+        repeat: until
+        repeat-until: _index == 8 or _io.eof
         doc: |
           A 3D transformation to be applied to a bone of a model. The exact
           fields and interpretation of a particular transform depends on the

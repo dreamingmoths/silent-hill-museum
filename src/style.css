@@ -235,7 +235,6 @@ ol {
 #sidebar-container {
   width: 250px;
   max-width: 250px;
-  min-width: 250px;
   position: absolute;
   top: 0;
   left: 0;
@@ -414,7 +413,8 @@ footer {
 
 .flexbox-container .placeholder {
   display: flex;
-  align-items: end;
+  flex-direction: column;
+  justify-content: flex-end;
   flex: 1;
   max-height: 100%;
   margin: 0 0.5rem;
@@ -528,6 +528,39 @@ div.struct-visualizer {
   text-transform: none;
 }
 
+.quick-access-toolbar {
+  width: 90%;
+  height: 2.5rem;
+  /* background: repeating-linear-gradient(
+    90deg,
+    #1f1f1f,
+    #1f1f1f 25%,
+    #d676aeaa 25%,
+    #d676aeaa calc(25% + 2px)
+  ); */
+
+  background: #1f1f1f;
+  box-shadow: inset 0 0 0.5px 1px hsla(0, 0%, 100%, 0.1),
+    0 0 0 1px hsla(230, 13%, 9%, 0.075), 0 0.3px 0.4px hsla(230, 13%, 9%, 0.02),
+    0 0.9px 1.5px hsla(230, 13%, 9%, 0.045),
+    0 3.5px 6px hsla(230, 13%, 9%, 0.09);
+
+  gap: 0.5rem;
+  margin-bottom: 3rem;
+  align-self: center;
+  border-radius: 1rem;
+  overflow: hidden;
+  container-type: inline-size;
+}
+
+.anm-progress-bar {
+  height: 100%;
+  width: 0.125rem;
+  background-color: #d676ae;
+  position: relative;
+  text-wrap: nowrap;
+}
+
 @media all and (max-width: 700px) {
   .flexbox-container .placeholder .lil-gui.root,
   footer {
@@ -550,5 +583,23 @@ div.struct-visualizer {
     max-width: 0;
     min-width: 0;
     display: none;
+  }
+
+  #sidebar-wrapper,
+  #ui-container {
+    width: 0;
+    flex: none;
+  }
+
+  .quick-access-toolbar {
+    max-width: 70%;
+    height: 2.5rem;
+  }
+}
+
+@media all and (min-width: 700px) {
+  body.viewing #sidebar-wrapper {
+    width: 155px;
+    flex: none;
   }
 }

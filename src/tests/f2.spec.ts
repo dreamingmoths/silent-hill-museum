@@ -14,7 +14,10 @@ class Float16 {
   public static readonly NEGATIVE_INFINITY = 0xfc00;
 
   public static fromBinaryFile(file: BinaryFile) {
-    return new KaitaiFloat16(file).floatValue;
+    const parsed = new KaitaiFloat16(file);
+    parsed._read();
+    parsed._fetchInstances();
+    return parsed.floatValue;
   }
 
   /**
