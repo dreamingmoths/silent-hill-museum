@@ -33,7 +33,7 @@ seq:
   - id: infinit_light_count
     type: u1
     valid:
-      expr: _ < 6 # why?
+      expr: total_light_count < 6 # why?
 
   - id: pad
     size: 1
