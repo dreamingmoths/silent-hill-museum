@@ -361,6 +361,9 @@ export default class MuseumState {
     if (this.file === "agl.mdl") {
       path = "/data/demo/fire_agl/agl.anm";
     }
+    if (this.file === "hhh_jms.mdl") {
+      path = "/data/demo/sankaku1/hhh_jms.anm";
+    }
 
     return path;
   }

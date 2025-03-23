@@ -558,6 +558,7 @@ div.struct-visualizer {
   width: 0.125rem;
   background-color: #d676ae;
   position: relative;
+  text-wrap: nowrap;
 }
 
 @media all and (max-width: 700px) {

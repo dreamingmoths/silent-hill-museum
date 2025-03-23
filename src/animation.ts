@@ -39,7 +39,7 @@ export const createAnimationTracks = (
       if (boneIndex >= model.modelData.boneCount) {
         continue;
       }
-      if (block.header[j] === undefined) {
+      if (!block.header || block.header[j] === undefined) {
         continue;
       }
       boneInfo[boneIndex] ??= {
@@ -135,20 +135,38 @@ export const processAnimationTransform = (
   boneInfo: BoneInfo
 ) => {
   if (transform && "translation" in transform && !("axis" in transform)) {
+    if (boneInfo.position.length < 100) {
+      // console.log("isometry", transform);
+    }
     translate(boneInfo, transform.translation);
     rotateEuler(boneInfo, transform.rotation);
-  } else if (boneInfo.position.length) {
+    advanceFrame(boneInfo);
+    return;
+  }
+  if (boneInfo.position.length) {
+    if (boneInfo.position.length < 100) {
+      // console.log("copying prev position", transform);
+    }
     boneInfo.position.push(...boneInfo.position.slice(-3));
     positionTimestamp(boneInfo);
   }
 
   if (transform instanceof SilentHillAnimation.Rotation) {
     rotateEuler(boneInfo, transform);
+    if (boneInfo.position.length < 100) {
+      // console.log("rotation", transform);
+    }
   } else if (boneInfo.rotation.length) {
     boneInfo.rotation.push(...boneInfo.rotation.slice(-4));
     rotationTimestamp(boneInfo);
+    if (boneInfo.position.length < 100) {
+      // console.log("copying prev rot", transform);
+    }
   }
 
+  if (boneInfo.position.length < 100) {
+    // console.log("advanced");
+  }
   advanceFrame(boneInfo);
 };
 
