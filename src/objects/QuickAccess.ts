@@ -19,6 +19,7 @@ export default class QuickAccess {
     const div = createDiv(parent, "quick-access-toolbar ui");
 
     let pointerIsDown = false;
+    let pointerId = -1;
     const shiftTime = (event: PointerEvent) => {
       const percent = event.offsetX / div.offsetWidth; // style computation. it's ok
       if (percent > 0) {
@@ -27,23 +28,32 @@ export default class QuickAccess {
     };
     div.addEventListener("pointerdown", (event) => {
       event.preventDefault();
+
       div.setPointerCapture(event.pointerId);
+      pointerId = event.pointerId;
       pointerIsDown = true;
+
       shiftTime(event);
     });
 
     div.addEventListener("pointermove", (event) => {
       event.preventDefault();
-      if (pointerIsDown) {
-        shiftTime(event);
+      if (!pointerIsDown) {
+        return;
       }
+      shiftTime(event);
     });
 
     const stop = (event: PointerEvent) => {
       event.preventDefault();
-      div.releasePointerCapture(event.pointerId);
-      this.animationTimer = -1;
+
+      if (pointerId >= 0) {
+        div.releasePointerCapture(pointerId);
+      }
+      pointerId = -1;
       pointerIsDown = false;
+
+      this.animationTimer = -1;
     };
 
     div.addEventListener("pointerup", stop);
@@ -88,6 +98,9 @@ export default class QuickAccess {
       } else {
         progressBar.style.left = `${percent}%`;
       }
+      progressBar.innerText = `${percent.toFixed(2)}%(${Math.floor(
+        (time * clip.duration) / 5
+      )} / ${duration / 5})`;
 
       return requestAnimationFrame(animate);
     }
