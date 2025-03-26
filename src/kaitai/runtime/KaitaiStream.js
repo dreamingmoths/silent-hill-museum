@@ -700,6 +700,10 @@ KaitaiStream.prototype._writeBytesNotAligned = function (buf) {
   }
 };
 
+KaitaiStream.bytesIndexOf = function(data, byte) {
+  return data.indexOf(byte);
+};
+
 // Unused since Kaitai Struct Compiler v0.9+ - compatibility with older versions
 KaitaiStream.prototype.ensureFixedContents = function(expected) {
   var actual = this.readBytes(expected.length);
@@ -713,6 +717,14 @@ KaitaiStream.prototype.ensureFixedContents = function(expected) {
     }
   }
   return actual;
+};
+
+KaitaiStream.bytesStripRight = function(data, padByte) {
+  var newLen = data.length;
+  while (data[newLen - 1] === padByte) {
+    newLen--;
+  }
+  return data.slice(0, newLen);
 };
 
 KaitaiStream.bytesStripRight = function(data, padByte) {

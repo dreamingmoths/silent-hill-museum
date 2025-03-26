@@ -2,6 +2,7 @@ import logger from "./objects/Logger";
 import KaitaiStream from "./kaitai/runtime/KaitaiStream";
 import SilentHillModel from "./kaitai/Mdl";
 import SilentHillAnimation from "./kaitai/Anm";
+import SilentHillDramaDemo from "./kaitai/Dds";
 
 // We can write a more general version of this soon.
 
@@ -22,6 +23,14 @@ export const fetchRawBytes = async (url: string): Promise<ArrayBuffer> => {
     logger.error("There was a problem with the fetch operation:", error);
     throw error;
   }
+};
+
+export const loadDramaDemoFromBytes = (bytes: ArrayBuffer) => {
+  const stream = new KaitaiStream(bytes);
+  const cutscene = new SilentHillDramaDemo(stream);
+  cutscene._read();
+  cutscene._fetchInstances();
+  return cutscene;
 };
 
 export const loadModelFromBytes = (bytes: ArrayBuffer) => {
