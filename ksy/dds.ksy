@@ -17,6 +17,7 @@ seq:
 
   - id: unknown0
     size: 12
+    doc: PS2 version does not look at these, but they can be nonzero.
 
   - id: total_demo_frame
     type: u2
@@ -45,13 +46,11 @@ seq:
     type: anim_info_name
     repeat: expr
     repeat-expr: character_count
-
+  
   - id: frames
     type: frame
     repeat: until
-    repeat-until: (_index == total_demo_frame - 1) or
-      (_io.size - _io.pos < 2) or
-      (_io.eof)
+    repeat-until: _index == total_demo_frame
 
 instances:
   total_light_count:
@@ -62,26 +61,15 @@ types:
     seq:
       - id: frame_index
         type: s2
-
-      - id: first_instruction_type
-        type: u1
-        enum: dds
-        if: frame_index >= 0
-
-      - id: key
-        type: dds_play_key
-        if: frame_index >= 0
-
+      
       - id: instructions
-        type: instruction(demo_status)
-        repeat: until #expr
-        # repeat-expr: 1000
+        type:
+          switch-on: _index == 0
+          cases:
+            true: instruction(0)
+            false: instruction(instructions[_index - 1].state)
+        repeat: until
         repeat-until: _.dds_block_type == dds::stop
-        if: frame_index >= 0
-
-    instances:
-      demo_status:
-        value: key.demo_status
         if: frame_index >= 0
 
   instruction:
@@ -92,24 +80,32 @@ types:
     seq:
       - id: control_byte
         type: u1
-
+        
       - id: dds_block
         type:
           switch-on: dds_block_type
           cases:
-            "dds::play_key": dds_play_key
-            "dds::play_camera": dds_play_camera(demo_status)
-            "dds::play_light": dds_play_light(demo_status)
-            "dds::play_character": dds_play_character(demo_status)
-            "dds::stop": empty
+            'dds::play_key': dds_play_key
+            'dds::play_camera': dds_play_camera(demo_status)
+            'dds::play_light': dds_play_light(demo_status)
+            'dds::play_character': dds_play_character(demo_status)
+            'dds::stop': empty
 
     instances:
+      state:
+        value: |
+          control_byte == 0 ?
+            dds_block.as<dds_play_key>.demo_status : demo_status
+    
       dds_block_type:
         enum: dds
         value: |
-          control_byte < 2 or control_byte == 255 ? control_byte : 
-            ((control_byte - 2 < _root.total_light_count) ? 2 : 3)
-
+          control_byte < 2 or control_byte == 255 ?
+            control_byte : 
+            ((control_byte - 2 < _root.total_light_count) ?
+              2 :
+              3)
+  
   dds_play_key:
     seq:
       - id: status_bytes
@@ -155,29 +151,29 @@ types:
     instances:
       state:
         value: demo_status
-
+        
   dds_camera_info:
     seq:
       - id: control_byte
         type: u1
-
+        
       - id: dds_block
         type:
           switch-on: >
             [control_byte, using_half_floats].as<bytes>
           cases:
-            "[1, 0]": empty # unknown, sets a flag to 1
-            "[2, 0]": empty # unknown, sets a flag to 0
-            "[3, 0]": f2_vector
-            "[3, 1]": f4_vector
-            "[4, 0]": f2_vector
-            "[4, 1]": f4_vector
-            "[5, 0]": f2_vector # rotation to interest
-            "[5, 1]": f2_vector
-            "[6, 0]": f2
-            "[6, 1]": f2
-            "[7, 0]": f4
-            "[7, 1]": f4
+            '[1, 0]': empty # unknown, sets a flag to 1
+            '[2, 0]': empty # unknown, sets a flag to 0
+            '[3, 0]': f2_vector
+            '[3, 1]': f4_vector
+            '[4, 0]': f2_vector
+            '[4, 1]': f4_vector
+            '[5, 0]': f2_vector # rotation to interest
+            '[5, 1]': f2_vector
+            '[6, 0]': f2
+            '[6, 1]': f2
+            '[7, 0]': f4
+            '[7, 1]': f4
     instances:
       using_half_floats:
         value: _parent.state & 2 > 0
@@ -194,31 +190,31 @@ types:
     instances:
       state:
         value: demo_status
-
+        
   dds_light_info:
     seq:
       - id: control_byte
         type: u1
-
+        
       - id: dds_block
         type:
           switch-on: >
             [control_byte, using_half_floats].as<bytes>
           cases:
-            "[1, 0]": empty # unknown, sets a flag to 1
-            "[2, 0]": empty # uknown, sets a flag to 0
-            "[3, 0]": f2_vector
-            "[3, 1]": f4_vector
-            "[4, 0]": f2_vector
-            "[4, 1]": f4_vector
-            "[5, 0]": f2_vector # rotation to interest
-            "[5, 1]": f2_vector
-            "[8, 0]": f2_vector
-            "[8, 1]": f2_vector
-            "[9, 0]": f2_vector2
-            "[9, 1]": f2_vector2
-            "[10, 0]": f2_vector2
-            "[10, 1]": f2_vector2
+            '[1, 0]': empty # unknown, sets a flag to 1
+            '[2, 0]': empty # uknown, sets a flag to 0
+            '[3, 0]': f2_vector
+            '[3, 1]': f4_vector
+            '[4, 0]': f2_vector
+            '[4, 1]': f4_vector
+            '[5, 0]': f2_vector # rotation to interest
+            '[5, 1]': f2_vector
+            '[8, 0]': f2_vector
+            '[8, 1]': f2_vector
+            '[9, 0]': f2_vector2
+            '[9, 1]': f2_vector2
+            '[10, 0]': f2_vector2
+            '[10, 1]': f2_vector2
     instances:
       using_half_floats:
         value: _parent.state & 2 > 0
@@ -272,24 +268,24 @@ types:
     instances:
       state:
         value: demo_status
-
+        
   dds_character_info:
     seq:
       - id: control_byte
         type: u1
-
+        
       - id: dds_block
         if: control_byte > 0 and control_byte < 4
         type:
           switch-on: >
             [control_byte, using_half_floats].as<bytes>
           cases:
-            "[1, 0]": empty # unknown, sets a flag to 1
-            "[1, 1]": empty # unknown, sets a flag to 1
-            "[2, 0]": empty # unknown, sets a flag to 0
-            "[2, 1]": empty # unknown, sets a flag to 0
-            "[3, 0]": f2_vector
-            "[3, 1]": f4_vector
+            '[1, 0]': empty # unknown, sets a flag to 1
+            '[1, 1]': empty # unknown, sets a flag to 1
+            '[2, 0]': empty # unknown, sets a flag to 0
+            '[2, 1]': empty # unknown, sets a flag to 0
+            '[3, 0]': f2_vector
+            '[3, 1]': f4_vector
     instances:
       using_half_floats:
         value: _parent.state & 2 > 0
