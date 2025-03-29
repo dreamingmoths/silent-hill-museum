@@ -7,6 +7,7 @@ const mockFetch = async (url: RequestInfo | URL) => {
     return {
       ok: true,
       status: 200,
+      statusText: "OK",
       json: async () => JSON.parse(fileContent.toString("utf-8")),
       text: async () => fileContent.toString("utf-8"),
       arrayBuffer: async () =>
@@ -19,6 +20,7 @@ const mockFetch = async (url: RequestInfo | URL) => {
     return {
       ok: false,
       status: 404,
+      statusText: "Not Found",
       json: async () => ({}),
       text: async () => "",
     };

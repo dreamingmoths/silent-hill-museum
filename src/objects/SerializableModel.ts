@@ -15,7 +15,6 @@ import {
   TypedArray,
   Vector3,
 } from "three";
-import { loadModelFromBytes } from "../load";
 import SilentHillModel, { PrimitiveHeader } from "../kaitai/Mdl";
 import Stripifier from "../wasm/stripifier/stripifier";
 import KaitaiStream from "../kaitai/runtime/KaitaiStream";
@@ -226,7 +225,8 @@ export default class SerializableModel {
     resizer?: ImageLibrary,
     sendToShared?: SendToShared
   ) {
-    const model = loadModelFromBytes(fileContents);
+    const stream = new KaitaiStream(fileContents);
+    const model = new SilentHillModel(stream);
     model._read();
     model._fetchInstances();
     Object.assign(this.params, params);

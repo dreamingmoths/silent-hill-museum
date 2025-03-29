@@ -87,13 +87,13 @@ export default class KeybindManager {
       ),
     ];
     if (!(event.key.toLowerCase() in modifiers)) {
-      keysDown.push(event.key);
+      keysDown.push(event.key === " " ? "space" : event.key);
     }
 
     const keyCombination = keysDown.join("+").toLowerCase() as KeyCombination;
 
     if (this.debugMode) {
-      logger.debug("Key combination detected", keyCombination);
+      logger.debug(`Key combination detected '${keyCombination}'`);
     }
 
     const action = this.keybindMap.get(keyCombination);

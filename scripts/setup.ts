@@ -24,11 +24,11 @@ async function ensureDir(
 }
 
 async function copyFilesToFavorites(files: string[]): Promise<void> {
-  const mdlDirectory = join(process.cwd(), "public", "mdl");
+  const mdlDirectory = join(process.cwd(), "public", "data");
   const favoritesDirectory = join(
     process.cwd(),
     "public",
-    "mdl",
+    "data",
     "chr",
     "favorites"
   );
@@ -52,11 +52,11 @@ async function copyFilesToFavorites(files: string[]): Promise<void> {
 }
 
 const filesToCopy: string[] = [
-  "public/mdl/chr/agl/agl.mdl",
-  "public/mdl/chr/item/inu.mdl",
-  "public/mdl/chr/lau/lau.mdl",
-  "public/mdl/chr/item/org.mdl",
-  "public/mdl/chr/wp/wp_csaw.mdl",
+  "public/data/chr/agl/agl.mdl",
+  "public/data/chr/item/inu.mdl",
+  "public/data/chr/lau/lau.mdl",
+  "public/data/chr/item/org.mdl",
+  "public/data/chr/wp/wp_csaw.mdl",
 ];
 
 copyFilesToFavorites(filesToCopy)

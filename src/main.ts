@@ -7,7 +7,13 @@ import {
   MaterialType,
   MaterialView,
 } from "./model";
-import { loadModel, loadModelFromBytes } from "./load";
+import {
+  loadAnimationFromUrl,
+  loadModelFromUrl,
+  loadModelFromBytes,
+  loadDramaDemoFromBytes,
+  fetchRawBytes,
+} from "./load";
 import {
   cameraFix,
   clientState,
@@ -46,8 +52,12 @@ import {
   Bone,
   RepeatWrapping,
   ClampToEdgeWrapping,
+  AnimationClip,
+  AnimationMixer,
+  MeshStandardMaterial,
 } from "three";
 import {
+  GLTFLoader,
   OrbitControls,
   TransformControls,
   VertexNormalsHelper,
@@ -57,19 +67,25 @@ import {
   initializeModals,
   showContentWarningModal,
   showNotSupportedModal,
-  toggleWithBackground,
 } from "./modals";
-import { chrFolders, MuseumFile } from "./files";
+import { chrFolders, destructureIndex, fileArray, MuseumFile } from "./files";
 import GUI from "lil-gui";
 import { acceptModelDrop, applyUpdate } from "./write";
 import SilentHillModel from "./kaitai/Mdl";
 import RaycastHelper from "./objects/RaycastHelper";
 import logger from "./objects/Logger";
-import "./keybinds";
+import { registerAllKeybinds } from "./keybinds";
 import EditMode, { consoleGui } from "./edit-mode";
 import { TextureViewerStates } from "./objects/TextureViewer";
 import { editorState } from "./objects/EditorState";
 import Gizmo from "./objects/Gizmo";
+import SilentHillAnimation from "./kaitai/Anm";
+import SilentHillDramaDemo from "./kaitai/Dds";
+import { createAnimationTracks } from "./animation";
+import AnimationGui from "./objects/AnimationGui";
+import ddsList from "./assets/dds-list.json";
+import { createCutsceneTracks } from "./cutscene";
+import "./style.css";
 
 const appContainer = document.getElementById("app");
 if (!(appContainer instanceof HTMLDivElement)) {
@@ -79,6 +95,12 @@ const uiContainer = document.getElementById("ui-container");
 if (!(uiContainer instanceof HTMLDivElement)) {
   throw Error("The UI container was not found!");
 }
+const animationGuiContainer = document.querySelector(".quick-access");
+if (!(animationGuiContainer instanceof HTMLDivElement)) {
+  throw Error("The quick access coontainer was not found!");
+}
+export const animationGui = new AnimationGui(animationGuiContainer);
+registerAllKeybinds({ animationGui });
 
 initializeModals();
 acceptModelDrop(appContainer);
@@ -86,7 +108,6 @@ acceptModelDrop(appContainer);
 const params = new URLSearchParams(window.location.search);
 const bypassAboutModal = params.get("bypass-modal");
 if (!bypassAboutModal && localStorage.getItem("visited") === null) {
-  toggleWithBackground("aboutModal", true);
   localStorage.setItem("visited", "true");
 }
 
@@ -174,6 +195,16 @@ fileInput.onFinishChange((file: (typeof possibleFilenames)[number]) => {
 dataGuiFolder.open();
 
 const controlsGuiFolder = gui.addFolder("Controls");
+gui.onOpenClose(() => {
+  if (!isMobileLayout) {
+    return;
+  }
+  if (gui._closed) {
+    animationGui.show();
+  } else {
+    animationGui.hide();
+  }
+});
 const editModeButton = controlsGuiFolder
   .add(clientState.uiParams, "Edit Mode ✨")
   .listen()
@@ -318,12 +349,13 @@ renderer.setPixelRatio(window.devicePixelRatio);
 appContainer.appendChild(renderer.domElement);
 
 Object3D.DEFAULT_UP.multiplyScalar(-1); // -Y is up
-const camera = new PerspectiveCamera(75, width / height, 0.1, 100);
+const camera = new PerspectiveCamera(75, width / height, 2, 131072);
 camera.position.z = 5;
 
 const prefersReducedMotion = !!window.matchMedia(
   `(prefers-reduced-motion: reduce)`
 );
+let isMobileLayout = false;
 const onWindowResize = () => {
   const width = appContainer.offsetWidth;
   const height = appContainer.offsetHeight;
@@ -331,11 +363,13 @@ const onWindowResize = () => {
   camera.updateProjectionMatrix();
   renderer.setSize(width, height);
   if (!gui._closed && width < 700) {
+    isMobileLayout = true;
     gui.close();
     textureViewerButton.hide();
     editModeButton.hide();
     clientState.setMode("viewing");
   } else if (width > 700 && gui._closed) {
+    isMobileLayout = false;
     if (prefersReducedMotion) {
       gui.openAnimated();
     } else {
@@ -423,10 +457,12 @@ originalTransformGizmo.setOnDrag(disableOrbitControls);
 originalTransformGizmo.setOnStopDrag(enableOrbitControls);
 
 let helper: SkeletonHelper | undefined;
+let animationVisualizerThreadId: number = -1;
 
 const clock = new Clock();
 let group = new Group();
-let lastIndex = clientState.getFileIndex();
+let lastIndex = -1;
+let mixers: AnimationMixer[] = [];
 
 const editor = new EditMode();
 
@@ -458,25 +494,34 @@ const render = () => {
 
   const modelCallback = (
     model: SilentHillModel | undefined,
-    cleanupResources = true
+    cleanupResources = true,
+    animation?: SilentHillAnimation,
+    dds?: SilentHillDramaDemo,
+    name?: string
   ) => {
     logger.debug("Parsed model structure", model);
-    scene.clear();
-    const light = new AmbientLight(
-      clientState.uiParams["Ambient Color"],
-      clientState.uiParams["Ambient Intensity"]
-    );
-    scene.add(light);
+
     if (model === undefined) {
       return;
     }
 
     if (cleanupResources) {
       disposeResources(group);
+      mixers = [];
       helper?.dispose();
       group.clear();
+      scene.clear();
     }
     group = new Group();
+    let light = scene.children.find((c) => c.name === "ambient-light");
+    if (!light) {
+      light = new AmbientLight(
+        clientState.uiParams["Ambient Color"],
+        clientState.uiParams["Ambient Intensity"]
+      );
+      light.name = "ambient-light";
+      scene.add(light);
+    }
 
     raycastTargetsGenerated = false;
     raycastTargets.length = 0;
@@ -558,11 +603,21 @@ const render = () => {
     }
 
     const opaqueGeometry = clientState.uiParams["Render Opaque"]
-      ? createGeometry(model, 0)
+      ? createGeometry(
+          model,
+          0,
+          !clientState.uiParams["Show All Hand Poses"]
+            ? clientState.folder === "jms"
+              ? [0, 3, 14]
+              : clientState.folder === "mar"
+              ? [0, 3, 6]
+              : undefined
+            : undefined
+        )
       : undefined;
 
     let modelSkeleton: Skeleton | undefined = undefined;
-    let opaqueMesh: SkinnedMesh | Mesh;
+    let opaqueMesh: SkinnedMesh | Mesh | undefined;
     if (opaqueGeometry) {
       opaqueGeometry.name = `${clientState.file}-opaque`;
 
@@ -572,7 +627,7 @@ const render = () => {
 
         opaqueMesh = new SkinnedMesh(opaqueGeometry, opaqueMaterial);
         rootBoneIndices.forEach((boneIndex) =>
-          opaqueMesh.add(skeleton.bones[boneIndex])
+          opaqueMesh?.add(skeleton.bones[boneIndex])
         );
         (opaqueMesh as SkinnedMesh).bind(skeleton);
         modelSkeleton = skeleton;
@@ -598,7 +653,7 @@ const render = () => {
     const transparentGeometry = clientState.uiParams["Render Transparent"]
       ? createGeometry(model, 1)
       : undefined;
-    let transparentMesh: SkinnedMesh | Mesh;
+    let transparentMesh: SkinnedMesh | Mesh | undefined;
     if (transparentGeometry) {
       transparentGeometry.name = `${clientState.file}-transparent`;
 
@@ -612,7 +667,7 @@ const render = () => {
           const { skeleton, rootBoneIndices } = createSkeleton(model);
           modelSkeleton = skeleton;
           rootBoneIndices.forEach((boneIndex) =>
-            transparentMesh.add(skeleton.bones[boneIndex])
+            transparentMesh?.add(skeleton.bones[boneIndex])
           );
         }
         bindSkeletonToTransparentGeometry(model, transparentGeometry);
@@ -678,6 +733,100 @@ const render = () => {
       modelSkeleton?.bones[8]?.rotateZ(Math.PI / 2);
     }
 
+    const mesh = opaqueMesh ?? transparentMesh;
+    let mixer: AnimationMixer | undefined;
+
+    if (clientState.file === "inu.mdl" && animation && mesh && modelSkeleton) {
+      mixer = new AnimationMixer(mesh);
+      mixers.push(mixer);
+
+      const tracks = createAnimationTracks(animation, modelSkeleton);
+      tracks.forEach((track) => track.trim(0, 5 * 794)); // hardcoded for now
+      const clip = new AnimationClip(
+        clientState.file.replace(".mdl", ".anm"),
+        -1,
+        tracks
+      );
+
+      const opaqueAction = mixer.clipAction(clip);
+      opaqueAction.play();
+
+      const { tracks: ddsTracks, ddsLights } = createCutsceneTracks(
+        dds,
+        name ?? ""
+      );
+      if (ddsTracks) {
+        const ddsClip = new AnimationClip(
+          name ?? clientState.file.replace(".mdl", ".anm"),
+          -1,
+          ddsTracks.character
+        );
+
+        const ddsAction = mixer.clipAction(ddsClip);
+        ddsAction.play();
+        logger.debug({ ddsClip });
+        const transparentDdsAction = mixer.clipAction(ddsClip, transparentMesh);
+        transparentDdsAction.play();
+
+        const ddsCameraClip = new AnimationClip("camera", -1, ddsTracks.camera);
+        const ddsCameraAction = mixer.clipAction(ddsCameraClip, camera);
+        ddsCameraAction.play();
+        const ddsControlsClip = new AnimationClip(
+          "camera",
+          -1,
+          ddsTracks.controls
+        );
+        const ddsControlsAction = mixer.clipAction(
+          ddsControlsClip,
+          //@ts-ignore
+          orbitControls
+        );
+        ddsControlsAction.play();
+
+        ddsLights.forEach((ddsLight, index) => {
+          scene.add(ddsLight);
+          const ddsLightClip = new AnimationClip(
+            `ddsLight${index}`,
+            -1,
+            ddsTracks.lights[index]
+          );
+          const ddsLightAction = mixer!.clipAction(ddsLightClip, ddsLight);
+          ddsLightAction.play();
+        });
+      }
+      if (ddsTracks && name === "inu.mdl") {
+        new GLTFLoader().load("/end_inu.glb", async (data) => {
+          scene.add(data.scene);
+          data.scene.rotateZ(Math.PI);
+          data.scene.rotateY(Math.PI);
+          data.scene.children.forEach((child) => child.scale.set(1, 1, 1));
+          data.scene.updateMatrixWorld(true);
+          data.scene.traverse((o) => {
+            if (o instanceof Mesh) {
+              if (o.material instanceof MeshStandardMaterial) {
+                o.material.metalness = 0;
+              }
+            }
+          });
+        });
+      }
+
+      if (animationVisualizerThreadId >= 0) {
+        cancelAnimationFrame(animationVisualizerThreadId);
+      }
+      animationVisualizerThreadId = animationGui.useAnimationVisualizer(
+        opaqueAction,
+        clip
+      );
+
+      if (opaqueMesh && transparentMesh) {
+        const transparentAction = mixer.clipAction(clip, transparentMesh);
+        transparentAction.play();
+      }
+    } else {
+      animationGui.hide();
+    }
+
     const maxBoneSelection = (modelSkeleton?.bones.length ?? 1) - 1;
     boneSelector.max(maxBoneSelection);
     if (maxBoneSelection === 0) {
@@ -710,7 +859,16 @@ const render = () => {
         // todo: maybe add a loading indicator
         return;
       }
+
       const delta = clock.getDelta() * 120; // targeting 120 fps
+      mixers.forEach((mixer) => {
+        mixer.update(delta);
+        if (mixer.time >= 5 * 794) {
+          // hardcoded for now
+          mixer.setTime(0);
+        }
+      });
+      camera.updateProjectionMatrix();
       modelTransformGizmo.render(
         clientState.getMode() === "edit" &&
           editorState.editorParams["Model Controls"],
@@ -729,8 +887,10 @@ const render = () => {
       orbitControls.autoRotate = clientState.uiParams["Auto-Rotate"];
       orbitControls.update();
 
-      light.color = new Color(clientState.uiParams["Ambient Color"]);
-      light.intensity = clientState.uiParams["Ambient Intensity"];
+      if (light instanceof AmbientLight) {
+        light.color = new Color(clientState.uiParams["Ambient Color"]);
+        light.intensity = clientState.uiParams["Ambient Intensity"];
+      }
       lightAnimate?.(delta);
 
       if (
@@ -750,7 +910,10 @@ const render = () => {
       }
     }
     renderIsFinished = true;
-    renderer.setAnimationLoop(animate);
+    if (name === clientState.file) {
+      renderer.setAnimationLoop(null);
+      renderer.setAnimationLoop(animate);
+    }
     return group;
   };
 
@@ -821,7 +984,7 @@ const render = () => {
       editorState.editorParams["Show Original"] &&
       !editorState.cachedOriginalModel
     ) {
-      loadModel(clientState.fullPath).then((original) => {
+      loadModelFromUrl(clientState.fullPath).then((original) => {
         const cachedOriginalModel = modelCallback(original);
         if (cachedOriginalModel) {
           cachedOriginalModel.parent = null;
@@ -858,7 +1021,58 @@ const render = () => {
     }
     return;
   }
-  loadModel(clientState.fullPath).then((model) => {
+
+  if (clientState.file === "inu.mdl") {
+    (async () => {
+      let bytes,
+        path,
+        index = -1;
+      if (clientState.file === "inu.mdl") {
+        path = "/data/demo/inu/end_inu.dds";
+      } else {
+        const split = clientState.uiParams.Animation?.split("/") ?? [];
+        if (split.length === 3) {
+          split.splice(0, 0, "", "data");
+        }
+        index = ddsList.findIndex((name) => name.includes(split[3]!));
+        path = `/data/${index >= 219 ? "demo2" : "demo"}/${ddsList[index]!}/${
+          ddsList[index + 1] ?? ""
+        }`;
+      }
+      bytes = await fetchRawBytes(path);
+      const dds = loadDramaDemoFromBytes(bytes);
+
+      function spawnCharacter(i = 0) {
+        const name = dds.characterNames[i];
+        if (name === undefined) {
+          return;
+        }
+        const mdlName = (name.name1.split("_pos")[0] +
+          ".mdl") as (typeof fileArray)[number];
+        const modelIndex = fileArray.indexOf(mdlName);
+        const path = destructureIndex(modelIndex).join("/");
+
+        loadModelFromUrl("/data/" + path).then(async (model) => {
+          let anm: SilentHillAnimation | undefined;
+          if (model !== undefined) {
+            anm = await loadAnimationFromUrl(
+              `/data/${index >= 219 ? "demo2" : "demo"}/${
+                ddsList[index] ?? "inu"
+              }/${mdlName}`.replace(".mdl", ".anm"),
+              model
+            );
+          }
+
+          modelCallback(model, i == 0, anm, dds, mdlName);
+          spawnCharacter(i + 1);
+        });
+      }
+      spawnCharacter();
+    })();
+    return;
+  }
+
+  loadModelFromUrl(clientState.fullPath).then(async (model) => {
     clientState.setCurrentViewerModel(model);
     modelCallback(model);
   });

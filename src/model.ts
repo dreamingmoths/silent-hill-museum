@@ -29,13 +29,17 @@ export const MaterialView = {
 } as const;
 export type MaterialType = (typeof MaterialView)[keyof typeof MaterialView];
 
-export const createGeometry = (model: SilentHillModel, primitiveType = 0) => {
+export const createGeometry = (
+  model: SilentHillModel,
+  primitiveType = 0,
+  filterPoseIndices?: number[]
+) => {
   const geometry = new BufferGeometry();
 
   if (primitiveType === 0) {
     const primitiveHeaders = model.modelData.geometry.primitiveHeaders;
     if (primitiveHeaders && primitiveHeaders.length !== 0) {
-      processPrimitiveHeaders(model, geometry);
+      processPrimitiveHeaders(model, geometry, filterPoseIndices);
     } else {
       logger.warn("Requested opaque primitive headers, but model has none.");
       return undefined;
@@ -140,7 +144,8 @@ const processTransparentPrimitiveHeaders = (
 
 const processPrimitiveHeaders = (
   model: SilentHillModel,
-  geometry: BufferGeometry
+  geometry: BufferGeometry,
+  filterPoseIndices: number[] | undefined
 ) => {
   const primitiveHeaders = model.modelData.geometry.primitiveHeaders;
   const geometryData = model.modelData.geometry;
@@ -207,10 +212,16 @@ const processPrimitiveHeaders = (
     (pair) => pair.textureIndex
   ) ?? [0];
   groupData.forEach((group, index) => {
+    const primitiveHeader = primitiveHeaders[index].body;
+    const shouldAssignMaterial = filterPoseIndices
+      ? filterPoseIndices.includes(primitiveHeader.poseIndex)
+      : true;
     geometry.addGroup(
       group.start,
       group.count,
-      textureIdMap[primitiveHeaders[index].body.textureIndices.array[0] ?? 0]
+      shouldAssignMaterial
+        ? textureIdMap[primitiveHeader.textureIndices.array[0] ?? 0]
+        : -1
     );
   });
   return geometry;

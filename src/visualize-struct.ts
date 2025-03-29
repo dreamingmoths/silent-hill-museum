@@ -8,7 +8,7 @@ const TOGGLE_VISIBLE = "block";
 const TOGGLE_HIDDEN = "none";
 const INITIAL_DROPDOWN_TEXT = ": {...}";
 const AUTOEXPAND_FILTER = ["model", "header"];
-const ARRAY_LENGTH_CUTOFF = 6000;
+const ARRAY_LENGTH_CUTOFF = 10000;
 
 const renderStructProperty = (
   parent: HTMLElement,
