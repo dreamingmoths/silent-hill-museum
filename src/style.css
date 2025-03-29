@@ -673,3 +673,9 @@ div.struct-visualizer {
     flex: none;
   }
 }
+
+html {
+  /* prevent FOUC */
+  visibility: visible;
+  opacity: 1;
+}
