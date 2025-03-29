@@ -8,7 +8,7 @@ import F2 from "./F2";
  */
 
 var Dds = (function () {
-  Dds.Dds = Object.freeze({
+  Dds.DramaDemo = Object.freeze({
     PLAY_KEY: 0,
     PLAY_CAMERA: 1,
     PLAY_LIGHT: 2,
@@ -46,14 +46,6 @@ var Dds = (function () {
     this.pointLightCount = this._io.readU1();
     this.spotLightCount = this._io.readU1();
     this.infinitLightCount = this._io.readU1();
-    var _ = this.infinitLightCount;
-    if (!(this.totalLightCount < 6)) {
-      throw new KaitaiStream.ValidationExprError(
-        this.infinitLightCount,
-        this._io,
-        "/seq/6"
-      );
-    }
     this.pad = this._io.readBytes(1);
     this.characterCount = this._io.readU1();
     this.characterNames = [];
@@ -70,7 +62,9 @@ var Dds = (function () {
       var _ = _t_frames;
       this.frames.push(_);
       i++;
-    } while (!(i == this.totalDemoFrame));
+    } while (
+      !(i == this.totalDemoFrame || (i > 0 && this.frames[i - 1].isStopFrame))
+    );
   };
 
   Dds.prototype._fetchInstances = function () {
@@ -144,14 +138,6 @@ var Dds = (function () {
         12
       );
     }
-    var _ = this.infinitLightCount;
-    if (!(this.totalLightCount < 6)) {
-      throw new KaitaiStream.ValidationExprError(
-        this.infinitLightCount,
-        null,
-        "/seq/6"
-      );
-    }
     if (this.pad.length != 1) {
       throw new KaitaiStream.ConsistencyError("pad", this.pad.length, 1);
     }
@@ -197,10 +183,15 @@ var Dds = (function () {
         );
       }
       var _ = this.frames[i];
-      if (((i == this.totalDemoFrame) != i) == this.frames.length - 1) {
+      if (
+        ((i == this.totalDemoFrame ||
+          (i > 0 && this.frames[i - 1].isStopFrame)) !=
+          i) ==
+        this.frames.length - 1
+      ) {
         throw new KaitaiStream.ConsistencyError(
           "frames",
-          i == this.totalDemoFrame,
+          i == this.totalDemoFrame || (i > 0 && this.frames[i - 1].isStopFrame),
           i == this.frames.length - 1
         );
       }
@@ -215,59 +206,55 @@ var Dds = (function () {
       this.demoStatus = demoStatus;
     }
     DdsPlayCharacter.prototype._read = function () {
-      this.characters = [];
+      this.info = [];
       var i = 0;
       do {
-        var _t_characters = new DdsCharacterInfo(this._io, this, this._root);
-        _t_characters._read();
-        var _ = _t_characters;
-        this.characters.push(_);
+        var _t_info = new DdsCharacterInfo(this._io, this, this._root);
+        _t_info._read();
+        var _ = _t_info;
+        this.info.push(_);
         i++;
       } while (!(_.controlByte == 11));
     };
 
     DdsPlayCharacter.prototype._fetchInstances = function () {
-      for (let i = 0; i < this.characters.length; i++) {
-        this.characters[i]._fetchInstances();
+      for (let i = 0; i < this.info.length; i++) {
+        this.info[i]._fetchInstances();
       }
     };
 
     DdsPlayCharacter.prototype._write__seq = function (io) {
       this._io = io;
-      for (let i = 0; i < this.characters.length; i++) {
-        this.characters[i]._write__seq(this._io);
+      for (let i = 0; i < this.info.length; i++) {
+        this.info[i]._write__seq(this._io);
       }
     };
 
     DdsPlayCharacter.prototype._check = function () {
-      if (this.characters.length == 0) {
-        throw new KaitaiStream.ConsistencyError(
-          "characters",
-          this.characters.length,
-          0
-        );
+      if (this.info.length == 0) {
+        throw new KaitaiStream.ConsistencyError("info", this.info.length, 0);
       }
-      for (let i = 0; i < this.characters.length; i++) {
-        if (this.characters[i]._root !== this._root) {
+      for (let i = 0; i < this.info.length; i++) {
+        if (this.info[i]._root !== this._root) {
           throw new KaitaiStream.ConsistencyError(
-            "characters",
-            this.characters[i]._root,
+            "info",
+            this.info[i]._root,
             this._root
           );
         }
-        if (this.characters[i]._parent !== this) {
+        if (this.info[i]._parent !== this) {
           throw new KaitaiStream.ConsistencyError(
-            "characters",
-            this.characters[i]._parent,
+            "info",
+            this.info[i]._parent,
             this
           );
         }
-        var _ = this.characters[i];
-        if (((_.controlByte == 11) != i) == this.characters.length - 1) {
+        var _ = this.info[i];
+        if (((_.controlByte == 11) != i) == this.info.length - 1) {
           throw new KaitaiStream.ConsistencyError(
-            "characters",
+            "info",
             _.controlByte == 11,
-            i == this.characters.length - 1
+            i == this.info.length - 1
           );
         }
       }
@@ -580,59 +567,55 @@ var Dds = (function () {
       this.demoStatus = demoStatus;
     }
     DdsPlayLight.prototype._read = function () {
-      this.lights = [];
+      this.info = [];
       var i = 0;
       do {
-        var _t_lights = new DdsLightInfo(this._io, this, this._root);
-        _t_lights._read();
-        var _ = _t_lights;
-        this.lights.push(_);
+        var _t_info = new DdsLightInfo(this._io, this, this._root);
+        _t_info._read();
+        var _ = _t_info;
+        this.info.push(_);
         i++;
       } while (!(_.controlByte >= 11));
     };
 
     DdsPlayLight.prototype._fetchInstances = function () {
-      for (let i = 0; i < this.lights.length; i++) {
-        this.lights[i]._fetchInstances();
+      for (let i = 0; i < this.info.length; i++) {
+        this.info[i]._fetchInstances();
       }
     };
 
     DdsPlayLight.prototype._write__seq = function (io) {
       this._io = io;
-      for (let i = 0; i < this.lights.length; i++) {
-        this.lights[i]._write__seq(this._io);
+      for (let i = 0; i < this.info.length; i++) {
+        this.info[i]._write__seq(this._io);
       }
     };
 
     DdsPlayLight.prototype._check = function () {
-      if (this.lights.length == 0) {
-        throw new KaitaiStream.ConsistencyError(
-          "lights",
-          this.lights.length,
-          0
-        );
+      if (this.info.length == 0) {
+        throw new KaitaiStream.ConsistencyError("info", this.info.length, 0);
       }
-      for (let i = 0; i < this.lights.length; i++) {
-        if (this.lights[i]._root !== this._root) {
+      for (let i = 0; i < this.info.length; i++) {
+        if (this.info[i]._root !== this._root) {
           throw new KaitaiStream.ConsistencyError(
-            "lights",
-            this.lights[i]._root,
+            "info",
+            this.info[i]._root,
             this._root
           );
         }
-        if (this.lights[i]._parent !== this) {
+        if (this.info[i]._parent !== this) {
           throw new KaitaiStream.ConsistencyError(
-            "lights",
-            this.lights[i]._parent,
+            "info",
+            this.info[i]._parent,
             this
           );
         }
-        var _ = this.lights[i];
-        if ((_.controlByte >= 11 != i) == this.lights.length - 1) {
+        var _ = this.info[i];
+        if ((_.controlByte >= 11 != i) == this.info.length - 1) {
           throw new KaitaiStream.ConsistencyError(
-            "lights",
+            "info",
             _.controlByte >= 11,
-            i == this.lights.length - 1
+            i == this.info.length - 1
           );
         }
       }
@@ -663,59 +646,55 @@ var Dds = (function () {
       this.demoStatus = demoStatus;
     }
     DdsPlayCamera.prototype._read = function () {
-      this.cameras = [];
+      this.info = [];
       var i = 0;
       do {
-        var _t_cameras = new DdsCameraInfo(this._io, this, this._root);
-        _t_cameras._read();
-        var _ = _t_cameras;
-        this.cameras.push(_);
+        var _t_info = new DdsCameraInfo(this._io, this, this._root);
+        _t_info._read();
+        var _ = _t_info;
+        this.info.push(_);
         i++;
       } while (!(_.controlByte >= 11));
     };
 
     DdsPlayCamera.prototype._fetchInstances = function () {
-      for (let i = 0; i < this.cameras.length; i++) {
-        this.cameras[i]._fetchInstances();
+      for (let i = 0; i < this.info.length; i++) {
+        this.info[i]._fetchInstances();
       }
     };
 
     DdsPlayCamera.prototype._write__seq = function (io) {
       this._io = io;
-      for (let i = 0; i < this.cameras.length; i++) {
-        this.cameras[i]._write__seq(this._io);
+      for (let i = 0; i < this.info.length; i++) {
+        this.info[i]._write__seq(this._io);
       }
     };
 
     DdsPlayCamera.prototype._check = function () {
-      if (this.cameras.length == 0) {
-        throw new KaitaiStream.ConsistencyError(
-          "cameras",
-          this.cameras.length,
-          0
-        );
+      if (this.info.length == 0) {
+        throw new KaitaiStream.ConsistencyError("info", this.info.length, 0);
       }
-      for (let i = 0; i < this.cameras.length; i++) {
-        if (this.cameras[i]._root !== this._root) {
+      for (let i = 0; i < this.info.length; i++) {
+        if (this.info[i]._root !== this._root) {
           throw new KaitaiStream.ConsistencyError(
-            "cameras",
-            this.cameras[i]._root,
+            "info",
+            this.info[i]._root,
             this._root
           );
         }
-        if (this.cameras[i]._parent !== this) {
+        if (this.info[i]._parent !== this) {
           throw new KaitaiStream.ConsistencyError(
-            "cameras",
-            this.cameras[i]._parent,
+            "info",
+            this.info[i]._parent,
             this
           );
         }
-        var _ = this.cameras[i];
-        if ((_.controlByte >= 11 != i) == this.cameras.length - 1) {
+        var _ = this.info[i];
+        if ((_.controlByte >= 11 != i) == this.info.length - 1) {
           throw new KaitaiStream.ConsistencyError(
-            "cameras",
+            "info",
             _.controlByte >= 11,
-            i == this.cameras.length - 1
+            i == this.info.length - 1
           );
         }
       }
@@ -943,24 +922,7 @@ var Dds = (function () {
     Instruction.prototype._read = function () {
       this.controlByte = this._io.readU1();
       switch (this.ddsBlockType) {
-        case Dds.Dds.PLAY_KEY:
-          this.ddsBlock = new DdsPlayKey(this._io, this, this._root);
-          this.ddsBlock._read();
-          break;
-        case Dds.Dds.STOP:
-          this.ddsBlock = new Empty(this._io, this, this._root);
-          this.ddsBlock._read();
-          break;
-        case Dds.Dds.PLAY_LIGHT:
-          this.ddsBlock = new DdsPlayLight(
-            this._io,
-            this,
-            this._root,
-            this.demoStatus
-          );
-          this.ddsBlock._read();
-          break;
-        case Dds.Dds.PLAY_CHARACTER:
+        case Dds.DramaDemo.PLAY_CHARACTER:
           this.ddsBlock = new DdsPlayCharacter(
             this._io,
             this,
@@ -969,8 +931,25 @@ var Dds = (function () {
           );
           this.ddsBlock._read();
           break;
-        case Dds.Dds.PLAY_CAMERA:
+        case Dds.DramaDemo.PLAY_KEY:
+          this.ddsBlock = new DdsPlayKey(this._io, this, this._root);
+          this.ddsBlock._read();
+          break;
+        case Dds.DramaDemo.STOP:
+          this.ddsBlock = new Empty(this._io, this, this._root);
+          this.ddsBlock._read();
+          break;
+        case Dds.DramaDemo.PLAY_CAMERA:
           this.ddsBlock = new DdsPlayCamera(
+            this._io,
+            this,
+            this._root,
+            this.demoStatus
+          );
+          this.ddsBlock._read();
+          break;
+        case Dds.DramaDemo.PLAY_LIGHT:
+          this.ddsBlock = new DdsPlayLight(
             this._io,
             this,
             this._root,
@@ -983,19 +962,19 @@ var Dds = (function () {
 
     Instruction.prototype._fetchInstances = function () {
       switch (this.ddsBlockType) {
-        case Dds.Dds.PLAY_KEY:
+        case Dds.DramaDemo.PLAY_CHARACTER:
           this.ddsBlock._fetchInstances();
           break;
-        case Dds.Dds.STOP:
+        case Dds.DramaDemo.PLAY_KEY:
           this.ddsBlock._fetchInstances();
           break;
-        case Dds.Dds.PLAY_LIGHT:
+        case Dds.DramaDemo.STOP:
           this.ddsBlock._fetchInstances();
           break;
-        case Dds.Dds.PLAY_CHARACTER:
+        case Dds.DramaDemo.PLAY_CAMERA:
           this.ddsBlock._fetchInstances();
           break;
-        case Dds.Dds.PLAY_CAMERA:
+        case Dds.DramaDemo.PLAY_LIGHT:
           this.ddsBlock._fetchInstances();
           break;
       }
@@ -1005,19 +984,19 @@ var Dds = (function () {
       this._io = io;
       this._io.writeU1(this.controlByte);
       switch (this.ddsBlockType) {
-        case Dds.Dds.PLAY_KEY:
+        case Dds.DramaDemo.PLAY_CHARACTER:
           this.ddsBlock._write__seq(this._io);
           break;
-        case Dds.Dds.STOP:
+        case Dds.DramaDemo.PLAY_KEY:
           this.ddsBlock._write__seq(this._io);
           break;
-        case Dds.Dds.PLAY_LIGHT:
+        case Dds.DramaDemo.STOP:
           this.ddsBlock._write__seq(this._io);
           break;
-        case Dds.Dds.PLAY_CHARACTER:
+        case Dds.DramaDemo.PLAY_CAMERA:
           this.ddsBlock._write__seq(this._io);
           break;
-        case Dds.Dds.PLAY_CAMERA:
+        case Dds.DramaDemo.PLAY_LIGHT:
           this.ddsBlock._write__seq(this._io);
           break;
       }
@@ -1025,39 +1004,7 @@ var Dds = (function () {
 
     Instruction.prototype._check = function () {
       switch (this.ddsBlockType) {
-        case Dds.Dds.PLAY_KEY:
-          if (this.ddsBlock._root !== this._root) {
-            throw new KaitaiStream.ConsistencyError(
-              "dds_block",
-              this.ddsBlock._root,
-              this._root
-            );
-          }
-          if (this.ddsBlock._parent !== this) {
-            throw new KaitaiStream.ConsistencyError(
-              "dds_block",
-              this.ddsBlock._parent,
-              this
-            );
-          }
-          break;
-        case Dds.Dds.STOP:
-          if (this.ddsBlock._root !== this._root) {
-            throw new KaitaiStream.ConsistencyError(
-              "dds_block",
-              this.ddsBlock._root,
-              this._root
-            );
-          }
-          if (this.ddsBlock._parent !== this) {
-            throw new KaitaiStream.ConsistencyError(
-              "dds_block",
-              this.ddsBlock._parent,
-              this
-            );
-          }
-          break;
-        case Dds.Dds.PLAY_LIGHT:
+        case Dds.DramaDemo.PLAY_CHARACTER:
           if (this.ddsBlock._root !== this._root) {
             throw new KaitaiStream.ConsistencyError(
               "dds_block",
@@ -1080,7 +1027,39 @@ var Dds = (function () {
             );
           }
           break;
-        case Dds.Dds.PLAY_CHARACTER:
+        case Dds.DramaDemo.PLAY_KEY:
+          if (this.ddsBlock._root !== this._root) {
+            throw new KaitaiStream.ConsistencyError(
+              "dds_block",
+              this.ddsBlock._root,
+              this._root
+            );
+          }
+          if (this.ddsBlock._parent !== this) {
+            throw new KaitaiStream.ConsistencyError(
+              "dds_block",
+              this.ddsBlock._parent,
+              this
+            );
+          }
+          break;
+        case Dds.DramaDemo.STOP:
+          if (this.ddsBlock._root !== this._root) {
+            throw new KaitaiStream.ConsistencyError(
+              "dds_block",
+              this.ddsBlock._root,
+              this._root
+            );
+          }
+          if (this.ddsBlock._parent !== this) {
+            throw new KaitaiStream.ConsistencyError(
+              "dds_block",
+              this.ddsBlock._parent,
+              this
+            );
+          }
+          break;
+        case Dds.DramaDemo.PLAY_CAMERA:
           if (this.ddsBlock._root !== this._root) {
             throw new KaitaiStream.ConsistencyError(
               "dds_block",
@@ -1103,7 +1082,7 @@ var Dds = (function () {
             );
           }
           break;
-        case Dds.Dds.PLAY_CAMERA:
+        case Dds.DramaDemo.PLAY_LIGHT:
           if (this.ddsBlock._root !== this._root) {
             throw new KaitaiStream.ConsistencyError(
               "dds_block",
@@ -1466,7 +1445,7 @@ var Dds = (function () {
               break;
           }
           i++;
-        } while (!(_.ddsBlockType == Dds.Dds.STOP));
+        } while (!(_.ddsBlockType == Dds.DramaDemo.STOP));
       }
     };
 
@@ -1565,17 +1544,31 @@ var Dds = (function () {
           }
           var _ = this.instructions[i];
           if (
-            ((_.ddsBlockType == Dds.Dds.STOP) != i) ==
+            ((_.ddsBlockType == Dds.DramaDemo.STOP) != i) ==
             this.instructions.length - 1
           ) {
             throw new KaitaiStream.ConsistencyError(
               "instructions",
-              _.ddsBlockType == Dds.Dds.STOP,
+              _.ddsBlockType == Dds.DramaDemo.STOP,
               i == this.instructions.length - 1
             );
           }
         }
       }
+    };
+    Object.defineProperty(Frame.prototype, "isStopFrame", {
+      set: function (v) {
+        this._m_isStopFrame = v;
+      },
+      get: function () {
+        if (this._m_isStopFrame !== undefined) return this._m_isStopFrame;
+        this._m_isStopFrame = this.frameIndex < 0;
+        return this._m_isStopFrame;
+      },
+    });
+
+    Frame.prototype._invalidate_isStopFrame = function () {
+      delete this._m_isStopFrame;
     };
 
     return Frame;

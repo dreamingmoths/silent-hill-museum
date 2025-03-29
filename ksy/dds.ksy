@@ -33,8 +33,8 @@ seq:
 
   - id: infinit_light_count
     type: u1
-    valid:
-      expr: total_light_count < 6 # why?
+    # valid:
+      # expr: total_light_count < 6 # why?
 
   - id: pad
     size: 1
@@ -50,7 +50,8 @@ seq:
   - id: frames
     type: frame
     repeat: until
-    repeat-until: _index == total_demo_frame
+    repeat-until: _index == total_demo_frame or 
+      (_index > 0 and frames[_index - 1].is_stop_frame)
 
 instances:
   total_light_count:
@@ -69,8 +70,12 @@ types:
             true: instruction(0)
             false: instruction(instructions[_index - 1].state)
         repeat: until
-        repeat-until: _.dds_block_type == dds::stop
+        repeat-until: _.dds_block_type == drama_demo::stop
         if: frame_index >= 0
+        
+    instances:
+      is_stop_frame:
+        value: frame_index < 0
 
   instruction:
     params:
@@ -85,11 +90,11 @@ types:
         type:
           switch-on: dds_block_type
           cases:
-            'dds::play_key': dds_play_key
-            'dds::play_camera': dds_play_camera(demo_status)
-            'dds::play_light': dds_play_light(demo_status)
-            'dds::play_character': dds_play_character(demo_status)
-            'dds::stop': empty
+            'drama_demo::play_key': dds_play_key
+            'drama_demo::play_camera': dds_play_camera(demo_status)
+            'drama_demo::play_light': dds_play_light(demo_status)
+            'drama_demo::play_character': dds_play_character(demo_status)
+            'drama_demo::stop': empty
 
     instances:
       state:
@@ -98,7 +103,7 @@ types:
             dds_block.as<dds_play_key>.demo_status : demo_status
     
       dds_block_type:
-        enum: dds
+        enum: drama_demo
         value: |
           control_byte < 2 or control_byte == 255 ?
             control_byte : 
@@ -144,7 +149,7 @@ types:
       - id: demo_status
         type: u1
     seq:
-      - id: cameras
+      - id: info
         type: dds_camera_info
         repeat: until
         repeat-until: _.control_byte >= 11
@@ -183,7 +188,7 @@ types:
       - id: demo_status
         type: u1
     seq:
-      - id: lights
+      - id: info
         type: dds_light_info
         repeat: until
         repeat-until: _.control_byte >= 11
@@ -261,7 +266,7 @@ types:
       - id: demo_status
         type: u1
     seq:
-      - id: characters
+      - id: info
         type: dds_character_info
         repeat: until
         repeat-until: _.control_byte == 11
@@ -303,7 +308,7 @@ types:
       These structs are called `DramaDemo_AnimInfo`.
 
 enums:
-  dds:
+  drama_demo:
     0: play_key
     1: play_camera
     2: play_light

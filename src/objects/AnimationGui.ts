@@ -1,11 +1,12 @@
 import { AnimationAction, AnimationClip } from "three";
 import { createDiv } from "../utils";
 
-export default class QuickAccess {
+export default class AnimationGui {
   public container: HTMLElement;
 
   public animationProgressBar: HTMLElement;
   public animationTimer = -1;
+  private playing = true;
 
   public constructor(parent: HTMLElement) {
     this.container = this.createAnimationVisualizer(parent);
@@ -74,7 +75,7 @@ export default class QuickAccess {
   public useAnimationVisualizer(action: AnimationAction, clip: AnimationClip) {
     const progressBar = this.animationProgressBar;
     const canUseTranslateX = CSS.supports("transform", "translateX(50cqi)");
-    const quickAccess = this;
+    const animationGui = this;
     this.show();
 
     function animate() {
@@ -83,9 +84,17 @@ export default class QuickAccess {
         return requestAnimationFrame(animate);
       }
 
-      let time = quickAccess.animationTimer;
+      if (!animationGui.playing) {
+        action.getMixer().timeScale = 0;
 
-      if (quickAccess.animationTimer >= 0) {
+        return requestAnimationFrame(animate);
+      } else if (!action.getMixer().timeScale) {
+        action.getMixer().timeScale = 1;
+      }
+
+      let time = animationGui.animationTimer;
+
+      if (animationGui.animationTimer >= 0) {
         action.getMixer().setTime(time * clip.duration);
       } else {
         time = action.time / duration;
@@ -105,5 +114,9 @@ export default class QuickAccess {
       return requestAnimationFrame(animate);
     }
     return requestAnimationFrame(animate);
+  }
+
+  public togglePause() {
+    this.playing = !this.playing;
   }
 }

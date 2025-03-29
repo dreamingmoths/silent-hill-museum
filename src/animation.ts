@@ -8,6 +8,7 @@ import {
   InterpolateLinear,
 } from "three";
 import SilentHillAnimation from "./kaitai/Anm";
+import logger from "./objects/Logger";
 
 type BoneInfo = {
   bone: Bone;
@@ -57,22 +58,17 @@ export const createAnimationTracks = (
           SilentHillAnimation.TransformHeader.TransformType[
             block.header[j].type
           ];
-        console.log(
+        logger.debug(
           `block ${i} has header type ${block.header[j].type} (${typeName})`
         );
       }
       anmTypes.add(block.header[j].type);
-      // if (block.header[j].type > 2) {
-      //   // stop when we reach an invalid transform type
-      //   i = blocks.length;
-      //   break;
-      // }
       processAnimationTransform(transform, boneInfo[boneIndex]);
     }
   }
 
-  console.log({ boneInfo });
-  console.log({ anmTypes });
+  logger.debug({ boneInfo });
+  logger.debug({ anmTypes });
 
   const tracks = boneInfo
     .flatMap(({ position, rotation, rotationTimes, positionTimes }, index) => [
@@ -95,7 +91,7 @@ export const createAnimationTracks = (
     ])
     .filter((tr) => tr !== undefined);
 
-  console.log({ tracks });
+  logger.debug({ tracks });
 
   return tracks;
 };
@@ -135,9 +131,6 @@ export const processAnimationTransform = (
   boneInfo: BoneInfo
 ) => {
   if (transform && "translation" in transform && !("axis" in transform)) {
-    if (boneInfo.position.length < 100) {
-      // console.log("isometry", transform);
-    }
     translate(boneInfo, transform.translation);
     rotateEuler(boneInfo, transform.rotation);
     advanceFrame(boneInfo);
@@ -145,7 +138,6 @@ export const processAnimationTransform = (
   }
   if (boneInfo.position.length) {
     if (boneInfo.position.length < 100) {
-      // console.log("copying prev position", transform);
     }
     boneInfo.position.push(...boneInfo.position.slice(-3));
     positionTimestamp(boneInfo);
@@ -154,19 +146,14 @@ export const processAnimationTransform = (
   if (transform instanceof SilentHillAnimation.Rotation) {
     rotateEuler(boneInfo, transform);
     if (boneInfo.position.length < 100) {
-      // console.log("rotation", transform);
     }
   } else if (boneInfo.rotation.length) {
     boneInfo.rotation.push(...boneInfo.rotation.slice(-4));
     rotationTimestamp(boneInfo);
     if (boneInfo.position.length < 100) {
-      // console.log("copying prev rot", transform);
     }
   }
 
-  if (boneInfo.position.length < 100) {
-    // console.log("advanced");
-  }
   advanceFrame(boneInfo);
 };
 

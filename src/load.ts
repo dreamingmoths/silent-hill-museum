@@ -36,8 +36,6 @@ export const loadDramaDemoFromBytes = (bytes: ArrayBuffer) => {
 export const loadModelFromBytes = (bytes: ArrayBuffer) => {
   const stream = new KaitaiStream(bytes);
   const model = new SilentHillModel(stream);
-  model._read();
-  model._fetchInstances();
   return model;
 };
 
@@ -56,7 +54,9 @@ export const loadModelFromUrl = async (url: string) => {
     modelCache[url] = undefined;
     return undefined;
   }
-  const model = loadModelFromBytes(bytes);
+  const stream = new KaitaiStream(bytes);
+  const model = new SilentHillModel(stream);
+  model._read();
   modelCache[url] = model;
   return model;
 };

@@ -14,6 +14,10 @@ declare class Dds {
 
   totalLightCount: number;
   magic: string;
+
+  /**
+   * PS2 version does not look at these, but they can be nonzero.
+   */
   unknown0: Uint8Array;
   totalDemoFrame: number;
   unknownShort: number;
@@ -105,7 +109,7 @@ declare namespace Dds {
     _io: any;
 
     state: number;
-    cameras: Dds.DdsCameraInfo[];
+    info: Dds.DdsCameraInfo[];
     demoStatus: number;
   }
 }
@@ -117,7 +121,7 @@ declare namespace Dds {
     _io: any;
 
     state: number;
-    characters: Dds.DdsCharacterInfo[];
+    info: Dds.DdsCharacterInfo[];
     demoStatus: number;
   }
 }
@@ -141,7 +145,7 @@ declare namespace Dds {
     _io: any;
 
     state: number;
-    lights: Dds.DdsLightInfo[];
+    info: Dds.DdsLightInfo[];
     demoStatus: number;
   }
 }
@@ -200,11 +204,9 @@ declare namespace Dds {
     __type: "Frame";
     _io: any;
 
-    demoStatus: number;
+    isStopFrame: boolean;
     frameIndex: number;
-    firstInstructionType: Dds.DdsType;
-    key: Dds.DdsPlayKey;
-    instructions: Dds.Instruction[];
+    instructions: Dds.Instruction[] | undefined;
   }
 }
 
@@ -214,7 +216,8 @@ declare namespace Dds {
     __type: "Instruction";
     _io: any;
 
-    ddsBlockType: Dds.DdsType;
+    ddsBlockType: Dds.DramaDemo;
+    state: number;
     controlByte: number;
     ddsBlock:
       | Dds.DdsPlayCamera
@@ -240,7 +243,7 @@ declare namespace Dds {
 }
 
 declare namespace Dds {
-  enum DdsType {
+  enum DramaDemo {
     PLAY_KEY = 0,
     PLAY_CAMERA = 1,
     PLAY_LIGHT = 2,

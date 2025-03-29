@@ -8,6 +8,7 @@ import { anmToMdlAssoc } from "../animation";
 import { destructureIndex, fileArray } from "../files";
 import { loadAnimationFromUrl, loadModelFromUrl } from "../load";
 import path from "path";
+import logger from "../objects/Logger";
 
 const lfshStructure = anmFileStructure.chr;
 const bfawStructure = anmFileStructure.chr2;
@@ -112,7 +113,7 @@ for (const [folderName, fileMap] of Object.entries(map)) {
           anm?._fetchInstances();
         } catch (e) {
           error = e;
-          console.log(filename, e);
+          logger.debug(filename, e);
         }
         expect(mdl).toBeDefined();
         expect(anm).toBeDefined();

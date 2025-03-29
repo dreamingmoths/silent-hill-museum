@@ -226,7 +226,10 @@ export default class SerializableModel {
     resizer?: ImageLibrary,
     sendToShared?: SendToShared
   ) {
-    const model = loadModelFromBytes(fileContents);
+    const stream = new KaitaiStream(fileContents);
+    const model = new SilentHillModel(stream);
+    model._read();
+    model._fetchInstances();
     Object.assign(this.params, params);
 
     this.validateModel(model);

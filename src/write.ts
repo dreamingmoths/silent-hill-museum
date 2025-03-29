@@ -18,6 +18,7 @@ import type {
 } from "./write-worker";
 import { WriteWorker } from "./objects/WriteWorker";
 import { editorState } from "./objects/EditorState";
+import { showQuickModal } from "./modals";
 
 /**
  * Any data that we need to share with SerializableModel, that would otherwise
@@ -254,7 +255,9 @@ const readFile = (file: File, callback: (buffer: ArrayBuffer) => void) => {
 };
 
 export const readCustomStruct = (buffer: ArrayBuffer) => {
-  const model = loadModelFromBytes(buffer);
+  const stream = new KaitaiStream(buffer);
+  const model = new SilentHillModel(stream);
+  model._read();
   clientState.setCustomModel({
     model,
     contents: new Uint8Array(buffer),
@@ -293,17 +296,23 @@ export const applyUpdate = () => {
 };
 
 export const fileCallback = (file: File) => {
+  if (clientState.file === "inu.mdl") {
+    showQuickModal("please pick a different starting mdl file for now :)");
+    return;
+  }
   if (file.name.endsWith(".gltf") || file.name.endsWith(".glb")) {
     clientState.setMode("edit");
     readFile(file, async (buffer) => {
       clientState.setCurrentFile(file);
 
       logger.enablePipeIfExists("editModeLog");
+      logger.debug(clientState.fullPath);
       const payload: CreationPayload = {
         bytes: buffer,
         baseFile: await fetchRawBytes(clientState.fullPath),
         serializationParams: editorState.getSerializationParams(),
       };
+      logger.debug(new Uint8Array(payload.baseFile), "basefile");
       if (WriteWorker.isSupported()) {
         gltfSerializationWorker({ type: "create", body: payload });
       } else {
