@@ -1,5 +1,6 @@
 import { AnimationAction, AnimationClip } from "three";
 import { createDiv } from "../utils";
+import { isMobile } from "../mobile";
 
 export default class AnimationGui {
   public container: HTMLElement;
@@ -17,7 +18,7 @@ export default class AnimationGui {
   }
 
   public createAnimationVisualizer(parent: HTMLElement) {
-    const div = createDiv(parent, "quick-access-toolbar ui");
+    const div = createDiv(parent, "quick-access-toolbar");
 
     let pointerIsDown = false;
     let pointerId = -1;
@@ -70,6 +71,9 @@ export default class AnimationGui {
 
   public show() {
     this.container.style.display = "flex";
+    this.container.innerHTML = isMobile()
+      ? `👀 turn the device <img class="accent spinny-landscape" src="/images/fa-mobile.svg" alt="Turn the device" />`
+      : `👀 best viewed in landscape <img class="accent widen-landscape" src="/images/fa-image.svg" alt="Make screen wider" />`;
   }
 
   public useAnimationVisualizer(action: AnimationAction, clip: AnimationClip) {

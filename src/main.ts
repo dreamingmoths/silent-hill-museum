@@ -357,13 +357,13 @@ const onWindowResize = () => {
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
   renderer.setSize(width, height);
-  if (!gui._closed && width < 700) {
+  if (!isMobileLayout && width < 700) {
     isMobileLayout = true;
     gui.close();
     textureViewerButton.hide();
     editModeButton.hide();
     clientState.setMode("viewing");
-  } else if (width > 700 && gui._closed) {
+  } else if (isMobileLayout && width > 700 && gui._closed) {
     isMobileLayout = false;
     if (prefersReducedMotion) {
       gui.openAnimated();
@@ -372,6 +372,16 @@ const onWindowResize = () => {
     }
     textureViewerButton.show();
     editModeButton.show();
+  }
+  portraitModeWarning(width, height);
+};
+const portraitModeWarning = (width?: number, height?: number) => {
+  width ??= appContainer.offsetWidth;
+  height ??= appContainer.offsetHeight;
+  if (width < height && clientState.file === "inu.mdl") {
+    animationGui.show();
+  } else {
+    animationGui.hide();
   }
 };
 onWindowResize();
@@ -859,6 +869,8 @@ const render = () => {
           mixer.setTime(0);
         }
       });
+      orbitControls.autoRotate = clientState.uiParams["Auto-Rotate"];
+      orbitControls.update();
       camera.updateProjectionMatrix();
       modelTransformGizmo.render(
         clientState.getMode() === "edit" &&
@@ -874,9 +886,6 @@ const render = () => {
           editorState.editorParams["Base Model Controls"],
         editorState.cachedOriginalModel
       );
-
-      orbitControls.autoRotate = clientState.uiParams["Auto-Rotate"];
-      orbitControls.update();
 
       if (light instanceof AmbientLight) {
         light.color = new Color(clientState.uiParams["Ambient Color"]);
@@ -953,6 +962,10 @@ const render = () => {
     lightGroup = undefined;
 
     clientState.releaseCustomModel();
+
+    if (clientState.file === "inu.mdl") {
+      portraitModeWarning();
+    }
 
     if (clientState.uiParams["Sharable Link"] && !!history.pushState) {
       updateLink();
