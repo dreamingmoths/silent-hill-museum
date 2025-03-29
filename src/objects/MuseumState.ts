@@ -438,6 +438,9 @@ export const clientState = new MuseumState();
 export const preferredParams: {
   [File in MuseumFile]?: Partial<typeof clientState.uiParams>;
 } = {
+  "inu.mdl": {
+    "Render Side": "FrontSide",
+  },
   "nef.mdl": {
     "Render Side": "DoubleSide",
   },
