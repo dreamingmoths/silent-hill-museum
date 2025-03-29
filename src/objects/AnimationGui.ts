@@ -15,6 +15,7 @@ export default class AnimationGui {
       this.container,
       "anm-progress-bar pointer-events-none"
     );
+    parent.style.visibility = "visible";
   }
 
   public createAnimationVisualizer(parent: HTMLElement) {

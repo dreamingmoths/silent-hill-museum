@@ -536,6 +536,10 @@ div.struct-visualizer {
   text-transform: none;
 }
 
+.quick-access {
+  visibility: hidden;
+}
+
 .quick-access-toolbar {
   min-width: 300px;
   width: 90%;
