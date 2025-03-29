@@ -529,6 +529,7 @@ div.struct-visualizer {
 }
 
 .quick-access-toolbar {
+  display: none;
   width: 90%;
   height: 2.5rem;
   /* background: repeating-linear-gradient(
@@ -592,6 +593,7 @@ div.struct-visualizer {
   }
 
   .quick-access-toolbar {
+    display: none;
     max-width: 70%;
     height: 2.5rem;
   }

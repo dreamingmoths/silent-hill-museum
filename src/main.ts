@@ -199,11 +199,6 @@ gui.onOpenClose(() => {
   if (!isMobileLayout) {
     return;
   }
-  if (gui._closed) {
-    animationGui.show();
-  } else {
-    animationGui.hide();
-  }
 });
 const editModeButton = controlsGuiFolder
   .add(clientState.uiParams, "Edit Mode ✨")
@@ -457,7 +452,6 @@ originalTransformGizmo.setOnDrag(disableOrbitControls);
 originalTransformGizmo.setOnStopDrag(enableOrbitControls);
 
 let helper: SkeletonHelper | undefined;
-let animationVisualizerThreadId: number = -1;
 
 const clock = new Clock();
 let group = new Group();
@@ -507,6 +501,10 @@ const render = () => {
 
     if (cleanupResources) {
       disposeResources(group);
+      mixers.forEach((mixer) => {
+        mixer.stopAllAction();
+        mixer.timeScale = -1;
+      });
       mixers = [];
       helper?.dispose();
       group.clear();
@@ -662,6 +660,7 @@ const render = () => {
           transparentGeometry,
           transparentMaterial
         );
+        transparentMesh.frustumCulled = false;
 
         if (!opaqueGeometry || !modelSkeleton) {
           const { skeleton, rootBoneIndices } = createSkeleton(model);
@@ -810,14 +809,6 @@ const render = () => {
           });
         });
       }
-
-      if (animationVisualizerThreadId >= 0) {
-        cancelAnimationFrame(animationVisualizerThreadId);
-      }
-      animationVisualizerThreadId = animationGui.useAnimationVisualizer(
-        opaqueAction,
-        clip
-      );
 
       if (opaqueMesh && transparentMesh) {
         const transparentAction = mixer.clipAction(clip, transparentMesh);
