@@ -25,13 +25,18 @@ a:hover {
   color: #aaa;
 }
 
+html,
+canvas {
+  height: 100%;
+}
+
 body {
   margin: 0;
   display: flex;
   min-width: 350px;
-  min-height: 100vh;
+  min-height: 100%;
   width: 100vw;
-  height: 100vh;
+  height: 100%;
   overflow: hidden;
 }
 
@@ -45,10 +50,6 @@ h1 {
   height: 100%;
   margin: 0;
   text-align: center;
-}
-
-body.edit #app {
-  height: 70%;
 }
 
 button {
@@ -156,12 +157,6 @@ kbd {
   white-space: nowrap;
 }
 
-@media (pointer: coarse) {
-  #keybinds-note {
-    display: none;
-  }
-}
-
 #keybinds-note,
 #mode-indicator {
   position: absolute;
@@ -176,6 +171,15 @@ kbd {
 #mode-indicator {
   bottom: 1.5rem;
   display: flex;
+}
+
+@media (pointer: coarse) {
+  #keybinds-note {
+    display: none;
+  }
+  #mode-indicator {
+    bottom: 0;
+  }
 }
 
 #mode-indicator a {
@@ -238,7 +242,7 @@ ol {
   position: absolute;
   top: 0;
   left: 0;
-  height: 100vh;
+  height: 100%;
   pointer-events: none;
 }
 
@@ -250,7 +254,6 @@ ol {
   width: 100%;
   height: calc(100% - 4rem);
   background: #1f1f1f;
-  box-shadow: 5px 0 5px 0#141414;
   transition: left 0.3s ease;
   padding: 1rem;
   text-align: center;
@@ -259,6 +262,11 @@ ol {
   box-sizing: border-box;
   font-size: 0.75rem;
   padding: 0;
+}
+
+#sidebar.hover {
+  /* when open, not hover -- this class name is a relic */
+  box-shadow: 5px 0 5px 0#141414;
 }
 
 #sidebar .texture-viewer-container .title::before,
@@ -403,7 +411,7 @@ footer {
 
 .flexbox-container {
   display: flex;
-  height: 100vh;
+  height: 100%;
   top: 0;
 }
 

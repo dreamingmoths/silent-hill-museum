@@ -86,6 +86,7 @@ import AnimationGui from "./objects/AnimationGui";
 import ddsList from "./assets/dds-list.json";
 import { createCutsceneTracks } from "./cutscene";
 import "./style.css";
+import { isMobile } from "./mobile";
 
 const appContainer = document.getElementById("app");
 if (!(appContainer instanceof HTMLDivElement)) {
@@ -365,13 +366,15 @@ const onWindowResize = () => {
     clientState.setMode("viewing");
   } else if (isMobileLayout && width > 700 && gui._closed) {
     isMobileLayout = false;
-    if (prefersReducedMotion) {
-      gui.openAnimated();
-    } else {
-      gui.open();
+    if (!isMobile()) {
+      if (prefersReducedMotion) {
+        gui.openAnimated();
+      } else {
+        gui.open();
+      }
+      editModeButton.show();
     }
     textureViewerButton.show();
-    editModeButton.show();
   }
   portraitModeWarning(width, height);
 };
@@ -1067,6 +1070,9 @@ const render = () => {
             );
           }
 
+          if (i === 0) {
+            clientState.setCurrentViewerModel(model);
+          }
           modelCallback(model, i == 0, anm, dds, mdlName);
           spawnCharacter(i + 1);
         });
