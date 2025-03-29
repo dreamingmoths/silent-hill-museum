@@ -1,5 +1,5 @@
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
-import { fetchRawBytes, loadModelFromBytes } from "./load";
+import { fetchRawBytes } from "./load";
 import { clientState } from "./objects/MuseumState";
 import { acceptFileDrop, arrayBufferToBase64 } from "./utils";
 import { Matrix4, Mesh, Object3D } from "three";

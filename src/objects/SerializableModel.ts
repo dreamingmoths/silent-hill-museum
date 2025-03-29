@@ -15,7 +15,6 @@ import {
   TypedArray,
   Vector3,
 } from "three";
-import { loadModelFromBytes } from "../load";
 import SilentHillModel, { PrimitiveHeader } from "../kaitai/Mdl";
 import Stripifier from "../wasm/stripifier/stripifier";
 import KaitaiStream from "../kaitai/runtime/KaitaiStream";
