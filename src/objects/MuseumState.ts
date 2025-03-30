@@ -375,7 +375,7 @@ export default class MuseumState {
     Animation: this.suggestAnimationPath() as string | undefined,
     "Edit Mode ✨": this.mode === "edit",
     "Texture Viewer 👀": false,
-    "Lock To Folder": true,
+    "Lock To Folder": !this.hasAcceptedContentWarning(),
     "Sharable Link": false,
     "Next File": () => this.nextFile(),
     "Previous File": () => this.previousFile(),
