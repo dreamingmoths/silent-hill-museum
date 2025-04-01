@@ -119,7 +119,7 @@ export const createCutsceneTracks = (
         if (ddsLights[lightIndex] === undefined) {
           if (isPointLight) {
             const pointLight = new PointLight();
-            pointLight.decay = 0.1; // ???
+            pointLight.decay = 0.0025; // ??
             ddsLights[lightIndex] = pointLight;
           } else {
             continue;

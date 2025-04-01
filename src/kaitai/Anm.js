@@ -850,7 +850,6 @@ var Anm = (function () {
           i = 0;
           this.header = [];
           reset = true;
-          console.log(`Reset on block ${this.blockIndex}`);
         }
         if (_t_header.type !== 0 || _t_header.flag) {
           allZeros = false;

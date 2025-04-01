@@ -95,11 +95,6 @@ export default class TextureViewer {
 
   public attach(object: Object3D) {
     this.currentObject = object;
-    console.log({
-      object,
-      state: this.state === TextureViewerStates.Active,
-      s: this.state,
-    });
     if (this.state !== TextureViewerStates.Inactive) {
       this.renderTextures();
     }

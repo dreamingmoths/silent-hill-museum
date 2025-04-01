@@ -55,6 +55,8 @@ import {
   AnimationClip,
   AnimationMixer,
   MeshStandardMaterial,
+  FrontSide,
+  AnimationAction,
 } from "three";
 import {
   GLTFLoader,
@@ -441,6 +443,25 @@ boneTransformGizmo.setRenderLoop(() => {
 boneTransformGizmo.setOnDrag(disableOrbitControls);
 boneTransformGizmo.setOnStopDrag(enableOrbitControls);
 
+type MixerWithActions = AnimationMixer & { _actions: AnimationAction[] };
+orbitControls.addEventListener("start", () => {
+  mixers.forEach((mixer) => {
+    const mixerWithActions = mixer as MixerWithActions;
+    const actions = mixerWithActions._actions.filter(
+      (action) =>
+        action.getClip().name === "camera" ||
+        action.getClip().name === "controls"
+    );
+    if (actions.length) {
+      actions.forEach((action) => {
+        action.timeScale = 0;
+      });
+    }
+  });
+  orbitControls.minDistance = 0;
+  orbitControls.minZoom = 0;
+});
+
 const modelTransformGizmo = new Gizmo(scene, camera, renderer.domElement);
 const modelRenderLoop = (controls: TransformControls) => {
   controls.mode = clientState.uiParams["Controls Mode"] as
@@ -780,31 +801,37 @@ const render = () => {
         const transparentDdsAction = mixer.clipAction(ddsClip, transparentMesh);
         transparentDdsAction.play();
 
-        const ddsCameraClip = new AnimationClip("camera", -1, ddsTracks.camera);
-        const ddsCameraAction = mixer.clipAction(ddsCameraClip, camera);
-        ddsCameraAction.play();
-        const ddsControlsClip = new AnimationClip(
-          "camera",
-          -1,
-          ddsTracks.controls
-        );
-        const ddsControlsAction = mixer.clipAction(
-          ddsControlsClip,
-          //@ts-ignore
-          orbitControls
-        );
-        ddsControlsAction.play();
-
-        ddsLights.forEach((ddsLight, index) => {
-          scene.add(ddsLight);
-          const ddsLightClip = new AnimationClip(
-            `ddsLight${index}`,
+        if (name === "inu.mdl") {
+          const ddsCameraClip = new AnimationClip(
+            "camera",
             -1,
-            ddsTracks.lights[index]
+            ddsTracks.camera
           );
-          const ddsLightAction = mixer!.clipAction(ddsLightClip, ddsLight);
-          ddsLightAction.play();
-        });
+          const ddsCameraAction = mixer.clipAction(ddsCameraClip, camera);
+          ddsCameraAction.play();
+          const ddsControlsClip = new AnimationClip(
+            "controls",
+            -1,
+            ddsTracks.controls
+          );
+          const ddsControlsAction = mixer.clipAction(
+            ddsControlsClip,
+            //@ts-ignore
+            orbitControls
+          );
+          ddsControlsAction.play();
+
+          ddsLights.forEach((ddsLight, index) => {
+            scene.add(ddsLight);
+            const ddsLightClip = new AnimationClip(
+              `ddsLight${index}`,
+              -1,
+              ddsTracks.lights[index]
+            );
+            const ddsLightAction = mixer!.clipAction(ddsLightClip, ddsLight);
+            ddsLightAction.play();
+          });
+        }
       }
       if (ddsTracks && name === "inu.mdl") {
         new GLTFLoader().load("/end_inu.glb", async (data) => {
@@ -817,6 +844,7 @@ const render = () => {
             if (o instanceof Mesh) {
               if (o.material instanceof MeshStandardMaterial) {
                 o.material.metalness = 0;
+                o.material.side = FrontSide;
               }
             }
           });
