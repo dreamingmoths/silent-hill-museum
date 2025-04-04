@@ -941,7 +941,7 @@ const render = () => {
       }
     }
     renderIsFinished = true;
-    if (name === clientState.file) {
+    if (!dds || name === clientState.file) {
       renderer.setAnimationLoop(null);
       renderer.setAnimationLoop(animate);
     }
