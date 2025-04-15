@@ -292,6 +292,7 @@ const fixPoseIndexMaterials = (object: Object3D) => {
         meshInfo.affectedGroups.forEach((groupInfo) => {
           groups[groupInfo.groupIndex].materialIndex = groupInfo.materialIndex;
         });
+        child.material.pop();
       }
     });
   };

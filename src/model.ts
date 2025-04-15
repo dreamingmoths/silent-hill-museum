@@ -216,12 +216,15 @@ const processPrimitiveHeaders = (
     const shouldAssignMaterial = filterPoseIndices
       ? filterPoseIndices.includes(primitiveHeader.poseIndex)
       : true;
+    const materialIndex =
+      textureIdMap[primitiveHeader.textureIndices.array[0] ?? 0];
     geometry.addGroup(
       group.start,
       group.count,
-      shouldAssignMaterial
-        ? textureIdMap[primitiveHeader.textureIndices.array[0] ?? 0]
-        : -1
+      /**
+       * @see fixPoseIndexMaterials
+       */
+      shouldAssignMaterial ? materialIndex : -materialIndex
     );
   });
   return geometry;
