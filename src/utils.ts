@@ -272,7 +272,7 @@ const fixPoseIndexMaterials = (object: Object3D) => {
           if (group.materialIndex && group.materialIndex < 0) {
             meshInfo.affectedGroups.push({
               groupIndex,
-              materialIndex: group.materialIndex,
+              materialIndex: group.materialIndex * -1,
             });
             group.materialIndex = meshInfo.blankMaterialIndex;
           }
