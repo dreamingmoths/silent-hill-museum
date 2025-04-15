@@ -221,7 +221,7 @@ const processPrimitiveHeaders = (
       group.count,
       shouldAssignMaterial
         ? textureIdMap[primitiveHeader.textureIndices.array[0] ?? 0]
-        : undefined
+        : -1
     );
   });
   return geometry;
