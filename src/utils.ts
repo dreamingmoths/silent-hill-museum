@@ -254,6 +254,10 @@ const fixPoseIndexMaterials = (object: Object3D) => {
   const fix = () => {
     object.traverse((child) => {
       if (child instanceof Mesh && child.geometry instanceof BufferGeometry) {
+        if (!Array.isArray(child.material)) {
+          return;
+        }
+
         const geom = child.geometry;
 
         let meshInfo = meshMap.get(child.uuid);
