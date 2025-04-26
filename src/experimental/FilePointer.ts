@@ -1,6 +1,6 @@
 export type FoldersRecord = Record<"folders", Record<string, unknown>>;
 export type FilesRecord = Record<"files", readonly string[]>;
-export type FolderEntry = FoldersRecord & FilesRecord;
+export type Directory = FoldersRecord & FilesRecord;
 
 export type FolderNamesOf<X extends FoldersRecord> = keyof X["folders"];
 export type FolderOf<
@@ -10,9 +10,9 @@ export type FolderOf<
 export type FilesOf<X extends FilesRecord> = X["files"][number];
 
 export type Access<
-  X extends FolderEntry | string,
+  X extends Directory | string,
   Key extends string | never
-> = X extends FolderEntry
+> = X extends Directory
   ? Key extends keyof X["folders"]
     ? X["folders"][Key]
     : Key extends X["files"][number]
@@ -20,29 +20,21 @@ export type Access<
     : never
   : never;
 
-export type Options<X extends FolderEntry | string | never> =
-  X extends FolderEntry ? keyof X["folders"] | X["files"][number] : never;
-
-export type Tuple<T, N extends number> = N extends N
-  ? number extends N
-    ? T[]
-    : TupleOf<T, N, []>
+export type Options<X extends Directory | string | never> = X extends Directory
+  ? keyof X["folders"] | X["files"][number]
   : never;
-type TupleOf<T, N extends number, R extends unknown[]> = R["length"] extends N
-  ? R
-  : TupleOf<T, N, [T, ...R]>;
 
-type FPointerOptions<T extends FolderEntry, R extends FolderEntry> = {
-  parent: T;
-  root: R;
+type FPointerOptions<Parent extends Directory, Root extends Directory> = {
+  parent: Parent;
+  root: Root;
   name: string;
   path: (string | unknown)[];
   indices?: number[];
 };
 
 export default class FilePointer<
-  Folder extends FolderEntry,
-  Root extends FolderEntry
+  Folder extends Directory,
+  Root extends Directory
 > {
   private root: Root;
   private parent: Folder;
@@ -98,7 +90,8 @@ export default class FilePointer<
     return this.parent.folders;
   }
 
-  public set({ parent, name, path }: FPointerOptions<Folder, Root>) {
+  public set({ root, parent, name, path }: FPointerOptions<Folder, Root>) {
+    this.root = root;
     this.parent = parent;
     this.name = name;
     this.index = parent.files.indexOf(name);
@@ -126,14 +119,14 @@ export default class FilePointer<
     for (let d = depth + 1; d < indices.length; d++) {
       indices[d] = 0;
     }
-    return FilePointer.invertIndices(this.root, ...indices);
+    return FilePointer.fromIndexTuple(this.root, ...indices);
   }
 
-  public static invertIndices<
-    ResultStructure extends FolderEntry,
-    RootStructure extends FolderEntry
+  public static fromIndexTuple<
+    ResultStructure extends Directory,
+    RootStructure extends Directory
   >(structure: RootStructure, ...args: Array<number | undefined>) {
-    let currentStructure: FolderEntry = structure;
+    let currentStructure: Directory = structure;
     let argIndex = 0;
     let path = args.map(() => "");
 
@@ -152,7 +145,7 @@ export default class FilePointer<
 
       if (folderName !== undefined) {
         path[argIndex] = folderName;
-        currentStructure = currentStructure.folders[folderName] as FolderEntry;
+        currentStructure = currentStructure.folders[folderName] as Directory;
         continue;
       }
 
@@ -171,11 +164,11 @@ export default class FilePointer<
     });
   }
 
-  protected static followPath<
-    ResultStructure extends FolderEntry,
-    RootStructure extends FolderEntry
+  protected static fromPath<
+    ResultStructure extends Directory,
+    RootStructure extends Directory
   >(structure: RootStructure, ...args: Array<string | undefined>) {
-    let currentStructure: FolderEntry = structure;
+    let currentStructure: Directory = structure;
     let argIndex = 0;
     let indexVector = args.map(() => -1);
 
@@ -199,7 +192,7 @@ export default class FilePointer<
       }
 
       if (arg in currentStructure.folders) {
-        currentStructure = currentStructure.folders[arg] as FolderEntry;
+        currentStructure = currentStructure.folders[arg] as Directory;
         continue;
       }
 

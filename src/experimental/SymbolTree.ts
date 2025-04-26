@@ -10,7 +10,17 @@ export type SymbolInfo = {
 };
 type SymbolMap = Map<string, SymbolInfo>;
 
-export default class SymbolPool {
+/**
+ * This "symbol tree" provides a way of generating unique names for elements in
+ * a tree-like structure of strings.
+ * @example ```ts
+ *  const season = tree.createUniqueSymbol("season");
+    const water = tree.createUniqueSymbol("water");
+    tree.createUniqueSymbol("fall", season).name === "seasonFall";
+    tree.createUniqueSymbol("fall", water).name === "waterFall";
+ * ```
+ */
+export default class SymbolTree {
   public symbols: SymbolMap = new Map();
   private maxDepth = -1;
 
@@ -51,7 +61,7 @@ export default class SymbolPool {
   }
 
   private sanitizeSymbolName(symbolName: string) {
-    return symbolName.replaceAll(" ", "_");
+    return symbolName.replace(/\s/g, "_").replace(/[^A-Za-z0-9_]/g, "");
   }
 
   private buildSymbolName(...values: string[]) {

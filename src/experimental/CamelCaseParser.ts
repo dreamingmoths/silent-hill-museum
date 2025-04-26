@@ -1,5 +1,6 @@
 export class CamelCaseParser {
   private array: Array<string> = [];
+
   public constructor(private string: string) {
     this.setString(string);
   }

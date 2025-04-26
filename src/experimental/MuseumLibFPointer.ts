@@ -1,4 +1,4 @@
-import FilePointer, { Access, Options, FolderEntry } from "./FilePointer";
+import FilePointer, { Access, Options, Directory } from "./FilePointer";
 const MuseumLib_apart = {
   folders: {},
   files: [
@@ -5018,9 +5018,10 @@ export const MuseumLib = {
   games: MuseumLib_games,
 } as const;
 
-export default class MuseumLibFPointer<
-  S extends FolderEntry
-> extends FilePointer<S, typeof MuseumLib.games> {
+export default class MuseumLibFPointer<S extends Directory> extends FilePointer<
+  S,
+  typeof MuseumLib.games
+> {
   public static new<
     Depth0Arg extends Options<typeof MuseumLib.games>,
     Depth0Value extends Access<typeof MuseumLib.games, Depth0Arg>,
@@ -5030,12 +5031,12 @@ export default class MuseumLibFPointer<
     Depth2Value extends Access<Depth1Value, Depth2Arg>,
     Depth3Arg extends Options<Depth2Value>
   >(arg0?: Depth0Arg, arg1?: Depth1Arg, arg2?: Depth2Arg, arg3?: Depth3Arg) {
-    return MuseumLibFPointer.followPath<
-      Depth2Value extends FolderEntry
+    return MuseumLibFPointer.fromPath<
+      Depth2Value extends Directory
         ? Depth2Value
-        : Depth1Value extends FolderEntry
+        : Depth1Value extends Directory
         ? Depth1Value
-        : Depth0Value extends FolderEntry
+        : Depth0Value extends Directory
         ? Depth0Value
         : never,
       typeof MuseumLib.games

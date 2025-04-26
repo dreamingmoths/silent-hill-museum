@@ -1,6 +1,5 @@
 import { assert, describe, expect, test } from "vitest";
-import MuseumLibFPointer, { MuseumLib } from "./gen";
-import FilePointer from "./FilePointer";
+import MuseumLibFPointer, { MuseumLib } from "./MuseumLibFPointer";
 
 describe("MuseumLibFPointer", () => {
   test("get file pointer", () => {
@@ -33,7 +32,7 @@ describe("MuseumLibFPointer", () => {
     const indices = files.getIndices();
     assert(indices !== undefined);
 
-    const inversion = MuseumLibFPointer.invertIndices(
+    const inversion = MuseumLibFPointer.fromIndexTuple(
       MuseumLib.games,
       ...indices
     );
