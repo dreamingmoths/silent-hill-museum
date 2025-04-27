@@ -27,8 +27,8 @@ export type Options<X extends Directory | string | never> = X extends Directory
 type FPointerOptions<Parent extends Directory, Root extends Directory> = {
   parent: Parent;
   root: Root;
-  name: string;
   path: (string | unknown)[];
+  name?: string;
   indices?: number[];
 };
 
@@ -38,9 +38,10 @@ export default class FilePointer<
 > {
   private root: Root;
   private parent: Folder;
-  private name: string;
+  private name?: string;
 
   private index: number;
+  private path: (string | unknown)[];
   private indices: number[] | undefined;
 
   private pathString: string = "";
@@ -50,11 +51,12 @@ export default class FilePointer<
   public static sortFolderName?: (a: string, b: string) => number;
 
   public constructor(options: FPointerOptions<Folder, Root>) {
-    const { root, parent, name, indices } = options;
+    const { root, parent, name, path, indices } = options;
     this.root = root;
     this.parent = parent;
     this.name = name;
     this.indices = indices;
+    this.path = path;
     this.index = this.set(options);
   }
 
@@ -82,6 +84,10 @@ export default class FilePointer<
     return this.parent;
   }
 
+  public getDepth() {
+    return (this.indices?.length ?? this.path.length) - 1;
+  }
+
   public files() {
     return this.parent.files;
   }
@@ -90,12 +96,19 @@ export default class FilePointer<
     return this.parent.folders;
   }
 
+  public isNullPointer() {
+    return this.name === undefined && this.index < 0;
+  }
+
   public set({ root, parent, name, path }: FPointerOptions<Folder, Root>) {
     this.root = root;
     this.parent = parent;
     this.name = name;
-    this.index = parent.files.indexOf(name);
-    this.pathString = path.filter((v) => typeof v === "string").join("->");
+    this.index = name ? parent.files.indexOf(name) : -1;
+    this.pathString = path
+      .filter((v) => typeof v === "string")
+      .map((v) => (v === "" ? "[null]" : v))
+      .join("->");
     return this.index;
   }
 
@@ -110,16 +123,52 @@ export default class FilePointer<
     return sorted;
   }
 
-  public travel(depth: number, offset: number) {
+  public travel(depth: number, offset = 0) {
     if (!this.indices) {
       throw new Error("Indices must be computed to use `travel`");
     }
-    const indices = this.indices.slice();
+
+    let indices = this.indices.slice(0, depth + 1);
+    for (let i = depth - indices.length; i >= 0; i--) {
+      indices.push(0);
+    }
+
     indices[depth] += offset;
     for (let d = depth + 1; d < indices.length; d++) {
       indices[d] = 0;
     }
+
     return FilePointer.fromIndexTuple(this.root, ...indices);
+  }
+
+  public step(offset: number) {
+    let pointer: ReturnType<typeof this.travel> | undefined;
+    let d = this.getDepth();
+
+    while (d >= 0) {
+      const current = this.travel(d, offset);
+      if (!current || current.isNullPointer()) {
+        d--;
+        continue;
+      }
+
+      pointer = current;
+      break;
+    }
+
+    if (!pointer) {
+      return this.travel(0);
+    }
+
+    return pointer;
+  }
+
+  public next() {
+    return this.step(1);
+  }
+
+  public prev() {
+    return this.step(-1);
   }
 
   public static fromIndexTuple<
@@ -128,7 +177,8 @@ export default class FilePointer<
   >(structure: RootStructure, ...args: Array<number | undefined>) {
     let currentStructure: Directory = structure;
     let argIndex = 0;
-    let path = args.map(() => "");
+    let path: string[] = args.map(() => "");
+    let name: string | undefined = "root";
 
     if (!this.indexingEnabled) {
       throw new Error("Cannot invert indices if indexing is not enabled");
@@ -145,20 +195,26 @@ export default class FilePointer<
 
       if (folderName !== undefined) {
         path[argIndex] = folderName;
+        name = folderName;
         currentStructure = currentStructure.folders[folderName] as Directory;
         continue;
       }
 
       const indexBoundary = names.length;
-      const filename = currentStructure.files[arg - indexBoundary];
-      path[argIndex] = filename;
+      const filename = currentStructure.files[arg - indexBoundary] as
+        | string
+        | undefined;
+
+      path[argIndex] = filename ?? "";
+      name = filename;
+
       break;
     }
 
     return new this<ResultStructure, typeof structure>({
       parent: currentStructure as ResultStructure,
       root: structure,
-      name: path[path.length - 1] ?? "root",
+      name,
       path,
       indices: args.filter((a) => a !== undefined) as number[],
     });
@@ -171,12 +227,14 @@ export default class FilePointer<
     let currentStructure: Directory = structure;
     let argIndex = 0;
     let indexVector = args.map(() => -1);
+    let name: string | undefined = "root";
 
     for (argIndex = 0; argIndex < args.length; argIndex++) {
       const arg = args[argIndex];
       if (arg === undefined) {
         continue;
       }
+      name = arg;
 
       let indexBoundary = 0;
       if (this.indexingEnabled !== false) {
@@ -198,7 +256,7 @@ export default class FilePointer<
 
       const index = currentStructure.files.indexOf(arg);
       if (index < 0) {
-        throw new Error("Critical: Invalid file pointer");
+        name = undefined;
       }
       indexVector[argIndex] = index + indexBoundary;
       break;
@@ -207,7 +265,7 @@ export default class FilePointer<
     return new this<ResultStructure, typeof structure>({
       parent: currentStructure as ResultStructure,
       root: structure,
-      name: args[argIndex] ?? "pointer",
+      name: name,
       path: args,
       indices: indexVector.filter((i) => i !== -1),
     });

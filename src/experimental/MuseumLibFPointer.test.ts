@@ -22,8 +22,10 @@ describe("MuseumLibFPointer", () => {
   });
 
   test("sh2", () => {
-    const files = MuseumLibFPointer.new("sh2", "demo", "papa_agl").files();
-    console.log(files);
+    const pointer = MuseumLibFPointer.new("sh2", "demo", "papa_agl");
+    const files = pointer.files();
+    expect(files.length).toBeGreaterThan(0);
+    expect(pointer.isNullPointer()).toBeFalsy();
   });
 
   test("vector repr", () => {
@@ -40,11 +42,57 @@ describe("MuseumLibFPointer", () => {
   });
 
   test("traveling along levels", () => {
-    const files = MuseumLibFPointer.new("sh3", "chr", "wp", "wp_sub.kg1");
-    const indices = files.getIndices();
+    const wpSub = MuseumLibFPointer.new("sh3", "chr", "wp", "wp_sub.kg1");
+    const indices = wpSub.getIndices();
     assert(indices !== undefined);
 
-    const newFiles = files.travel(0, -1);
-    expect(newFiles.toString()).toEqual("sh2->bg->ap->ap.map");
+    expect(wpSub.travel(0, -1).toString()).toEqual("sh2");
+    expect(wpSub.travel(0, -1).travel(3).toString()).toEqual(
+      "sh2->bg->ap->ap.map"
+    );
+  });
+
+  test("null pointers", () => {
+    const wpSub = MuseumLibFPointer.new("sh3", "chr", "wp", "wp_sub.kg1");
+    const nullPtr = wpSub.travel(1, 1000);
+
+    expect(nullPtr.isNullPointer()).toBeTruthy();
+    expect(nullPtr.toString()).toEqual("sh3->[null]");
+    expect(wpSub.isNullPointer()).toBeFalsy();
+
+    const nil = MuseumLibFPointer.new(
+      // @ts-expect-error
+      "sh1",
+      "cheryl"
+    );
+    expect(nil.isNullPointer()).toBeTruthy();
+  });
+
+  test("next", () => {
+    const bg = MuseumLibFPointer.new("sh3", "chr", "bg");
+    expect(bg.next().toString()).toEqual("sh3->chr->ch");
+  });
+
+  test("next files", () => {
+    const wp = MuseumLibFPointer.new("sh3", "chr", "wp");
+    const wpFiles = wp.files();
+
+    const array: (string | undefined)[] = [];
+    let current = wp.travel(3, 0);
+
+    for (let i = 0; i < wpFiles.length; i++) {
+      array.push(current.getName());
+      current = current.next();
+    }
+
+    expect(array).toStrictEqual(wpFiles);
+  });
+
+  test("next + travel", () => {
+    const cutscene = MuseumLibFPointer.new("sh2", "demo", "fire_agl")
+      .travel(3)
+      .next();
+    expect(cutscene.toString()).toContain("agl.cls");
+    expect(cutscene.travel(1).next().getFolderInfo()).toEqual(MuseumLib.demo2);
   });
 });
