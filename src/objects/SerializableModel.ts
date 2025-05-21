@@ -832,11 +832,7 @@ export default class SerializableModel {
         for (let pairIndex = 1; pairIndex <= 3; pairIndex++) {
           const parent = targetBone;
           let child = bonemap[boneIndices[skinIndex + pairIndex]];
-          if (
-            parent === undefined ||
-            child === undefined ||
-            child === targetBone
-          ) {
+          if (parent === undefined || child === undefined || parent >= child) {
             continue;
           }
           const mapKey = (parent << 8) | child;
