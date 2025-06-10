@@ -49,6 +49,8 @@ export const mod = (n: number, m: number) => {
   return ((n % m) + m) % m;
 };
 
+export const clamp = (x: number, min: number, max: number) => Math.max(min, Math.min(max, x))
+
 export const findLastNotExceeding = (
   array: readonly number[],
   target: number
@@ -222,13 +224,13 @@ export function exportModel(
     object,
     typeof filenameOrCallback === "string"
       ? (result) => {
-          if (result instanceof ArrayBuffer) {
-            saveArrayBuffer(result, `${filenameOrCallback}.glb`);
-          } else {
-            const output = JSON.stringify(result, null, 2);
-            saveString(output, `${filenameOrCallback}.gltf`);
-          }
+        if (result instanceof ArrayBuffer) {
+          saveArrayBuffer(result, `${filenameOrCallback}.glb`);
+        } else {
+          const output = JSON.stringify(result, null, 2);
+          saveString(output, `${filenameOrCallback}.gltf`);
         }
+      }
       : filenameOrCallback,
     (error) => {
       logger.warn("Could not export the scene. An error occurred: ", error);

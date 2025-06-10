@@ -21,6 +21,7 @@ import KaitaiStream from "../kaitai/runtime/KaitaiStream";
 import {
   applyDiffToOffsetTable,
   assignPublicProperties,
+  clamp,
   computeAverageVertex,
   ensureOffsetTableAligned,
   getPixelsFromCanvasImageSource,
@@ -397,9 +398,6 @@ export default class SerializableModel {
       primitiveWrapper.body = primitive;
       primitive.primitiveStartIndex = currentPrimitiveTriangleIndex;
       primitive.primitiveLength = triangleIndexCount;
-      primitive.backfaceCulling = Number(this.params.backfaceCulling);
-      primitive.materialType =
-        SilentHillModel.PrimitiveHeader.MaterialType.MATTE_PLUS;
       primitive.samplerStates = [/*0x03, 0x03,*/ 0x01, 0x01, 0x02, 0x02];
       currentPrimitiveTriangleIndex += triangleIndexCount;
 
@@ -805,7 +803,7 @@ export default class SerializableModel {
         mesh.skeleton.bones[sourceBone].updateMatrixWorld();
         const transform =
           model.modelData.initialMatrices[
-            targetBone ?? bonemapCollapseTarget
+          targetBone ?? bonemapCollapseTarget
           ] ?? model.modelData.initialMatrices[bonemapCollapseTarget];
         objectSpaceMatrix = transformationMatrixToMat4(transform).invert();
         boneSpaceMatrices.set(targetBone, objectSpaceMatrix);
@@ -824,9 +822,9 @@ export default class SerializableModel {
           vector.z,
         ];
         vertexData.normals = [
-          normalVector.x * MIN_SIGNED_INT,
-          normalVector.y * MIN_SIGNED_INT,
-          normalVector.z * MIN_SIGNED_INT,
+          clamp(normalVector.x * MIN_SIGNED_INT, -0x8000, 0x8000 - 1),
+          clamp(normalVector.y * MIN_SIGNED_INT, -0x8000, 0x8000 - 1),
+          clamp(normalVector.z * MIN_SIGNED_INT, -0x8000, 0x8000 - 1),
         ];
 
         for (let pairIndex = 1; pairIndex <= 3; pairIndex++) {
@@ -856,13 +854,13 @@ export default class SerializableModel {
               mat4ToTransformationMatrix(
                 transformationMatrixToMat4(
                   model.modelData.initialMatrices[child] ??
-                    model.modelData.initialMatrices[bonemapCollapseTarget]
+                  model.modelData.initialMatrices[bonemapCollapseTarget]
                 )
                   .invert()
                   .multiply(
                     transformationMatrixToMat4(
                       model.modelData.initialMatrices[parent] ??
-                        model.modelData.initialMatrices[bonemapCollapseTarget]
+                      model.modelData.initialMatrices[bonemapCollapseTarget]
                     )
                   ),
                 new SilentHillModel.TransformationMatrix(
@@ -911,11 +909,11 @@ export default class SerializableModel {
           vertexData.boneWeight2,
           vertexData.boneWeight3,
         ] = [
-          boneWeights[skinIndex],
-          boneAndPairs[1] ? boneWeights[skinIndex + 1] : 0,
-          boneAndPairs[2] ? boneWeights[skinIndex + 2] : 0,
-          boneAndPairs[3] ? boneWeights[skinIndex + 3] : 0,
-        ];
+            boneWeights[skinIndex],
+            boneAndPairs[1] ? boneWeights[skinIndex + 1] : 0,
+            boneAndPairs[2] ? boneWeights[skinIndex + 2] : 0,
+            boneAndPairs[3] ? boneWeights[skinIndex + 3] : 0,
+          ];
         const sum =
           vertexData.boneWeight0 +
           vertexData.boneWeight1 +
@@ -928,11 +926,11 @@ export default class SerializableModel {
             vertexData.boneWeight2,
             vertexData.boneWeight3,
           ] = [
-            vertexData.boneWeight0 / sum,
-            vertexData.boneWeight1 / sum,
-            vertexData.boneWeight2 / sum,
-            vertexData.boneWeight3 / sum,
-          ];
+              vertexData.boneWeight0 / sum,
+              vertexData.boneWeight1 / sum,
+              vertexData.boneWeight2 / sum,
+              vertexData.boneWeight3 / sum,
+            ];
         } else {
           [
             vertexData.boneWeight0,
@@ -983,9 +981,9 @@ export default class SerializableModel {
           vector.z,
         ];
         vertexData.normals = [
-          normalVector.x * MIN_SIGNED_INT,
-          normalVector.y * MIN_SIGNED_INT,
-          normalVector.z * MIN_SIGNED_INT,
+          clamp(normalVector.x * MIN_SIGNED_INT, -0x8000, 0x8000 - 1),
+          clamp(normalVector.y * MIN_SIGNED_INT, -0x8000, 0x8000 - 1),
+          clamp(normalVector.z * MIN_SIGNED_INT, -0x8000, 0x8000 - 1),
         ];
         vertexData.boneWeight0 = 1;
         vertexData.boneWeight1 = 0;
