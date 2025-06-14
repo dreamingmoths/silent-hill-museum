@@ -420,8 +420,6 @@ export default class SerializableModel {
       if (shouldEditMaterialType) {
         primitive.materialType = materialType;
       }
-      primitive.materialType =
-        SilentHillModel.PrimitiveHeader.MaterialType.MATTE;
       primitive.samplerStates = [/*0x03, 0x03,*/ 0x01, 0x01, 0x02, 0x02];
       currentPrimitiveTriangleIndex += triangleIndexCount;
 
