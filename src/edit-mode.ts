@@ -8,8 +8,12 @@ import {
   Autoscale,
   BonemapMethod,
   BonemapType,
+  ModelParams,
   SilentHillModelTypes,
 } from "./objects/SerializableModel";
+import SilentHillModel from "./kaitai/Mdl";
+import { ModelPropertyDiffJson } from "./write-worker";
+import { showQuickModal } from "./modals";
 
 export const consoleGui = new GUI({
   title: "Output",
@@ -39,6 +43,18 @@ export default class EditMode {
       }
     });
     const editorGui = new GUI({ container: sidebar, title: "Options" });
+    const rerenderButton = editorGui.add(
+      {
+        Rerender: async () => {
+          const object = clientState.getCurrentObject();
+          if (!object) {
+            return;
+          }
+          applyUpdate();
+        },
+      },
+      "Rerender"
+    );
     const exportButton = editorGui.add(
       {
         "Export Current": async () => {
@@ -68,6 +84,7 @@ export default class EditMode {
     );
     sidebarButtonsContainer.appendChild(exportButton.domElement);
     sidebarButtonsContainer.appendChild(resetButton.domElement);
+    sidebarButtonsContainer.appendChild(rerenderButton.domElement);
     editorGui
       .add(
         editorState.editorParams,
@@ -118,6 +135,125 @@ export default class EditMode {
       Number.MIN_VALUE,
       180
     );
+
+    const bread = editorGui.add(editorState.editorParams, "🍞 It's Bread.");
+    const breadContainer = editorGui.addFolder("🖤 Advanced").hide();
+    const croissant = breadContainer.add(
+      {
+        "sh3 coming soon?": () => {
+          breadify(croissant.domElement, [
+            "💖",
+            "💙",
+            "💚",
+            "💛",
+            "🧡",
+            "💜",
+            "❤️",
+            "💙",
+            "🌈",
+          ]);
+        },
+      },
+      "sh3 coming soon?"
+    );
+    breadContainer.add(
+      {
+        "Copy Params To Clipboard": async () => {
+          breadify(croissant.domElement, ["📋", "📎"]);
+          await navigator.clipboard.writeText(
+            JSON.stringify({
+              params: editorState.getSerializationParams(),
+              diff: editorState.getModelPropertyDiff(),
+            })
+          );
+        },
+      },
+      "Copy Params To Clipboard"
+    );
+    breadContainer.add(
+      {
+        "Paste Params From Clipboard": async () => {
+          breadify(croissant.domElement, ["📋", "📎"]);
+          const unclippy = await navigator.clipboard.readText();
+          try {
+            const parsed = JSON.parse(unclippy);
+            if (typeof parsed !== "object") {
+              throw new Error("Clipboard contents were invalid");
+            }
+            if (typeof parsed["params"] !== "object") {
+              throw new Error("Failed to parse serialization params");
+            }
+            if (typeof parsed["diff"] !== "object") {
+              throw new Error("Failed to parse transform diff");
+            }
+            const { params, diff } = parsed as {
+              params: Partial<ModelParams>;
+              diff: ModelPropertyDiffJson;
+            };
+            editorState.resetSerializationState();
+            editorState.initializePropertyDiff();
+            editorState.updateSerializationParams(params);
+            editorState.setModelPropertyDiffFromJson(diff);
+            applyUpdate();
+          } catch (e) {
+            logger.debug(e);
+            showQuickModal(`<code style="text-wrap: wrap">${e}</code>`);
+          }
+        },
+      },
+      "Paste Params From Clipboard"
+    );
+    breadContainer.add(editorState.editorParams, "Backface Culling", [
+      "Default",
+      "On",
+      "Off",
+    ]);
+    breadContainer.add(
+      editorState.editorParams,
+      "Material Type",
+      Object.values(SilentHillModel.PrimitiveHeader.MaterialType)
+        .filter((value) => isNaN(parseInt(String(value))))
+        .concat("Default")
+    );
+
+    const EMOJIS = ["🍞"];
+    bread.onFinishChange((v: boolean) => {
+      if (v) {
+        breadContainer.show();
+      } else {
+        breadContainer.hide();
+      }
+
+      breadify(bread.domElement);
+    });
+
+    const breadify = (element: HTMLElement, emojis = EMOJIS) => {
+      const rect = element.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const SIZE = 200;
+
+      for (let i = 0; i < 20; i++) {
+        const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+        const particle = document.createElement("span");
+        particle.className = "particle";
+        particle.textContent = emoji;
+
+        const dx = `${(Math.random() - 0.5) * SIZE}px`;
+        const dy = `${(Math.random() - 0.5) * SIZE}px`;
+
+        particle.style.left = `${centerX}px`;
+        particle.style.top = `${centerY}px`;
+        particle.style.setProperty("--dx", dx);
+        particle.style.setProperty("--dy", dy);
+
+        document.body.appendChild(particle);
+
+        particle.addEventListener("animationend", () => {
+          particle.remove();
+        });
+      }
+    };
     const originalModelControls = editorGui
       .add(editorState.editorParams, "Base Model Controls")
       .onFinishChange(() =>

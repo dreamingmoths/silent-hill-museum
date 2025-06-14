@@ -331,6 +331,9 @@ body.viewing .flexbox-container .placeholder .lil-gui.root {
 #sidebar .lil-gui.root,
 #sidebar div.children {
   width: 100%;
+  margin-left: 0;
+  border-left: none;
+  padding-left: 0;
 }
 
 #sidebar .filepicker {
@@ -631,6 +634,21 @@ div.struct-visualizer {
   }
   100% {
     transform: scale(1);
+  }
+}
+
+.particle {
+  position: absolute;
+  font-size: 1.2rem;
+  pointer-events: none;
+  opacity: 0.8;
+  animation: pop 1s ease-out forwards;
+}
+
+@keyframes pop {
+  100% {
+    transform: translate(var(--dx), var(--dy)) scale(0.5);
+    opacity: 0;
   }
 }
 

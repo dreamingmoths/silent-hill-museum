@@ -1,6 +1,10 @@
 import { Vector3, Quaternion, Matrix4, Object3D } from "three";
 import { sharedSerializationData } from "../write";
-import type { ModelPropertyDiff, CreationPayload } from "../write-worker";
+import type {
+  ModelPropertyDiff,
+  CreationPayload,
+  ModelPropertyDiffJson,
+} from "../write-worker";
 import {
   ModelParams,
   Autoscale,
@@ -8,6 +12,7 @@ import {
   SilentHillModelTypes,
 } from "./SerializableModel";
 import { clientState } from "./MuseumState";
+import Mdl from "../kaitai/Mdl";
 
 export default class EditorState {
   public editorParams = {
@@ -21,6 +26,9 @@ export default class EditorState {
     "Show Original": false,
     "Base Model Controls": false,
     "Rotation Step": 90,
+    "🍞 It's Bread.": false,
+    "Backface Culling": "Default",
+    "Material Type": "Default",
   };
 
   private serializationParams: Partial<ModelParams> = {};
@@ -36,7 +44,12 @@ export default class EditorState {
         clientState.file.startsWith("r") && clientState.file !== "red.mdl"
           ? SilentHillModelTypes.RModel
           : this.editorParams["Model Type"],
-      backfaceCulling: clientState.uiParams["Render Side"] !== "DoubleSide",
+      backfaceCulling:
+        this.editorParams["Backface Culling"] === "Default"
+          ? undefined
+          : this.editorParams["Backface Culling"] === "On"
+          ? true
+          : false,
       materialIndices: sharedSerializationData.materialIndices,
       textureIndices: sharedSerializationData.textureIndices,
       textureIdStart:
@@ -50,6 +63,12 @@ export default class EditorState {
       bonemapType: this.editorParams["Bonemap Method"],
       bonemap: sharedSerializationData.bonemap,
       bonemapCollapseTarget: this.editorParams["Collapse Target"],
+      materialType:
+        Mdl.PrimitiveHeader.MaterialType[
+          this.editorParams[
+            "Material Type"
+          ] as keyof typeof Mdl.PrimitiveHeader.MaterialType
+        ],
     });
   }
   public updateSerializationParams(
@@ -115,6 +134,21 @@ export default class EditorState {
         position: accumulatedTransform.position.clone(),
         quaternion: accumulatedTransform.quaternion.clone(),
         scale: accumulatedTransform.scale.clone(),
+      },
+    };
+  }
+
+  public setModelPropertyDiffFromJson(json: ModelPropertyDiffJson) {
+    const accumulatedTransform = json.accumulatedTransform;
+    const { position, quaternion, scale } = accumulatedTransform;
+    this.modelPropertyDiff = {
+      transform: json.transform
+        ? new Matrix4().fromArray(json.transform)
+        : undefined,
+      accumulatedTransform: {
+        position: new Vector3(position.x, position.y, position.z),
+        quaternion: new Quaternion().fromArray(quaternion),
+        scale: new Vector3(scale.x, scale.y, scale.z),
       },
     };
   }
