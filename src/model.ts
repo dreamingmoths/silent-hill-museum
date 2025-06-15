@@ -145,7 +145,7 @@ const processTransparentPrimitiveHeaders = (
 const processPrimitiveHeaders = (
   model: SilentHillModel,
   geometry: BufferGeometry,
-  filterPoseIndices: number[] | undefined
+  _filterPoseIndices: number[] | undefined
 ) => {
   const primitiveHeaders = model.modelData.geometry.primitiveHeaders;
   const geometryData = model.modelData.geometry;
@@ -213,19 +213,9 @@ const processPrimitiveHeaders = (
   ) ?? [0];
   groupData.forEach((group, index) => {
     const primitiveHeader = primitiveHeaders[index].body;
-    const shouldAssignMaterial = filterPoseIndices
-      ? filterPoseIndices.includes(primitiveHeader.poseIndex)
-      : true;
     const materialIndex =
       textureIdMap[primitiveHeader.textureIndices.array[0] ?? 0];
-    geometry.addGroup(
-      group.start,
-      group.count,
-      /**
-       * @see fixPoseIndexMaterials
-       */
-      shouldAssignMaterial ? materialIndex : -materialIndex
-    );
+    geometry.addGroup(group.start, group.count, materialIndex);
   });
   return geometry;
 };
