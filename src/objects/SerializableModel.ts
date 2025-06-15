@@ -4,6 +4,7 @@ import {
   DataTexture,
   InterleavedBufferAttribute,
   Material,
+  Matrix3,
   Matrix4,
   Mesh,
   MeshBasicMaterial,
@@ -192,13 +193,13 @@ export default class SerializableModel {
   private textureIndices: number[] = [];
   private seenMapToMaterialIndex: number[] = [];
   /**
-   * Array of pointers to buffers that have edits applied.
+   * Array of references to buffers that have edits applied.
    */
   private transformedBuffers: (BufferAttribute | InterleavedBufferAttribute)[] =
     [];
   private globalAddedBonePairs = new Map<number, number>();
   private boneSpaceMatrices = new Map<number, Matrix4>();
-  private transposeBoneSpaceMatrices = new Map<number, Matrix4>();
+  private transposeBoneSpaceMatrices = new Map<number, Matrix3>();
 
   /* diff machinery */
   private totalSizeDiff = 0;
@@ -370,6 +371,7 @@ export default class SerializableModel {
       mesh.updateMatrixWorld();
       const meshVertices = meshAttributes.position.array;
       if (!meshAttributes.normal) {
+        logger.debug("Computing vertex normals!");
         meshGeometry.computeVertexNormals();
       }
 
@@ -829,15 +831,15 @@ export default class SerializableModel {
           ] ?? model.modelData.initialMatrices[bonemapCollapseTarget];
         objectSpaceMatrix = transformationMatrixToMat4(transform).invert();
         boneSpaceMatrices.set(targetBone, objectSpaceMatrix);
-        transposeBoneSpaceMatrix = new Matrix4()
-          .extractRotation(transformationMatrixToMat4(transform))
-          .transpose();
+        transposeBoneSpaceMatrix = new Matrix3().getNormalMatrix(
+          transformationMatrixToMat4(transform).invert()
+        );
         this.transposeBoneSpaceMatrices.set(
           targetBone,
           transposeBoneSpaceMatrix
         );
         vector.applyMatrix4(objectSpaceMatrix);
-        normalVector.applyMatrix4(transposeBoneSpaceMatrix);
+        normalVector.applyNormalMatrix(transposeBoneSpaceMatrix);
         [vertexData.x, vertexData.y, vertexData.z] = [
           vector.x,
           vector.y,
@@ -983,20 +985,18 @@ export default class SerializableModel {
             model.modelData.initialMatrices[bonemapCollapseTarget]
           ).invert();
           boneSpaceMatrices.set(bonemapCollapseTarget, objectSpaceMatrix);
-          transposeBoneSpaceMatrix = new Matrix4()
-            .extractRotation(
-              transformationMatrixToMat4(
-                model.modelData.initialMatrices[bonemapCollapseTarget]
-              )
-            )
-            .transpose();
+          transposeBoneSpaceMatrix = new Matrix3().getNormalMatrix(
+            transformationMatrixToMat4(
+              model.modelData.initialMatrices[bonemapCollapseTarget]
+            ).invert()
+          );
           this.transposeBoneSpaceMatrices.set(
             bonemapCollapseTarget,
             transposeBoneSpaceMatrix
           );
         }
         vector.applyMatrix4(objectSpaceMatrix);
-        normalVector.applyMatrix4(transposeBoneSpaceMatrix);
+        normalVector.applyNormalMatrix(transposeBoneSpaceMatrix);
         [vertexData.x, vertexData.y, vertexData.z] = [
           vector.x,
           vector.y,
@@ -1403,6 +1403,14 @@ export default class SerializableModel {
     let anyTransformsApplied = false;
     this.meshes.forEach((mesh) => {
       const meshVertices = mesh.geometry.attributes.position;
+      const meshNormals = mesh.geometry.attributes.normal;
+      if (transformedBuffers.indexOf(meshNormals) < 0) {
+        transformedBuffers.push(meshNormals);
+
+        anyTransformsApplied = true;
+        meshNormals.applyNormalMatrix(new Matrix3().getNormalMatrix(matrix));
+      }
+
       if (transformedBuffers.indexOf(meshVertices) >= 0) {
         return;
       }
