@@ -26,7 +26,7 @@ export default class EditorState {
     "Show Original": false,
     "Base Model Controls": false,
     "Rotation Step": 90,
-    "🍞 It's Bread.": false,
+    "🍞 It's Bread": false,
     "Backface Culling": "Default",
     "Material Type": "Default",
     Confetti: true,

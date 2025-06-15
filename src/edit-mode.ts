@@ -142,25 +142,25 @@ export default class EditMode {
       : hatesConfetti !== null
       ? hatesConfetti === "false"
       : true;
-    const bread = editorGui.add(editorState.editorParams, "🍞 It's Bread.");
-    const breadContainer = editorGui.addFolder("🖤 Advanced").hide();
+    const bread = editorGui.add(editorState.editorParams, "🍞 It's Bread");
+    const breadContainer = editorGui.addFolder("...").hide();
     const croissant = breadContainer.add(
       {
-        "sh3 coming soon?": () => {
+        "more coming soon!": () => {
           breadify(croissant.domElement, [
             "💖",
-            "💙",
             "💚",
             "💛",
             "🧡",
             "💜",
             "❤️",
             "💙",
-            "🌈",
+            "🤍",
+            "🖤",
           ]);
         },
       },
-      "sh3 coming soon?"
+      "more coming soon!"
     );
     breadContainer.add(
       {
