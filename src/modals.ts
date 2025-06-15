@@ -70,10 +70,10 @@ export const initializeModals = () => {
   addUiElement("aboutModal", aboutModal);
   addUiElement("blurBackground", blurBackground);
   addUiElement("disclaimerModal", disclaimerModal);
+  addUiElement("blenderExportModal", blenderExportModal);
   addUiElement("keybindsModal", keybindsModal);
   addUiElement("contentWarningModal", contentWarningModal);
   addUiElement("webglNotSupportedModal", webglNotSupportedModal);
-  addUiElement("blenderExportModal", blenderExportModal);
   addUiElement("quickModal", quickModal);
   openAboutModal.addEventListener("click", () => {
     toggleWithBackground("aboutModal", true);
