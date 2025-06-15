@@ -3,7 +3,7 @@ import { clientState } from "./objects/MuseumState";
 import TextureViewer from "./objects/TextureViewer";
 import { applyUpdate, fileCallback, sharedSerializationData } from "./write";
 import logger from "./objects/Logger";
-import { editorState } from "./objects/EditorState";
+import EditorState, { editorState } from "./objects/EditorState";
 import {
   Autoscale,
   BonemapMethod,
@@ -136,6 +136,12 @@ export default class EditMode {
       180
     );
 
+    const hatesConfetti = localStorage.getItem("hatesConfetti");
+    editorState.editorParams["Confetti"] = clientState.prefersReducedMotion()
+      ? false
+      : hatesConfetti !== null
+      ? hatesConfetti === "false"
+      : true;
     const bread = editorGui.add(editorState.editorParams, "🍞 It's Bread.");
     const breadContainer = editorGui.addFolder("🖤 Advanced").hide();
     const croissant = breadContainer.add(
@@ -163,6 +169,8 @@ export default class EditMode {
           await navigator.clipboard.writeText(
             JSON.stringify({
               params: editorState.getSerializationParams(),
+              editorParams: editorState.editorParams,
+              modelParams: editorState.getSerializationParams(),
               diff: editorState.getModelPropertyDiff(),
             })
           );
@@ -180,20 +188,38 @@ export default class EditMode {
             if (typeof parsed !== "object") {
               throw new Error("Clipboard contents were invalid");
             }
-            if (typeof parsed["params"] !== "object") {
+            if (typeof parsed["modelParams"] !== "object") {
               throw new Error("Failed to parse serialization params");
+            }
+            if (typeof parsed["editorParams"] !== "object") {
+              throw new Error("Failed to parse editor params");
             }
             if (typeof parsed["diff"] !== "object") {
               throw new Error("Failed to parse transform diff");
             }
-            const { params, diff } = parsed as {
-              params: Partial<ModelParams>;
+            const { editorParams, modelParams, diff } = parsed as {
+              editorParams: EditorState["editorParams"];
+              modelParams: Partial<ModelParams>;
               diff: ModelPropertyDiffJson;
             };
-            editorState.resetSerializationState();
             editorState.initializePropertyDiff();
-            editorState.updateSerializationParams(params);
+            editorState.resetSerializationState();
+            Object.assign(editorState.editorParams, {
+              "Flip Y": editorParams["Flip Y"],
+              "Backface Culling": editorParams["Backface Culling"],
+              "Material Type": editorParams["Material Type"],
+              "Auto-Scale": editorParams["Auto-Scale"],
+              "Collapse Target": editorParams["Collapse Target"],
+              "Bonemap Method": editorParams["Bonemap Method"],
+            });
+            delete modelParams.materialIndices;
+            delete modelParams.textureIndices;
+            delete modelParams.textureIdStart;
+            editorState.updateSerializationParams(modelParams);
             editorState.setModelPropertyDiffFromJson(diff);
+            editorGui.controllersRecursive().forEach((c) => {
+              c.updateDisplay();
+            });
             applyUpdate();
           } catch (e) {
             logger.debug(e);
@@ -228,6 +254,9 @@ export default class EditMode {
     });
 
     const breadify = (element: HTMLElement, emojis = EMOJIS) => {
+      if (!editorState.editorParams["Confetti"]) {
+        return;
+      }
       const rect = element.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
@@ -286,6 +315,15 @@ export default class EditMode {
 
     editorGui.domElement.appendChild(bonemapTextarea);
     editorGui.domElement.appendChild(bonemapButton);
+
+    const confettiToggle = breadContainer.add(
+      editorState.editorParams,
+      "Confetti"
+    );
+    confettiToggle.onFinishChange((value: boolean) => {
+      localStorage.setItem("hatesConfetti", String(!value));
+      editorState.editorParams["Confetti"] = value;
+    });
 
     this.editorGui = editorGui;
     this.sidebarButtonsContainer = sidebarButtonsContainer;
