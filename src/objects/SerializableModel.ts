@@ -4,6 +4,7 @@ import {
   DataTexture,
   InterleavedBufferAttribute,
   Material,
+  Matrix3,
   Matrix4,
   Mesh,
   MeshBasicMaterial,
@@ -62,8 +63,9 @@ export type ModelParams = {
   autoscale: AutoscaleType;
   flipY: boolean;
 
-  backfaceCulling: boolean;
+  backfaceCulling: boolean | undefined;
   renderTransparentPrimitives: boolean;
+  materialType?: SilentHillModel.PrimitiveHeader.MaterialType;
   materialIndices?: number[];
   textureIndices?: number[];
   textureIdStart?: number;
@@ -148,7 +150,8 @@ export default class SerializableModel {
     bonemapType: BonemapMethod.Collapse,
     bonemapCollapseTarget: 0,
     removeMorphTargets: true,
-    backfaceCulling: false,
+    backfaceCulling: undefined,
+    materialType: undefined,
     renderTransparentPrimitives: false,
     mapToSelf: true,
   };
@@ -190,13 +193,13 @@ export default class SerializableModel {
   private textureIndices: number[] = [];
   private seenMapToMaterialIndex: number[] = [];
   /**
-   * Array of pointers to buffers that have edits applied.
+   * Array of references to buffers that have edits applied.
    */
   private transformedBuffers: (BufferAttribute | InterleavedBufferAttribute)[] =
     [];
   private globalAddedBonePairs = new Map<number, number>();
   private boneSpaceMatrices = new Map<number, Matrix4>();
-  private transposeBoneSpaceMatrices = new Map<number, Matrix4>();
+  private transposeBoneSpaceMatrices = new Map<number, Matrix3>();
 
   /* diff machinery */
   private totalSizeDiff = 0;
@@ -346,6 +349,20 @@ export default class SerializableModel {
     }
     this.generateBonePairMap();
 
+    const shouldEditCulling = typeof this.params.backfaceCulling === "boolean";
+    const materialType = this.params.materialType;
+    const shouldEditMaterialType = materialType !== undefined;
+    if (shouldEditCulling) {
+      logger.debug(
+        `Setting all backface culling parameters to ${this.params.backfaceCulling}`
+      );
+    }
+    if (shouldEditMaterialType) {
+      logger.debug(
+        `Setting all material type parameters to ${this.params.materialType}`
+      );
+    }
+
     for (let index = 0; index < meshes.length; index++) {
       // load up all attributes
       const mesh = meshes[index];
@@ -354,6 +371,7 @@ export default class SerializableModel {
       mesh.updateMatrixWorld();
       const meshVertices = meshAttributes.position.array;
       if (!meshAttributes.normal) {
+        logger.debug("Computing vertex normals!");
         meshGeometry.computeVertexNormals();
       }
 
@@ -398,6 +416,12 @@ export default class SerializableModel {
       primitiveWrapper.body = primitive;
       primitive.primitiveStartIndex = currentPrimitiveTriangleIndex;
       primitive.primitiveLength = triangleIndexCount;
+      if (shouldEditCulling) {
+        primitive.backfaceCulling = Number(this.params.backfaceCulling);
+      }
+      if (shouldEditMaterialType) {
+        primitive.materialType = materialType;
+      }
       primitive.samplerStates = [/*0x03, 0x03,*/ 0x01, 0x01, 0x02, 0x02];
       currentPrimitiveTriangleIndex += triangleIndexCount;
 
@@ -803,19 +827,19 @@ export default class SerializableModel {
         mesh.skeleton.bones[sourceBone].updateMatrixWorld();
         const transform =
           model.modelData.initialMatrices[
-          targetBone ?? bonemapCollapseTarget
+            targetBone ?? bonemapCollapseTarget
           ] ?? model.modelData.initialMatrices[bonemapCollapseTarget];
         objectSpaceMatrix = transformationMatrixToMat4(transform).invert();
         boneSpaceMatrices.set(targetBone, objectSpaceMatrix);
-        transposeBoneSpaceMatrix = new Matrix4()
-          .extractRotation(transformationMatrixToMat4(transform))
-          .transpose();
+        transposeBoneSpaceMatrix = new Matrix3().getNormalMatrix(
+          transformationMatrixToMat4(transform).invert()
+        );
         this.transposeBoneSpaceMatrices.set(
           targetBone,
           transposeBoneSpaceMatrix
         );
         vector.applyMatrix4(objectSpaceMatrix);
-        normalVector.applyMatrix4(transposeBoneSpaceMatrix);
+        normalVector.applyNormalMatrix(transposeBoneSpaceMatrix);
         [vertexData.x, vertexData.y, vertexData.z] = [
           vector.x,
           vector.y,
@@ -854,13 +878,13 @@ export default class SerializableModel {
               mat4ToTransformationMatrix(
                 transformationMatrixToMat4(
                   model.modelData.initialMatrices[child] ??
-                  model.modelData.initialMatrices[bonemapCollapseTarget]
+                    model.modelData.initialMatrices[bonemapCollapseTarget]
                 )
                   .invert()
                   .multiply(
                     transformationMatrixToMat4(
                       model.modelData.initialMatrices[parent] ??
-                      model.modelData.initialMatrices[bonemapCollapseTarget]
+                        model.modelData.initialMatrices[bonemapCollapseTarget]
                     )
                   ),
                 new SilentHillModel.TransformationMatrix(
@@ -909,11 +933,11 @@ export default class SerializableModel {
           vertexData.boneWeight2,
           vertexData.boneWeight3,
         ] = [
-            boneWeights[skinIndex],
-            boneAndPairs[1] ? boneWeights[skinIndex + 1] : 0,
-            boneAndPairs[2] ? boneWeights[skinIndex + 2] : 0,
-            boneAndPairs[3] ? boneWeights[skinIndex + 3] : 0,
-          ];
+          boneWeights[skinIndex],
+          boneAndPairs[1] ? boneWeights[skinIndex + 1] : 0,
+          boneAndPairs[2] ? boneWeights[skinIndex + 2] : 0,
+          boneAndPairs[3] ? boneWeights[skinIndex + 3] : 0,
+        ];
         const sum =
           vertexData.boneWeight0 +
           vertexData.boneWeight1 +
@@ -926,11 +950,11 @@ export default class SerializableModel {
             vertexData.boneWeight2,
             vertexData.boneWeight3,
           ] = [
-              vertexData.boneWeight0 / sum,
-              vertexData.boneWeight1 / sum,
-              vertexData.boneWeight2 / sum,
-              vertexData.boneWeight3 / sum,
-            ];
+            vertexData.boneWeight0 / sum,
+            vertexData.boneWeight1 / sum,
+            vertexData.boneWeight2 / sum,
+            vertexData.boneWeight3 / sum,
+          ];
         } else {
           [
             vertexData.boneWeight0,
@@ -961,20 +985,18 @@ export default class SerializableModel {
             model.modelData.initialMatrices[bonemapCollapseTarget]
           ).invert();
           boneSpaceMatrices.set(bonemapCollapseTarget, objectSpaceMatrix);
-          transposeBoneSpaceMatrix = new Matrix4()
-            .extractRotation(
-              transformationMatrixToMat4(
-                model.modelData.initialMatrices[bonemapCollapseTarget]
-              )
-            )
-            .transpose();
+          transposeBoneSpaceMatrix = new Matrix3().getNormalMatrix(
+            transformationMatrixToMat4(
+              model.modelData.initialMatrices[bonemapCollapseTarget]
+            ).invert()
+          );
           this.transposeBoneSpaceMatrices.set(
             bonemapCollapseTarget,
             transposeBoneSpaceMatrix
           );
         }
         vector.applyMatrix4(objectSpaceMatrix);
-        normalVector.applyMatrix4(transposeBoneSpaceMatrix);
+        normalVector.applyNormalMatrix(transposeBoneSpaceMatrix);
         [vertexData.x, vertexData.y, vertexData.z] = [
           vector.x,
           vector.y,
@@ -1381,6 +1403,14 @@ export default class SerializableModel {
     let anyTransformsApplied = false;
     this.meshes.forEach((mesh) => {
       const meshVertices = mesh.geometry.attributes.position;
+      const meshNormals = mesh.geometry.attributes.normal;
+      if (transformedBuffers.indexOf(meshNormals) < 0) {
+        transformedBuffers.push(meshNormals);
+
+        anyTransformsApplied = true;
+        meshNormals.applyNormalMatrix(new Matrix3().getNormalMatrix(matrix));
+      }
+
       if (transformedBuffers.indexOf(meshVertices) >= 0) {
         return;
       }

@@ -1,4 +1,4 @@
-import { Matrix4, Quaternion, Vector3 } from "three";
+import { Matrix4, Quaternion, Vector3, Vector3Like } from "three";
 import logger from "./objects/Logger";
 import { ModelParams } from "./objects/SerializableModel";
 import { serializeGltfModel } from "./write";
@@ -53,6 +53,18 @@ export type ModelPropertyDiff = {
     position: Vector3;
     quaternion: Quaternion;
     scale: Vector3;
+  };
+};
+
+/**
+ * This sucks. Can we make this better?
+ */
+export type ModelPropertyDiffJson = {
+  transform?: number[];
+  accumulatedTransform: {
+    position: Vector3Like;
+    quaternion: number[];
+    scale: Vector3Like;
   };
 };
 

@@ -8,7 +8,7 @@ import {
   Float32BufferAttribute,
   LinearFilter,
   Material,
-  Matrix4,
+  Matrix3,
   MeshStandardMaterial,
   MeshStandardMaterialParameters,
   Skeleton,
@@ -86,9 +86,7 @@ const processTransparentPrimitiveHeaders = (
     transformationMatrixToMat4(matrix)
   );
   const normalsMatrices = initialMatrices.map((matrix) => {
-    const rotationMatrix = new Matrix4();
-    rotationMatrix.extractRotation(matrix);
-    return rotationMatrix.invert().transpose();
+    return new Matrix3().getNormalMatrix(matrix);
   });
   const vertices: number[] = [];
   const normals: number[] = [];
@@ -112,7 +110,7 @@ const processTransparentPrimitiveHeaders = (
       const matrix = initialMatrices[vertex.boneIndex];
       const normalsMatrix = normalsMatrices[vertex.boneIndex];
       positionVector.applyMatrix4(matrix);
-      normalVector.applyMatrix4(normalsMatrix);
+      normalVector.applyNormalMatrix(normalsMatrix);
     }
     vertices.push(positionVector.x, positionVector.y, positionVector.z);
     normals.push(normalVector.x, normalVector.y, normalVector.z);
@@ -165,9 +163,7 @@ const processPrimitiveHeaders = (
     transformationMatrixToMat4(matrix)
   );
   const normalsMatrices = initialMatrices.map((matrix) => {
-    const rotationMatrix = new Matrix4();
-    rotationMatrix.extractRotation(matrix);
-    return rotationMatrix.invert().transpose();
+    return new Matrix3().getNormalMatrix(matrix);
   });
   const vertices: number[] = [];
   const normals: number[] = [];
@@ -191,7 +187,7 @@ const processPrimitiveHeaders = (
       const matrix = initialMatrices[boneIndex];
       const normalsMatrix = normalsMatrices[boneIndex];
       positionVector.applyMatrix4(matrix);
-      normalVector.applyMatrix4(normalsMatrix);
+      normalVector.applyNormalMatrix(normalsMatrix);
     }
     vertices.push(positionVector.x, positionVector.y, positionVector.z);
     normals.push(normalVector.x, normalVector.y, normalVector.z);

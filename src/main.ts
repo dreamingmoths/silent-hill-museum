@@ -66,9 +66,12 @@ import {
   WebGL,
 } from "three/examples/jsm/Addons.js";
 import {
+  closeAllElements,
   initializeModals,
+  isAnyElementOpenOtherThan,
   showContentWarningModal,
   showNotSupportedModal,
+  toggleWithBackground,
 } from "./modals";
 import { chrFolders, destructureIndex, fileArray, MuseumFile } from "./files";
 import GUI from "lil-gui";
@@ -76,7 +79,6 @@ import { acceptModelDrop, applyUpdate } from "./write";
 import SilentHillModel from "./kaitai/Mdl";
 import RaycastHelper from "./objects/RaycastHelper";
 import logger from "./objects/Logger";
-import { registerAllKeybinds } from "./keybinds";
 import EditMode, { consoleGui } from "./edit-mode";
 import { TextureViewerStates } from "./objects/TextureViewer";
 import { editorState } from "./objects/EditorState";
@@ -89,6 +91,7 @@ import ddsList from "./assets/dds-list.json";
 import { createCutsceneTracks } from "./cutscene";
 import "./style.css";
 import { isMobile } from "./mobile";
+import KeybindManager from "./objects/KeybindManager";
 
 const appContainer = document.getElementById("app");
 if (!(appContainer instanceof HTMLDivElement)) {
@@ -103,7 +106,6 @@ if (!(animationGuiContainer instanceof HTMLDivElement)) {
   throw Error("The quick access coontainer was not found!");
 }
 export const animationGui = new AnimationGui(animationGuiContainer);
-registerAllKeybinds({ animationGui });
 
 initializeModals();
 acceptModelDrop(appContainer);
@@ -203,17 +205,18 @@ gui.onOpenClose(() => {
     return;
   }
 });
-const editModeButton = controlsGuiFolder
+export const toggleEditMode = (value: boolean) => {
+  clientState.setMode(value ? "edit" : "viewing");
+  if (value) {
+    textureViewerButton.hide();
+  } else {
+    textureViewerButton.show();
+  }
+};
+export const editModeButton = controlsGuiFolder
   .add(clientState.uiParams, "Edit Mode ✨")
   .listen()
-  .onFinishChange((value: boolean) => {
-    clientState.setMode(value ? "edit" : "viewing");
-    if (value) {
-      textureViewerButton.hide();
-    } else {
-      textureViewerButton.show();
-    }
-  });
+  .onFinishChange(toggleEditMode);
 const textureViewerButton = controlsGuiFolder
   .add(clientState.uiParams, "Texture Viewer 👀")
   .listen()
@@ -350,9 +353,7 @@ Object3D.DEFAULT_UP.multiplyScalar(-1); // -Y is up
 const camera = new PerspectiveCamera(75, width / height, 2, 131072);
 camera.position.z = 5;
 
-const prefersReducedMotion = !!window.matchMedia(
-  `(prefers-reduced-motion: reduce)`
-);
+const prefersReducedMotion = clientState.prefersReducedMotion();
 let isMobileLayout = false;
 const onWindowResize = () => {
   const width = appContainer.offsetWidth;
@@ -513,6 +514,120 @@ clientState.setOnModeUpdate((oldMode) => {
   }
   onWindowResize();
 });
+
+const registerAllKeybinds = ({
+  animationGui,
+}: {
+  animationGui: AnimationGui;
+}) => {
+  const keybindManager = new KeybindManager();
+  keybindManager.addKeybind(
+    "arrowright",
+    () => clientState.nextFile(),
+    "Next file"
+  );
+  keybindManager.addKeybind(
+    "arrowleft",
+    () => clientState.previousFile(),
+    "Previous file"
+  );
+  keybindManager.addKeybind(
+    "arrowup",
+    () => clientState.nextFolder(),
+    "Next folder"
+  );
+  keybindManager.addKeybind(
+    "arrowdown",
+    () => clientState.previousFolder(),
+    "Previous folder"
+  );
+  keybindManager.addKeybind(
+    "f",
+    () => clientState.nextRootFolder(),
+    "Toggle scenarios"
+  );
+  keybindManager.addKeybind(
+    "r",
+    () => {
+      clientState.uiParams["Controls Mode"] = "rotate";
+      if (clientState.getMode() === "edit") {
+        editorState.editorParams["Model Controls"] = true;
+      }
+    },
+    "Rotate mode"
+  );
+  keybindManager.addKeybind(
+    "t",
+    () => {
+      clientState.uiParams["Controls Mode"] = "translate";
+      if (clientState.getMode() === "edit") {
+        editorState.editorParams["Model Controls"] = true;
+      }
+    },
+    "Move mode"
+  );
+  keybindManager.addKeybind(
+    "s",
+    () => {
+      clientState.uiParams["Controls Mode"] = "scale";
+      if (clientState.getMode() === "edit") {
+        editorState.editorParams["Model Controls"] = true;
+      }
+    },
+    "Scale mode"
+  );
+  keybindManager.addKeybind(
+    "e",
+    () => {
+      const value = !editModeButton.getValue();
+      toggleEditMode(value);
+      editModeButton.setValue(value);
+    },
+    "Edit mode"
+  );
+  keybindManager.addKeybind(
+    "0",
+    () => (clientState.uiParams["Render This Frame"] = true),
+    "Render the current frame as PNG"
+  );
+  keybindManager.addKeybind(
+    "k",
+    () =>
+      !isAnyElementOpenOtherThan("keybindsModal") &&
+      toggleWithBackground("keybindsModal"),
+    "Toggle keybinds modal"
+  );
+  keybindManager.addKeybind(
+    "escape",
+    () => closeAllElements(),
+    "Close all modals"
+  );
+  keybindManager.addKeybind("i", () =>
+    clientState.uiParams["View Structure 🔎"]()
+  );
+  keybindManager.addKeybind("space", () => {
+    animationGui.togglePause();
+  });
+
+  const keybindsModal = document.getElementById("keybinds-modal");
+  if (keybindsModal) {
+    // list all keybinds
+    const entries = Array.from(keybindManager.getDescriptionMap().entries());
+    let html = "<table><tbody>";
+    for (const [keybind, description] of entries) {
+      const keybindHtml = keybind
+        .split("/")
+        .map((key) => `<kbd>${key}</kbd>`)
+        .join("+");
+      html += `<tr><td>${keybindHtml}</td>`;
+      html += `<td>${description}</td></tr>`;
+    }
+    html += "</tbody></table>";
+    keybindsModal.innerHTML = html;
+  }
+};
+
+registerAllKeybinds({ animationGui });
 
 let lightGroup: Group | undefined;
 let renderIsFinished = true;
@@ -675,7 +790,7 @@ const render = () => {
 
       if (clientState.uiParams["Visualize Normals"]) {
         const normalsHelper = new VertexNormalsHelper(opaqueMesh, 8, 0xff0000);
-        opaqueMesh.add(normalsHelper);
+        scene.add(normalsHelper);
       }
 
       logger.debug("Added opaque geometry to mesh!", opaqueGeometry);
@@ -716,7 +831,7 @@ const render = () => {
           8,
           0xff0000
         );
-        transparentMesh.add(normalsHelper);
+        scene.add(normalsHelper);
       }
 
       logger.debug("Added transparent geometry to mesh!", transparentGeometry);
@@ -731,9 +846,9 @@ const render = () => {
     };
     logger.debug("Adding group to scene", group);
     scene.add(group);
-
     clientState.setCurrentObject(group);
     clientState.getTextureViewer()?.attach(group);
+
     if (
       !clientState.getCustomModel() &&
       (opaqueGeometry !== undefined || transparentGeometry !== undefined)

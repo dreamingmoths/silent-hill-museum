@@ -247,3 +247,31 @@ if (!QUICK) {
     }
   });
 }
+
+test("backface culling field", () => {
+  let culledCount = 0;
+  let totalCount = 0;
+
+  for (const file in modelCache) {
+    const { model } = modelCache[file];
+    if (model === undefined) {
+      continue;
+    }
+
+    let culled = false;
+    model.modelData.geometry.primitiveHeaders.forEach(prim => {
+      if (!prim.body.backfaceCulling && !culled) {
+        culled = true;
+        culledCount += 1;
+      }
+    });
+
+    totalCount++;
+    if (culled) {
+      logger.debug(file.split("/").at(-1));
+    }
+  }
+  logger.debug(
+    `Out of the ${totalCount} files, ${culledCount} have backface culling enabled for some prims.`
+  );
+})

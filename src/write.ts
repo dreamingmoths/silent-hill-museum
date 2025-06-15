@@ -204,9 +204,15 @@ export const serializeObjects = async (
     }
   };
   searchForMeshes(rootObject);
-  meshes.forEach((mesh) =>
-    mesh.geometry.attributes.position.applyMatrix4(mesh.matrixWorld)
-  );
+
+  // bake 👩🏻‍🍳
+  meshes.forEach((mesh) => {
+    mesh.geometry.attributes.position.applyMatrix4(mesh.matrixWorld);
+    mesh.normalMatrix.getNormalMatrix(mesh.matrixWorld);
+    mesh.geometry.attributes.normal.applyNormalMatrix(mesh.normalMatrix);
+    mesh.geometry.attributes.normal.needsUpdate = true;
+  });
+
   return writeMeshes(
     meshes,
     baseFile,
