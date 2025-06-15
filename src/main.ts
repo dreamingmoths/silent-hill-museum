@@ -384,7 +384,11 @@ const onWindowResize = () => {
 const portraitModeWarning = (width?: number, height?: number) => {
   width ??= appContainer.offsetWidth;
   height ??= appContainer.offsetHeight;
-  if (width < height && clientState.file === "inu.mdl") {
+  if (
+    width < height &&
+    clientState.file === "inu.mdl" &&
+    !animationGui.forceClosed
+  ) {
     animationGui.show();
   } else {
     animationGui.hide();

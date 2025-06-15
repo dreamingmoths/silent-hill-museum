@@ -661,6 +661,21 @@ div.struct-visualizer {
   text-wrap: nowrap;
 }
 
+.hidden {
+  display: none;
+}
+
+.animated-hidden {
+  animation: downward 0.25s forwards;
+}
+
+@keyframes downward {
+  100% {
+    display: none;
+    transform: translateY(300%);
+  }
+}
+
 @media all and (max-width: 700px) {
   .flexbox-container .placeholder .lil-gui.root,
   footer {
