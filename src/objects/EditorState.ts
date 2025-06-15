@@ -29,6 +29,7 @@ export default class EditorState {
     "🍞 It's Bread.": false,
     "Backface Culling": "Default",
     "Material Type": "Default",
+    Confetti: true,
   };
 
   private serializationParams: Partial<ModelParams> = {};

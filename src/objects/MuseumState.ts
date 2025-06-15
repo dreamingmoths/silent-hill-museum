@@ -368,6 +368,15 @@ export default class MuseumState {
     return path;
   }
 
+  private _prefersReducedMotion: boolean | undefined = undefined;
+  public prefersReducedMotion() {
+    const result =
+      this._prefersReducedMotion ??
+      !!window.matchMedia(`(prefers-reduced-motion: reduce)`).matches;
+    this._prefersReducedMotion = result;
+    return result;
+  }
+
   public uiParams = {
     Scenario: this.rootFolder === "chr" ? "Main Scenario" : "Born From A Wish",
     Folder: this.folder,
