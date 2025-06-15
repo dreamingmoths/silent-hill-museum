@@ -1,10 +1,8 @@
 import {
   BackSide,
   Box3,
-  BufferGeometry,
   ClampToEdgeWrapping,
   Color,
-  DataTexture,
   DoubleSide,
   FrontSide,
   Group,
@@ -49,7 +47,8 @@ export const mod = (n: number, m: number) => {
   return ((n % m) + m) % m;
 };
 
-export const clamp = (x: number, min: number, max: number) => Math.max(min, Math.min(max, x))
+export const clamp = (x: number, min: number, max: number) =>
+  Math.max(min, Math.min(max, x));
 
 export const findLastNotExceeding = (
   array: readonly number[],
@@ -217,94 +216,24 @@ export function exportModel(
   object: Object3D,
   filenameOrCallback: string | GltfCallback
 ) {
-  const { fix, unfix } = fixPoseIndexMaterials(object);
-  fix();
-
   exporter.parse(
     object,
     typeof filenameOrCallback === "string"
       ? (result) => {
-        if (result instanceof ArrayBuffer) {
-          saveArrayBuffer(result, `${filenameOrCallback}.glb`);
-        } else {
-          const output = JSON.stringify(result, null, 2);
-          saveString(output, `${filenameOrCallback}.gltf`);
+          if (result instanceof ArrayBuffer) {
+            saveArrayBuffer(result, `${filenameOrCallback}.glb`);
+          } else {
+            const output = JSON.stringify(result, null, 2);
+            saveString(output, `${filenameOrCallback}.gltf`);
+          }
         }
-      }
       : filenameOrCallback,
     (error) => {
       logger.warn("Could not export the scene. An error occurred: ", error);
     },
     { onlyVisible: false, trs: true }
   );
-
-  unfix();
 }
-
-const fixPoseIndexMaterials = (object: Object3D) => {
-  // hack to ensure all that hidden primitives can export correctly, bc we set
-  // them to a negative material index to hide them. this could possibly be
-  // fixed by not using `BufferGeometry.addGroup` in the future?
-  const meshMap: Map<
-    string /* mesh uuid */,
-    {
-      blankMaterialIndex: number;
-      affectedGroups: { groupIndex: number; materialIndex: number }[];
-    }
-  > = new Map();
-
-  const fix = () => {
-    object.traverse((child) => {
-      if (child instanceof Mesh && child.geometry instanceof BufferGeometry) {
-        if (!Array.isArray(child.material)) {
-          return;
-        }
-
-        const geom = child.geometry;
-
-        let meshInfo = meshMap.get(child.uuid);
-        if (meshInfo === undefined) {
-          const blankMaterial = new MeshBasicMaterial({
-            transparent: true,
-            map: new DataTexture(new Uint8Array([0, 0, 0, 0]), 1, 1),
-          });
-
-          const length = child.material.push(blankMaterial);
-          meshInfo = { blankMaterialIndex: length - 1, affectedGroups: [] };
-          meshMap.set(child.uuid, meshInfo);
-        }
-
-        geom.groups.forEach((group, groupIndex) => {
-          if (group.materialIndex && group.materialIndex < 0) {
-            meshInfo.affectedGroups.push({
-              groupIndex,
-              materialIndex: group.materialIndex * -1,
-            });
-            group.materialIndex = meshInfo.blankMaterialIndex;
-          }
-        });
-      }
-    });
-  };
-
-  const unfix = () => {
-    object.traverse((child) => {
-      if (child instanceof Mesh && child.geometry instanceof BufferGeometry) {
-        const groups = child.geometry.groups;
-        const meshInfo = meshMap.get(child.uuid);
-        if (meshInfo === undefined) {
-          return;
-        }
-        meshInfo.affectedGroups.forEach((groupInfo) => {
-          groups[groupInfo.groupIndex].materialIndex = groupInfo.materialIndex;
-        });
-        child.material.pop();
-      }
-    });
-  };
-
-  return { fix, unfix };
-};
 
 export const assignPublicProperties = <T>(
   source: T,
