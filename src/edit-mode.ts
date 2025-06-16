@@ -67,7 +67,8 @@ export default class EditMode {
               `please go give it a like ` +
               `<a href="https://sketchfab.com/3d-models/low-poly-ghost-62e2b3e9db77443b88a7341ac0032e3b">on sketchfab</a> :)</p>` +
               `<p>it's licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a>, so by proceeding, ` +
-              `you agree to adhere to the restrictions of this license.</p>`,
+              `you agree to adhere to the restrictions of this license.</p>` +
+              `<img src="/images/ghost.png" alt="ghost hill mod">`,
             undefined,
             { confirm: { okText: "amazing!", cancelText: "nevermind" } }
           );
