@@ -8,14 +8,26 @@ export default class AnimationGui {
   public animationProgressBar: HTMLElement;
   public animationTimer = -1;
   private playing = true;
+  private _forceClosed = false;
 
   public constructor(parent: HTMLElement) {
-    this.container = this.createAnimationVisualizer(parent);
+    this.container = this.createNotifcation(parent);
     this.animationProgressBar = createDiv(
       this.container,
       "anm-progress-bar pointer-events-none"
     );
     parent.style.visibility = "visible";
+  }
+
+  public createNotifcation(parent: HTMLElement) {
+    const div = createDiv(parent, "quick-access-toolbar ui");
+
+    div.addEventListener("pointerdown", () => {
+      this._forceClosed = true;
+      this.hide(true);
+    });
+
+    return div;
   }
 
   public createAnimationVisualizer(parent: HTMLElement) {
@@ -66,12 +78,18 @@ export default class AnimationGui {
     return div;
   }
 
-  public hide() {
-    this.container.style.display = "none";
+  public hide(animated = false) {
+    if (animated) {
+      this.container.classList.add("animated-hidden");
+    } else {
+      this.container.classList.add("hidden");
+    }
   }
 
   public show() {
-    this.container.style.display = "flex";
+    this._forceClosed = false;
+    this.container.classList.remove("animated-hidden");
+    this.container.classList.remove("hidden");
     this.container.innerHTML = isMobile()
       ? `👀 turn the device <img class="accent spinny-landscape" src="/images/fa-mobile.svg" alt="Turn the device" />`
       : `👀 best viewed in landscape <img class="accent widen-landscape" src="/images/fa-image.svg" alt="Make screen wider" />`;
@@ -123,5 +141,9 @@ export default class AnimationGui {
 
   public togglePause() {
     this.playing = !this.playing;
+  }
+
+  public get forceClosed() {
+    return this._forceClosed;
   }
 }

@@ -214,19 +214,51 @@ export const showNotSupportedModal = (glVersion = 0, queue = true) => {
   }
 };
 
-export const showQuickModal = (html?: string, className?: string) => {
+export const showQuickModal = (
+  html?: string,
+  className?: string,
+  options?: { confirm?: { okText: string; cancelText: string } }
+) => {
   const element = uiDescriptions.quickModal.element;
   if (!element) {
     throw Error("Could not find quick modal element!");
   }
+
+  const content = element.querySelector(".content");
+  if (!content) {
+    throw Error("Could not find quick modal content element!");
+  }
+
   if (html !== undefined) {
-    element.innerHTML = html;
+    content.innerHTML = html;
   }
   element.className = "modal";
-  element.role = "button";
   if (className) {
     element.classList.add(className);
   }
+
+  const holder = element.querySelector(".button-holder");
+  if (!holder) {
+    throw new Error("Could not find button holder for quick modal!");
+  }
+  if (options?.confirm) {
+    const okButton = holder.querySelector(".confirm-button");
+    if (!okButton) {
+      throw new Error("Could not find OK button!");
+    }
+    const cancelButton = holder.querySelector(".close-all-modals");
+    if (!cancelButton) {
+      throw new Error("Could not find cancel button!");
+    }
+
+    const { okText, cancelText } = options.confirm;
+    okButton.textContent = okText;
+    cancelButton.textContent = cancelText;
+    holder.classList.remove("hidden");
+  } else {
+    holder.classList.add("hidden");
+  }
+
   pushToQueue("quickModal", true);
   return element;
 };

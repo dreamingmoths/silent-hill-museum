@@ -304,7 +304,7 @@ export const applyUpdate = () => {
 export const fileCallback = (file: File) => {
   if (clientState.file === "inu.mdl") {
     showQuickModal("please pick a different starting mdl file for now :)");
-    return;
+    return false;
   }
   if (file.name.endsWith(".gltf") || file.name.endsWith(".glb")) {
     clientState.setMode("edit");
@@ -326,11 +326,12 @@ export const fileCallback = (file: File) => {
         editorState.cachedCreationPayload = payload;
       }
     });
-    return;
+    return true;
   } else if (!file.name.endsWith(".mdl")) {
     throw Error("Not a mdl!");
   }
   readFile(file, readCustomStruct);
+  return true;
 };
 
 export const acceptModelDrop = (appContainer: HTMLDivElement) =>

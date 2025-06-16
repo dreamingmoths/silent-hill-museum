@@ -34,3 +34,4 @@ public/data
 public/mdl
 public/**/*.glb
 !src/wasm/**/dist
+!public/glb/low-poly-ghost/*
