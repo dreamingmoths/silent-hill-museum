@@ -1,4 +1,4 @@
-import GUI from "lil-gui";
+import GUI, { Controller } from "lil-gui";
 import { clientState } from "./objects/MuseumState";
 import TextureViewer from "./objects/TextureViewer";
 import { applyUpdate, fileCallback, sharedSerializationData } from "./write";
@@ -13,7 +13,8 @@ import {
 } from "./objects/SerializableModel";
 import SilentHillModel from "./kaitai/Mdl";
 import { ModelPropertyDiffJson } from "./write-worker";
-import { showQuickModal } from "./modals";
+import { onConfirm, showQuickModal } from "./modals";
+import ghostParams from "./assets/ghost-params.json";
 
 export const consoleGui = new GUI({
   title: "Output",
@@ -23,6 +24,7 @@ export const consoleGui = new GUI({
 export default class EditMode {
   public editorGui: GUI;
   public sidebarButtonsContainer: HTMLDivElement;
+  public tryExampleButton: Controller;
   public bonemapTextarea: HTMLTextAreaElement;
 
   public constructor() {
@@ -55,6 +57,59 @@ export default class EditMode {
       },
       "Rerender"
     );
+
+    const tryExampleButton = editorGui.add(
+      {
+        "try the example model!": async () => {
+          showQuickModal(
+            `<p>this will load <span class="accent"><code>Low Poly Ghost</code></span> ` +
+              `by user <strong>Jenna Ward</strong> on Sketchfab! it's a really cute model, ` +
+              `please go give it a like ` +
+              `<a href="https://sketchfab.com/3d-models/low-poly-ghost-62e2b3e9db77443b88a7341ac0032e3b">on sketchfab</a> :)</p>` +
+              `<p>it's licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a>, so by proceeding, ` +
+              `you agree to adhere to the restrictions of this license.</p>`,
+            undefined,
+            { confirm: { okText: "amazing!", cancelText: "nevermind" } }
+          );
+          onConfirm(async () => {
+            const resp = await fetch("/glb/low-poly-ghost/low-poly-ghost.glb");
+            const blob = await resp.blob();
+            const file = new File([blob], "low-poly-ghost.glb", {
+              type: "model/gltf-binary",
+            });
+            if (!fileCallback(file)) {
+              return;
+            }
+
+            const unsub = clientState.subscribeToUpdates(() => {
+              showQuickModal(
+                "<p>done! <strong>use preset params?</strong> (intended for characters such as " +
+                  `<a href="/?model=chr-jms-hll_jms"><code>hll_jms.mdl</code></a>, ` +
+                  "but it may also work on other models such as " +
+                  `<a href="/?model=chr-item-c1b"><code>c1b.mdl</code></a>.)</p>` +
+                  "<p><em>more notes</em>:</p> <p>when it loads, click 'export current' to download it! " +
+                  "<p>note that for best results with james, you need to export all `jms` models.</p>",
+                undefined,
+                {
+                  confirm: {
+                    okText: "sure, use preset!",
+                    cancelText: "hmm i'll figure it out",
+                  },
+                }
+              );
+              onConfirm(() => {
+                loadJsonParams(ghostParams);
+              });
+              unsub();
+            });
+          });
+        },
+      },
+      "try the example model!"
+    );
+    tryExampleButton.domElement.classList.add("try-example-button");
+    this.tryExampleButton = tryExampleButton;
+
     const exportButton = editorGui.add(
       {
         "Export Current": async () => {
@@ -82,6 +137,10 @@ export default class EditMode {
       },
       "Reset Model"
     );
+    tryExampleButton.domElement.querySelector(
+      "button div"
+    )!.innerHTML += ` <span class="accent">[new!]</span>`;
+    filepicker?.parentElement?.appendChild(tryExampleButton.domElement);
     sidebarButtonsContainer.appendChild(exportButton.domElement);
     sidebarButtonsContainer.appendChild(resetButton.domElement);
     sidebarButtonsContainer.appendChild(rerenderButton.domElement);
@@ -178,53 +237,63 @@ export default class EditMode {
       },
       "Copy Params To Clipboard"
     );
+
+    const loadJsonParams = (params: object | string) => {
+      try {
+        let parsed: any;
+
+        if (typeof params === "string") {
+          parsed = JSON.parse(params);
+        } else if (typeof params !== "object") {
+          throw new Error("Clipboard contents were invalid");
+        } else {
+          parsed = params as any;
+        }
+
+        if (typeof parsed["modelParams"] !== "object") {
+          throw new Error("Failed to parse serialization params");
+        }
+        if (typeof parsed["editorParams"] !== "object") {
+          throw new Error("Failed to parse editor params");
+        }
+        if (typeof parsed["diff"] !== "object") {
+          throw new Error("Failed to parse transform diff");
+        }
+        const { editorParams, modelParams, diff } = parsed as {
+          editorParams: EditorState["editorParams"];
+          modelParams: Partial<ModelParams>;
+          diff: ModelPropertyDiffJson;
+        };
+        editorState.initializePropertyDiff();
+        editorState.resetSerializationState();
+        Object.assign(editorState.editorParams, {
+          "Flip Y": editorParams["Flip Y"],
+          "Backface Culling": editorParams["Backface Culling"],
+          "Material Type": editorParams["Material Type"],
+          "Auto-Scale": editorParams["Auto-Scale"],
+          "Collapse Target": editorParams["Collapse Target"],
+          "Bonemap Method": editorParams["Bonemap Method"],
+        });
+        delete modelParams.materialIndices;
+        delete modelParams.textureIndices;
+        delete modelParams.textureIdStart;
+        editorState.updateSerializationParams(modelParams);
+        editorState.setModelPropertyDiffFromJson(diff);
+        editorGui.controllersRecursive().forEach((c) => {
+          c.updateDisplay();
+        });
+        applyUpdate();
+      } catch (e) {
+        logger.debug(e);
+        showQuickModal(`<code style="text-wrap: wrap">${e}</code>`);
+      }
+    };
     breadContainer.add(
       {
         "Paste Params From Clipboard": async () => {
           breadify(croissant.domElement, ["📋", "📎"]);
           const unclippy = await navigator.clipboard.readText();
-          try {
-            const parsed = JSON.parse(unclippy);
-            if (typeof parsed !== "object") {
-              throw new Error("Clipboard contents were invalid");
-            }
-            if (typeof parsed["modelParams"] !== "object") {
-              throw new Error("Failed to parse serialization params");
-            }
-            if (typeof parsed["editorParams"] !== "object") {
-              throw new Error("Failed to parse editor params");
-            }
-            if (typeof parsed["diff"] !== "object") {
-              throw new Error("Failed to parse transform diff");
-            }
-            const { editorParams, modelParams, diff } = parsed as {
-              editorParams: EditorState["editorParams"];
-              modelParams: Partial<ModelParams>;
-              diff: ModelPropertyDiffJson;
-            };
-            editorState.initializePropertyDiff();
-            editorState.resetSerializationState();
-            Object.assign(editorState.editorParams, {
-              "Flip Y": editorParams["Flip Y"],
-              "Backface Culling": editorParams["Backface Culling"],
-              "Material Type": editorParams["Material Type"],
-              "Auto-Scale": editorParams["Auto-Scale"],
-              "Collapse Target": editorParams["Collapse Target"],
-              "Bonemap Method": editorParams["Bonemap Method"],
-            });
-            delete modelParams.materialIndices;
-            delete modelParams.textureIndices;
-            delete modelParams.textureIdStart;
-            editorState.updateSerializationParams(modelParams);
-            editorState.setModelPropertyDiffFromJson(diff);
-            editorGui.controllersRecursive().forEach((c) => {
-              c.updateDisplay();
-            });
-            applyUpdate();
-          } catch (e) {
-            logger.debug(e);
-            showQuickModal(`<code style="text-wrap: wrap">${e}</code>`);
-          }
+          loadJsonParams(unclippy);
         },
       },
       "Paste Params From Clipboard"
@@ -387,9 +456,11 @@ export default class EditMode {
   public toggleOptionsIfNeeded() {
     if (!clientState.getCustomModel()) {
       this.sidebarButtonsContainer.style.display = "none";
+      this.tryExampleButton.show();
       this.editorGui.hide();
     } else {
       this.sidebarButtonsContainer.style.display = "block";
+      this.tryExampleButton.hide();
       this.editorGui.show();
     }
   }

@@ -953,7 +953,7 @@ const render = () => {
         }
       }
       if (ddsTracks && name === "inu.mdl") {
-        new GLTFLoader().load("/end_inu.glb", async (data) => {
+        new GLTFLoader().load("/glb/end_inu.glb", async (data) => {
           scene.add(data.scene);
           data.scene.rotateZ(Math.PI);
           data.scene.rotateY(Math.PI);

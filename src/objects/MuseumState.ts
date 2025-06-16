@@ -65,7 +65,7 @@ export default class MuseumState {
   private textureViewer?: TextureViewer;
   private mode: "viewing" | "edit" = "viewing";
   private saveRequested = false;
-  private onUpdate?: () => void;
+  private updateCallbacks: Array<() => void> = [];
   private onModeUpdate?: (previousMode: "viewing" | "edit") => void;
 
   private currentViewerModel?: SilentHillModel;
@@ -78,7 +78,7 @@ export default class MuseumState {
   public setFileIndex(index: number) {
     this.fileIndex = index;
     this.computeFilePathArray();
-    this.onUpdate?.();
+    this.onUpdate();
   }
 
   public getFileIndex() {
@@ -171,11 +171,11 @@ export default class MuseumState {
   }
 
   public setOnUpdate(onUpdate: () => void) {
-    this.onUpdate = onUpdate;
+    this.subscribeToUpdates(onUpdate);
   }
 
   public triggerUpdate() {
-    this.onUpdate?.();
+    this.onUpdate();
   }
 
   public setOnModeUpdate(onUpdate: (mode: "viewing" | "edit") => void) {
@@ -200,7 +200,7 @@ export default class MuseumState {
       }
       saveArrayBuffer(model.contents, filename);
     }
-    this.onUpdate?.();
+    this.onUpdate();
   }
 
   /**
@@ -366,6 +366,22 @@ export default class MuseumState {
     }
 
     return path;
+  }
+
+  public subscribeToUpdates(callback: () => void) {
+    this.updateCallbacks.push(callback);
+    return () => {
+      const index = this.updateCallbacks.indexOf(callback);
+      if (index < 0) {
+        return false;
+      }
+      this.updateCallbacks.splice(index, 1);
+      return true;
+    };
+  }
+
+  private onUpdate() {
+    this.updateCallbacks.forEach((callback) => callback());
   }
 
   private _prefersReducedMotion: boolean | undefined = undefined;

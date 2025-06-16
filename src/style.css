@@ -569,6 +569,10 @@ div.struct-visualizer {
   font-style: italic;
 }
 
+.lil-gui .controller.try-example-button {
+  padding: 0;
+}
+
 .quick-access-toolbar img {
   width: 1rem;
   margin-left: 0.25rem;

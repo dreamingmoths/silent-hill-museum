@@ -1,0 +1,59 @@
+{
+  "params": {
+    "modelType": "BaseModel",
+    "backfaceCulling": false,
+    "materialIndices": [0],
+    "textureIndices": [0],
+    "textureIdStart": 54172,
+    "spriteIdStart": 99963,
+    "autoscale": "BoundingBox",
+    "flipY": false,
+    "bonemapType": "Collapse",
+    "bonemapCollapseTarget": 0,
+    "materialType": 2
+  },
+  "editorParams": {
+    "Model Type": "BaseModel",
+    "Auto-Scale": "BoundingBox",
+    "Flip Y": false,
+    "Bonemap Method": "Collapse",
+    "Collapse Target": 0,
+    "Model Scale": 1,
+    "Model Controls": true,
+    "Show Original": true,
+    "Base Model Controls": false,
+    "Rotation Step": 90,
+    "🍞 It's Bread": true,
+    "Backface Culling": "Off",
+    "Material Type": "Matte",
+    "Confetti": true
+  },
+  "modelParams": {
+    "modelType": "BaseModel",
+    "backfaceCulling": false,
+    "materialIndices": [0],
+    "textureIndices": [0],
+    "textureIdStart": 54172,
+    "spriteIdStart": 99963,
+    "autoscale": "BoundingBox",
+    "flipY": false,
+    "bonemapType": "Collapse",
+    "bonemapCollapseTarget": 0,
+    "materialType": 2
+  },
+  "diff": {
+    "accumulatedTransform": {
+      "position": {
+        "x": -0.6417912716311065,
+        "y": -326.61435113964484,
+        "z": -21.48854163360896
+      },
+      "quaternion": [0, -6.123233995736766e-17, 1, 0],
+      "scale": {
+        "x": 2.9461112183800156,
+        "y": 2.9461112183800156,
+        "z": 2.9461112183800156
+      }
+    }
+  }
+}
