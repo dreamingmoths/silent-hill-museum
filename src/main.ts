@@ -342,6 +342,11 @@ textureFolder
     }
   });
 
+const loadingMessage = document.createElement("div");
+loadingMessage.className = "loading-message";
+loadingMessage.textContent = "loading...";
+appContainer.appendChild(loadingMessage);
+
 const width = appContainer.offsetWidth;
 const height = appContainer.offsetHeight;
 const renderer = glVersion === 2 ? new WebGLRenderer() : new WebGL1Renderer();
@@ -953,7 +958,7 @@ const render = () => {
         }
       }
       if (ddsTracks && name === "inu.mdl") {
-        new GLTFLoader().load("/glb/end_inu.glb", async (data) => {
+        new GLTFLoader().loadAsync("/glb/end_inu.glb").then((data) => {
           scene.add(data.scene);
           data.scene.rotateZ(Math.PI);
           data.scene.rotateY(Math.PI);
@@ -967,6 +972,7 @@ const render = () => {
               }
             }
           });
+          loadingMessage.remove();
         });
       }
 
@@ -976,6 +982,7 @@ const render = () => {
       }
     } else {
       animationGui.hide();
+      loadingMessage.remove();
     }
 
     const maxBoneSelection = (modelSkeleton?.bones.length ?? 1) - 1;
@@ -1196,7 +1203,9 @@ const render = () => {
       bytes = await fetchRawBytes(path);
       const dds = loadDramaDemoFromBytes(bytes);
 
-      function spawnCharacter(i = 0) {
+      const argArray: Array<Parameters<typeof modelCallback>> = [];
+      let loaded = 0;
+      async function spawnCharacter(i = 0) {
         const name = dds.characterNames[i];
         if (name === undefined) {
           return;
@@ -1206,25 +1215,39 @@ const render = () => {
         const modelIndex = fileArray.indexOf(mdlName);
         const path = destructureIndex(modelIndex).join("/");
 
-        loadModelFromUrl("/data/" + path).then(async (model) => {
-          let anm: SilentHillAnimation | undefined;
-          if (model !== undefined) {
-            anm = await loadAnimationFromUrl(
-              `/data/${index >= 219 ? "demo2" : "demo"}/${
-                ddsList[index] ?? "inu"
-              }/${mdlName}`.replace(".mdl", ".anm"),
-              model
-            );
-          }
+        const model = await loadModelFromUrl("/data/" + path);
 
-          if (i === 0) {
-            clientState.setCurrentViewerModel(model);
-          }
-          modelCallback(model, i == 0, anm, dds, mdlName);
-          spawnCharacter(i + 1);
-        });
+        if (clientState.file !== "inu.mdl") {
+          // file changed while loading
+          return;
+        }
+        let anm: SilentHillAnimation | undefined;
+        if (model !== undefined) {
+          anm = await loadAnimationFromUrl(
+            `/data/${index >= 219 ? "demo2" : "demo"}/${
+              ddsList[index] ?? "inu"
+            }/${mdlName}`.replace(".mdl", ".anm"),
+            model
+          );
+        }
+
+        if (i === 0) {
+          clientState.setCurrentViewerModel(model);
+        }
+        argArray.push([model, i == 0, anm, dds, mdlName]);
+        loaded++;
+        loadingMessage.textContent = `loading... (${loaded}/${
+          dds.characterNames.length + 1
+        })`;
       }
-      spawnCharacter();
+
+      Promise.all(dds.characterNames.map((_, i) => spawnCharacter(i))).then(
+        () => {
+          argArray.forEach((args) => {
+            modelCallback(...args);
+          });
+        }
+      );
     })();
     return;
   }
