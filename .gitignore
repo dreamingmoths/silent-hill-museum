@@ -1,0 +1,11 @@
+kaitai_struct_compiler
+node_modules
+
+public
+build
+dist
+
+.DS_Store
+.vscode
+.venv
+__pycache__
