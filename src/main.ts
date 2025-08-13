@@ -1234,20 +1234,23 @@ const render = () => {
         if (i === 0) {
           clientState.setCurrentViewerModel(model);
         }
-        argArray.push([model, i == 0, anm, dds, mdlName]);
+        argArray.push([model, undefined, anm, dds, mdlName]);
         loaded++;
         loadingMessage.textContent = `loading... (${loaded}/${
           dds.characterNames.length + 1
         })`;
       }
 
-      Promise.all(dds.characterNames.map((_, i) => spawnCharacter(i))).then(
-        () => {
-          argArray.forEach((args) => {
-            modelCallback(...args);
-          });
-        }
-      );
+      Promise.all(
+        dds.characterNames.map((_, i) => {
+          return spawnCharacter(i);
+        })
+      ).then(() => {
+        argArray.forEach((args, index) => {
+          args[1] = index === 0;
+          modelCallback(...args);
+        });
+      });
     })();
     return;
   }

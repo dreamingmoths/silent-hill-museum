@@ -23,6 +23,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.metals
 
 # Python
 .venv
@@ -31,6 +32,8 @@ __pycache__
 # Project-specific
 kaitai_struct_compiler
 public/data
+assets
+target
 public/mdl
 public/**/*.glb
 !src/wasm/**/dist
