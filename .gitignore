@@ -36,6 +36,7 @@ public/data
 assets
 target
 public/mdl
+public/sh1
 public/**/*.glb
 !src/wasm/**/dist
 !public/glb/low-poly-ghost/*
