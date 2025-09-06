@@ -1,6 +1,6 @@
 meta:
   id: sh1anm
-  file-extension: sh1anm
+  file-extension: anm
   endian: le
 
 doc: |

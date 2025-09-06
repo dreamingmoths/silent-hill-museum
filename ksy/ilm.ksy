@@ -2,7 +2,7 @@ meta:
   id: ilm
   file-extension: ilm
   endian: le
-  encoding: ascii
+  encoding: ASCII
 
 doc: |
   Ilm is the skeletal 3D model format used in Silent Hill (PSX).
@@ -54,7 +54,8 @@ instances:
 types:
   obj:
     seq:
-      - type: str
+      - id: bone_index
+        type: str
         size: 2
 
       - id: name
@@ -63,8 +64,10 @@ types:
 
       - type: u1
 
-      - id: base_idx
+      - id: base_index
         type: u1
+        doc: all quad/triangle indices for the object are offset by this value
+
       - type: u1
       - type: u1
       - id: ofs
