@@ -23,13 +23,17 @@ seq:
   - id: num_translation_bones
     type: u1
 
-  - size: 2
+  - id: frame_size
+    type: s2
 
   - id: num_bones
     type: s2
 
-  - type: s4
-  - type: s4
+  - id: flags
+    type: s4
+
+  - id: end_ofs
+    type: s4
 
   - id: num_frames
     type: u2
