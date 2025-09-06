@@ -64,15 +64,6 @@ instances:
     value: num_rotation_bones + num_translation_bones
 
 types:
-  rotation:
-    seq:
-      - id: rotation
-        type: s1matrix
-  translation:
-    seq:
-      - id: translation
-        type: s1vector
-
   bind_pose:
     seq:
       - id: bone
@@ -82,9 +73,9 @@ types:
       - type: u1
 
       - id: translation
-        type: s1vector
+        type: translation
 
-  s1vector:
+  translation:
     seq:
       - id: x
         type: s1
@@ -93,8 +84,8 @@ types:
       - id: z
         type: s1
 
-  s1matrix:
-    doc: signed fixed point with 7 fraction bits
+  rotation:
+    doc: 3x3 matrix, signed fixed point with 7 fraction bits
     seq:
       - id: value
         type: s1
