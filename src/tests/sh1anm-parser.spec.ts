@@ -5,64 +5,13 @@ import { fetchRawBytes } from "../load";
 import Ilm from "../kaitai/Ilm";
 import Sh1anm from "../kaitai/Sh1anm";
 import KaitaiStream from "../kaitai/runtime/KaitaiStream";
+import { ilmToAnmAssoc, anmToIlmAssoc } from "../sh1";
+import logger from "../objects/Logger";
 
 const ILM_PATH = path.join(__dirname, "../../public/sh1/CHARA");
 const ANM_PATH = path.join(__dirname, "../../public/sh1/ANIM");
 
 // just guesses
-const ilmToAnmArray = [
-  ["HERO", "HR"],
-  ["BOS2", "BOS"],
-  ["TDRA", "TAR"],
-  ["BLISA", "BLS"],
-  ["DARIA", "DA"],
-  ["DARIA", "DA2"],
-  ["DARIA", "TDA"],
-  ["SIBYL", "SBL"],
-  ["PRSD", "PRS"],
-  ["LISA", "LS"],
-  ["DG2", "DOG"],
-  ["CLD3", "CLD2"],
-  ["CLD4", "CLD2"],
-  ["BD2", "BIRD"],
-  ["BAR", "BAR_LAST"],
-  ["KAU", "KAU2"],
-  ["SIBYL", "SBL2"],
-  ["HERO", "HR_E01"],
-  ["SIBYL", "SBL_LAST"],
-  ["SNK", "SPD"],
-] as const;
-type SpecialIlmName = (typeof ilmToAnmArray)[number][0];
-type SpecialAnmName = (typeof ilmToAnmArray)[number][1];
-
-const ilmToAnmMap = new Map(ilmToAnmArray);
-
-const ilmToAnmAssoc = (ilmName: string) => {
-  let name = ilmName.toUpperCase().replace(".ILM", "");
-
-  return (ilmToAnmMap.get(name as SpecialIlmName) ?? name) + ".ANM";
-};
-
-const anmToIlmMap = new Map(
-  ilmToAnmArray.map((pair) => pair.slice().reverse()) as Array<
-    [SpecialAnmName, SpecialIlmName]
-  >
-);
-
-const anmToIlmAssoc = (anmName: string) => {
-  let name = anmName.toUpperCase().replace(".ANM", "");
-
-  const ilmName = anmToIlmMap.get(name as SpecialAnmName);
-  if (ilmName) {
-    return ilmName + ".ILM";
-  }
-
-  if (name.endsWith("_LAST")) {
-    return name.replace("_LAST", ".ILM");
-  }
-
-  return name + ".ILM";
-};
 
 // TODO: parse the partial animations
 // @ts-ignore
@@ -133,17 +82,17 @@ describe("ilm + sh1anm", () => {
 
       let maxBoneIndex = -1;
       for (const o of ilm.objs) {
-        const boneIndex = parseInt(o._unnamed0);
+        const boneIndex = o.boneIndex;
         maxBoneIndex = Math.max(boneIndex, maxBoneIndex);
       }
 
       expect(anm.numBones).toBeGreaterThan(maxBoneIndex);
 
       if (anmFile === "SPD.ANM") {
-        console.debug(anm.numBones);
+        logger.debug(anm.numBones);
       }
       if (maxBoneIndex <= 22) {
-        console.debug(anmFile, ilmFile);
+        logger.debug(anmFile, ilmFile);
       }
     });
   });
