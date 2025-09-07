@@ -92,12 +92,9 @@ var Ilm = (function () {
         var _pos = this._io.pos;
         this._io.seek(this.primsOfs);
         this._m_prims = [];
-        var i = 0;
-        do {
-          var _ = new IndexPacket(this._io, this, this._root);
-          this._m_prims.push(_);
-          i++;
-        } while (!(this._io.pos == this.vertexXyOfs));
+        for (var i = 0; i < this.numPrims; i++) {
+          this._m_prims.push(new IndexPacket(this._io, this, this._root));
+        }
         this._io.seek(_pos);
         return this._m_prims;
       },
@@ -108,12 +105,9 @@ var Ilm = (function () {
         var _pos = this._io.pos;
         this._io.seek(this.vertexXyOfs);
         this._m_vertexXy = [];
-        var i = 0;
-        do {
-          var _ = this._io.readS2le();
-          this._m_vertexXy.push(_);
-          i++;
-        } while (!(this._io.pos == this.vertexZOfs));
+        for (var i = 0; i < this.numVertices * 2; i++) {
+          this._m_vertexXy.push(this._io.readS2le());
+        }
         this._io.seek(_pos);
         return this._m_vertexXy;
       },
@@ -124,12 +118,9 @@ var Ilm = (function () {
         var _pos = this._io.pos;
         this._io.seek(this.vertexZOfs);
         this._m_vertexZ = [];
-        var i = 0;
-        do {
-          var _ = this._io.readS2le();
-          this._m_vertexZ.push(_);
-          i++;
-        } while (!(this._io.pos == this.nextOfs));
+        for (var i = 0; i < this.numVertices; i++) {
+          this._m_vertexZ.push(this._io.readS2le());
+        }
         this._io.seek(_pos);
         return this._m_vertexZ;
       },
@@ -222,22 +213,6 @@ var Ilm = (function () {
 
     return PrimIndices;
   })());
-
-  var XyPair = (Ilm.XyPair = (function () {
-    function XyPair(_io, _parent, _root) {
-      this._io = _io;
-      this._parent = _parent;
-      this._root = _root || this;
-
-      this._read();
-    }
-    XyPair.prototype._read = function () {
-      this.x = this._io.readS2le();
-      this.y = this._io.readS2le();
-    };
-
-    return XyPair;
-  })());
   Object.defineProperty(Ilm.prototype, "idTable", {
     get: function () {
       if (this._m_idTable !== undefined) return this._m_idTable;
@@ -254,5 +229,4 @@ var Ilm = (function () {
 
   return Ilm;
 })();
-
 export default Ilm;

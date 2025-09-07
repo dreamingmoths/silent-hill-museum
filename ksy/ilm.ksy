@@ -105,18 +105,18 @@ types:
       prims:
         pos: prims_ofs
         type: index_packet
-        repeat: until
-        repeat-until: _io.pos == vertex_xy_ofs
+        repeat: expr
+        repeat-expr: num_prims
       vertex_xy:
         pos: vertex_xy_ofs
         type: s2
-        repeat: until
-        repeat-until: _io.pos == vertex_z_ofs
+        repeat: expr
+        repeat-expr: num_vertices * 2
       vertex_z:
         pos: vertex_z_ofs
         type: s2
-        repeat: until
-        repeat-until: _io.pos == next_ofs
+        repeat: expr
+        repeat-expr: num_vertices
 
   index_packet:
     seq:
@@ -157,10 +157,3 @@ types:
         type: u1
       - id: v3
         type: u1
-
-  xy_pair:
-    seq:
-      - id: x
-        type: s2
-      - id: y
-        type: s2
