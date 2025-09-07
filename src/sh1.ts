@@ -73,6 +73,26 @@ export const createSh1Geometry = (ilm: Ilm, skeleton: Skeleton) => {
 
   const u = (x: number) => x / 0xff;
   const v = (x: number) => 2 * (1.0 - x / 0xff);
+  const loadFromScratchpad = (uv: Ilm.Uv, index: number) => {
+    vertexBuffer[vertexIndex] = scratchpadBuffer[index];
+    vertexBuffer[vertexIndex + 1] = scratchpadBuffer[index + 1];
+    vertexBuffer[vertexIndex + 2] = scratchpadBuffer[index + 2];
+    vertexIndex += 3;
+
+    uvBuffer[uvIndex] = u(uv.u);
+    uvBuffer[uvIndex + 1] = v(uv.v);
+    uvIndex += 2;
+
+    skinIndexBuffer[skinIndex] = scratchpadBuffer[index + 3];
+    skinIndexBuffer[skinIndex + 1] = 0;
+    skinIndexBuffer[skinIndex + 2] = 0;
+    skinIndexBuffer[skinIndex + 3] = 0;
+    skinWeightBuffer[skinIndex] = 1;
+    skinWeightBuffer[skinIndex + 1] = 0;
+    skinWeightBuffer[skinIndex + 2] = 0;
+    skinWeightBuffer[skinIndex + 3] = 0;
+    skinIndex += 4;
+  };
 
   for (let objectIndex = 0; objectIndex < ilm.numObjs; objectIndex++) {
     const id = ilm.idTable[objectIndex];
@@ -100,38 +120,30 @@ export const createSh1Geometry = (ilm: Ilm, skeleton: Skeleton) => {
       scratchpadBuffer[bufferIndex + 3] = boneIndex;
     }
 
-    const loadFromScratchpad = (uv: Ilm.Uv, index: number) => {
-      vertexBuffer[vertexIndex] = scratchpadBuffer[index];
-      vertexBuffer[vertexIndex + 1] = scratchpadBuffer[index + 1];
-      vertexBuffer[vertexIndex + 2] = scratchpadBuffer[index + 2];
-      vertexIndex += 3;
-
-      uvBuffer[uvIndex] = u(uv.u);
-      uvBuffer[uvIndex + 1] = v(uv.v);
-      uvIndex += 2;
-
-      skinIndexBuffer[skinIndex] = scratchpadBuffer[index + 3];
-      skinIndexBuffer[skinIndex + 1] = 0;
-      skinIndexBuffer[skinIndex + 2] = 0;
-      skinIndexBuffer[skinIndex + 3] = 0;
-      skinWeightBuffer[skinIndex] = 1;
-      skinWeightBuffer[skinIndex + 1] = 0;
-      skinWeightBuffer[skinIndex + 2] = 0;
-      skinWeightBuffer[skinIndex + 3] = 0;
-      skinIndex += 4;
-    };
-
     // now build non-indexed triangle list and uvs
     for (let primIndex = 0; primIndex < info.numPrims; primIndex++) {
       const prim = info.prims[primIndex];
 
       const indices = prim.indices;
-      const [i0, i1, i2, i3] = [
+      let [i0, i1, i2, i3] = [
         indices.v0 * 4,
         indices.v1 * 4,
         indices.v2 * 4,
         indices.v3 * 4,
       ];
+
+      // temporary patch until the active bone indices flag is implemented
+      if (
+        object.name.includes("RHAND2") ||
+        object.name.includes("FLAURO") ||
+        object.name.includes("KEY") ||
+        object.name.includes("RAGLA")
+      ) {
+        i0 = 0;
+        i1 = 0;
+        i2 = 0;
+      }
+
       const isQuad = indices.v3 != 0xff;
 
       // 2 -> 1 -> 0
@@ -295,14 +307,15 @@ export const createSh1Animation = (anm: Sh1anm) => {
 };
 
 // 🗂️ ------- file structure associations ------- 🗂️
-const ilmToAnmArray = [
+export const ilmToAnmArray = [
   ["HERO", "HR"],
+  ["BOS", "BOS"],
   ["BOS2", "BOS"],
-  ["TDRA", "TAR"],
+  ["TDRA", "TDA"],
   ["BLISA", "BLS"],
-  ["DARIA", "DA"],
   ["DARIA", "DA2"],
   ["DARIA", "TDA"],
+  ["DARIA", "DA"],
   ["SIBYL", "SBL"],
   ["PRSD", "PRS"],
   ["LISA", "LS"],
@@ -312,6 +325,7 @@ const ilmToAnmArray = [
   ["BD2", "BIRD"],
   ["BAR", "BAR_LAST"],
   ["KAU", "KAU2"],
+  ["KAU", "KAU"],
   ["SIBYL", "SBL2"],
   ["HERO", "HR_E01"],
   ["SIBYL", "SBL_LAST"],
