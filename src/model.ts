@@ -482,7 +482,7 @@ const getDefaultDiffuseMap = () => {
   }
   return data;
 };
-const defaultDiffuseMap = getDefaultDiffuseMap();
+export const defaultDiffuseMap = getDefaultDiffuseMap();
 
 /**
  * Remove degenerate triangles, split by primitives, and convert to

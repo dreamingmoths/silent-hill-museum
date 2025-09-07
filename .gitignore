@@ -35,6 +35,7 @@ kaitai_struct_rust_runtime
 public/data
 assets
 target
+public/sh1png
 public/mdl
 public/sh1
 public/**/*.glb

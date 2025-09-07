@@ -118,16 +118,26 @@ export default class TextureViewer {
           return;
         }
         const texture = material.map;
-        const { data, width, height } = texture.source.data;
-        if (!(data instanceof Uint8Array)) {
-          logger.warn("Data was not a Uint8Array.", data);
-          return;
+
+        let { data, width, height } = texture.source.data;
+        if (data === undefined) {
+          data = texture.source.data;
         }
         if (this.seenMaps.indexOf(data) >= 0) {
           return;
         }
         this.seenMaps.push(data);
-        const image = this.renderUint8ArrayAsImage(data, width, height);
+
+        let image: HTMLImageElement;
+        if (data instanceof HTMLImageElement) {
+          image = data;
+        } else if (!(data instanceof Uint8Array)) {
+          logger.warn("Data was not a Uint8Array.", data);
+          return;
+        } else {
+          image = this.renderUint8ArrayAsImage(data, width, height);
+        }
+
         this.attachPointerListener(image);
         this.contentWindow.appendChild(image);
       });
