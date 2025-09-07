@@ -260,5 +260,5 @@ export const showQuickModal = (
   }
 
   pushToQueue("quickModal", true);
-  return element;
+  return content as HTMLElement;
 };

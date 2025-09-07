@@ -23,6 +23,7 @@ import { editorState } from "./EditorState";
 import { renderStructToContainer } from "../visualize-struct";
 import { anmToMdlAssoc } from "../animation";
 import anmList from "../assets/anm-list.json";
+import Ilm from "../kaitai/Ilm";
 
 export const START_INDEX = constructIndex("chr", "favorites", "inu.mdl");
 const START_PATH_ARRAY = destructureIndex(START_INDEX);
@@ -77,6 +78,7 @@ export default class MuseumState {
   private onModeUpdate?: (previousMode: "viewing" | "edit") => void;
 
   private currentViewerModel?: SilentHillModel;
+  private currentViewerIlm?: Ilm;
   private customModel?: {
     contents: Uint8Array;
     model: SilentHillModel;
@@ -216,7 +218,13 @@ export default class MuseumState {
   }
 
   public setCurrentViewerModel(model: SilentHillModel | undefined) {
+    this.currentViewerIlm = undefined;
     this.currentViewerModel = model;
+  }
+
+  public setCurrentViewerIlm(ilm: Ilm | undefined) {
+    this.currentViewerModel = undefined;
+    this.currentViewerIlm = ilm;
   }
 
   public setCustomModel(model: typeof this.customModel) {
@@ -442,7 +450,10 @@ export default class MuseumState {
       }
       renderStructToContainer(
         showQuickModal(undefined, "struct-visualizer"),
-        this.getCustomModel()?.model ?? this.currentViewerModel ?? {}
+        this.getCustomModel()?.model ??
+          this.currentViewerModel ??
+          this.currentViewerIlm ??
+          {}
       );
     },
     "Export to GLTF": () => {

@@ -155,7 +155,8 @@ const gameInput = dataGuiFolder
 const sh1FileInput = dataGuiFolder
   .add(clientState.uiParams, "File (SH1)", sh1Files)
   .hide()
-  .onFinishChange(() => render());
+  .onFinishChange(() => render())
+  .listen();
 const scenarioInput = dataGuiFolder
   .add(clientState.uiParams, "Scenario", ["Main Scenario", "Born From A Wish"])
   .onFinishChange((scenarioName: "Main Scenario" | "Born From A Wish") => {
@@ -884,6 +885,7 @@ const renderSh1 = async () => {
   const ilm = new SilentHill1Model(
     new KaitaiStream(await fetchRawBytes(`sh1/CHARA/${MODEL_NAME}.ILM`))
   );
+  clientState.setCurrentViewerIlm(ilm);
   const anm = new Sh1anm(
     new KaitaiStream(await fetchRawBytes(`sh1/ANIM/${anmName}`))
   );
@@ -1323,9 +1325,11 @@ const render = () => {
     lastGame = clientState.uiParams.Game;
 
     if (
-      ((isSh1 && lastSh1File !== "AR") || clientState.folder !== "favorites") &&
+      ((isSh1 && lastSh1File === "BLISA") ||
+        clientState.folder !== "favorites") &&
       !clientState.hasAcceptedContentWarning()
     ) {
+      loadingMessage.remove();
       showContentWarningModal(
         () => {
           clientState.uiParams["Lock To Folder"] = false;
