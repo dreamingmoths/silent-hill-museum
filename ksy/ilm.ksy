@@ -54,7 +54,7 @@ instances:
 types:
   obj:
     seq:
-      - id: bone_index
+      - id: bone_index_ascii
         type: str
         size: 2
 
@@ -74,6 +74,9 @@ types:
         type: u4
 
     instances:
+      bone_index:
+        value: bone_index_ascii.as<u1>
+
       body:
         pos: ofs
         type: obj_body

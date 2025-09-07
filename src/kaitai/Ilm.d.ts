@@ -50,10 +50,15 @@ declare namespace Ilm {
     _io: any;
 
     body: Ilm.ObjBody;
-    _unnamed0: string;
+    boneIndex: number;
+    boneIndexAscii: string;
     name: string;
     _unnamed2: number;
-    baseIdx: number;
+
+    /**
+     * all quad/triangle indices for the object are offset by this value
+     */
+    baseIndex: number;
     _unnamed4: number;
     _unnamed5: number;
     ofs: number;
