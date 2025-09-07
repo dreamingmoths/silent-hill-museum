@@ -39,7 +39,14 @@ export default class MuseumState {
     }
     const params = new URLSearchParams(window.location.search);
     const model = params.get("model");
+    const game = params.get("game");
     const modelSplit = model?.split("-");
+
+    if (game === "sh1") {
+      this.uiParams["Game"] = "Silent Hill 1";
+      this.uiParams["File (SH1)"] = params.get("file") ?? "DARIA";
+      return;
+    }
 
     if (modelSplit && modelSplit.length !== 3) {
       throw new Error(
@@ -48,6 +55,7 @@ export default class MuseumState {
     } else if (!modelSplit) {
       return;
     }
+    this.uiParams["Game"] = "Silent Hill 2";
     modelSplit[2] += ".mdl";
     this.defaultStartIndex = constructIndex(
       ...(modelSplit as Parameters<typeof constructIndex>)
@@ -122,6 +130,15 @@ export default class MuseumState {
   }
 
   public nextFile() {
+    if (this.uiParams["Game"] === "Silent Hill 1") {
+      this.uiParams["File (SH1)"] =
+        sh1Files[
+          (sh1Files.indexOf(this.uiParams["File (SH1)"]) + 1) % sh1Files.length
+        ];
+      this.onUpdate();
+      return;
+    }
+
     const newIndex = travelAlongLevel(
       this.fileIndex,
       FilePath.File,
@@ -132,6 +149,18 @@ export default class MuseumState {
   }
 
   public previousFile() {
+    if (this.uiParams["Game"] === "Silent Hill 1") {
+      this.uiParams["File (SH1)"] =
+        sh1Files[
+          (sh1Files.indexOf(this.uiParams["File (SH1)"]) -
+            1 +
+            sh1Files.length) %
+            sh1Files.length
+        ];
+      this.onUpdate();
+      return;
+    }
+
     const newIndex = travelAlongLevel(
       this.fileIndex,
       FilePath.File,
@@ -394,6 +423,8 @@ export default class MuseumState {
   }
 
   public uiParams = {
+    Game: Math.random() > 0.5 ? "Silent Hill 1" : "Silent Hill 2",
+    "File (SH1)": "DARIA",
     Scenario: this.rootFolder === "chr" ? "Main Scenario" : "Born From A Wish",
     Folder: this.folder,
     Filename: this.file,
@@ -528,3 +559,13 @@ export const defaultParams = Object.assign(
     )
   )
 );
+
+export const sh1Files = [
+  "SRL",
+  "AR",
+  "LISA",
+  "BLISA",
+  "DARIA",
+  "SIBYL",
+  "KAU",
+].sort();

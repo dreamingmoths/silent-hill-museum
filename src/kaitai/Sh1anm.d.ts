@@ -14,10 +14,10 @@ declare class Sh1anm {
   constructor(io: any, parent?: any, root?: any);
   __type: "Sh1anm";
   _io: any;
-  _m_frameData: Sh1anm.Translation | Sh1anm.Rotation | undefined[] | undefined;
+  _m_frameData: Array<Sh1anm.Translation | Sh1anm.Rotation> | undefined;
 
   bonesPerFrame: number;
-  frameData: Sh1anm.Translation | Sh1anm.Rotation | undefined[];
+  frameData: Array<Sh1anm.Translation | Sh1anm.Rotation>;
   magic: number;
   numRotationBones: number;
   numTranslationBones: number;

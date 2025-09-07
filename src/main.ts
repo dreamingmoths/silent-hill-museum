@@ -4,6 +4,7 @@ import {
   createGeometry,
   createMaterial,
   createSkeleton,
+  defaultDiffuseMap,
   MaterialType,
   MaterialView,
 } from "./model";
@@ -19,6 +20,7 @@ import {
   clientState,
   defaultParams,
   preferredParams,
+  sh1Files,
 } from "./objects/MuseumState";
 import {
   createRainbowLights,
@@ -57,6 +59,9 @@ import {
   MeshStandardMaterial,
   FrontSide,
   AnimationAction,
+  TextureLoader,
+  NearestFilter,
+  DataTexture,
 } from "three";
 import {
   GLTFLoader,
@@ -71,12 +76,13 @@ import {
   isAnyElementOpenOtherThan,
   showContentWarningModal,
   showNotSupportedModal,
+  showQuickModal,
   toggleWithBackground,
 } from "./modals";
 import { chrFolders, destructureIndex, fileArray, MuseumFile } from "./files";
-import GUI from "lil-gui";
+import GUI, { Controller } from "lil-gui";
 import { acceptModelDrop, applyUpdate } from "./write";
-import SilentHillModel from "./kaitai/Mdl";
+import SilentHill2Model from "./kaitai/Mdl";
 import RaycastHelper from "./objects/RaycastHelper";
 import logger from "./objects/Logger";
 import EditMode, { consoleGui } from "./edit-mode";
@@ -92,6 +98,15 @@ import { createCutsceneTracks } from "./cutscene";
 import "./style.css";
 import { isMobile } from "./mobile";
 import KeybindManager from "./objects/KeybindManager";
+import SilentHill1Model from "./kaitai/Ilm";
+import KaitaiStream from "./kaitai/runtime/KaitaiStream";
+import Sh1anm from "./kaitai/Sh1anm";
+import {
+  createSh1Animation,
+  createSh1Geometry,
+  createSh1Skeleton,
+  ilmToAnmAssoc,
+} from "./sh1";
 
 const appContainer = document.getElementById("app");
 if (!(appContainer instanceof HTMLDivElement)) {
@@ -132,6 +147,15 @@ const gui = new GUI({ width: 250, container: uiContainer });
 gui.domElement.id = "main-gui";
 
 const dataGuiFolder = gui.addFolder("Data");
+const gameInput = dataGuiFolder
+  .add(clientState.uiParams, "Game", ["Silent Hill 1", "Silent Hill 2"])
+  .onFinishChange(() => {
+    render();
+  });
+const sh1FileInput = dataGuiFolder
+  .add(clientState.uiParams, "File (SH1)", sh1Files)
+  .hide()
+  .onFinishChange(() => render());
 const scenarioInput = dataGuiFolder
   .add(clientState.uiParams, "Scenario", ["Main Scenario", "Born From A Wish"])
   .onFinishChange((scenarioName: "Main Scenario" | "Born From A Wish") => {
@@ -148,7 +172,7 @@ const fileInput = dataGuiFolder.add(
   "Filename",
   possibleFilenames
 );
-dataGuiFolder
+const lockToFolder = dataGuiFolder
   .add(clientState.uiParams, "Lock To Folder")
   .onFinishChange(() => {
     showContentWarningModal(
@@ -176,16 +200,22 @@ const updateLink = (sharable?: boolean) => {
     window.history.pushState({ path: baseUrl }, "", baseUrl);
     return;
   }
-  const newUrl =
-    baseUrl +
-    "?model=" +
-    [
-      clientState.rootFolder,
-      clientState.folder,
-      clientState.file.split(".")[0],
-    ].join("-");
+
+  let newUrl = baseUrl;
+  if (clientState.uiParams.Game === "Silent Hill 1") {
+    newUrl += "?game=sh1&file=" + clientState.uiParams["File (SH1)"];
+  } else {
+    newUrl +=
+      "?model=" +
+      [
+        clientState.rootFolder,
+        clientState.folder,
+        clientState.file.split(".")[0],
+      ].join("-");
+  }
   window.history.pushState({ path: newUrl }, "", newUrl);
 };
+
 dataGuiFolder
   .add(clientState.uiParams, "Sharable Link")
   .onFinishChange(updateLink);
@@ -256,14 +286,15 @@ const controlsModeInput = controlsGuiFolder
   .hide();
 
 const geometryFolder = gui.addFolder("Geometry");
-geometryFolder
+const renderOpaqueInput = geometryFolder
   .add(clientState.uiParams, "Render Opaque")
   .onFinishChange(() => render());
-geometryFolder
+const renderTransparentInput = geometryFolder
   .add(clientState.uiParams, "Render Transparent")
   .onFinishChange(() => render());
+let skeletonModeController: Controller | undefined = undefined;
 if (clientState.getGlVersion() === 2) {
-  geometryFolder
+  skeletonModeController = geometryFolder
     .add(clientState.uiParams, "Skeleton Mode")
     .onFinishChange(() => render());
   geometryFolder
@@ -277,10 +308,14 @@ if (clientState.getGlVersion() === 2) {
       render();
     });
 } else {
+  gameInput.setValue("Silent Hill 2");
+  clientState.uiParams["Game"] = "Silent Hill 2";
+  clientState.uiParams["Skeleton Mode"] = false;
+
   controlsGuiFolder.hide();
   geometryFolder.add(clientState.uiParams, "Auto-Rotate");
 }
-geometryFolder
+const visualizeNormalsInput = geometryFolder
   .add(clientState.uiParams, "Visualize Normals")
   .onFinishChange(() => render());
 
@@ -301,7 +336,7 @@ textureFolder
   ])
   .onFinishChange(() => render())
   .listen();
-textureFolder
+const wrappingInput = textureFolder
   .add(clientState.uiParams, "Wrapping", [
     "ClampToEdge",
     "Repeat",
@@ -318,7 +353,7 @@ textureFolder
   .add(clientState.uiParams, "Transparency")
   .onFinishChange(() => render())
   .listen();
-textureFolder
+const invertAlphaInput = textureFolder
   .add(clientState.uiParams, "Invert Alpha")
   .onFinishChange(() => render())
   .listen();
@@ -390,6 +425,7 @@ const portraitModeWarning = (width?: number, height?: number) => {
   width ??= appContainer.offsetWidth;
   height ??= appContainer.offsetHeight;
   if (
+    clientState.uiParams["Game"] === "Silent Hill 2" &&
     width < height &&
     clientState.file === "inu.mdl" &&
     !animationGui.forceClosed
@@ -500,6 +536,8 @@ let helper: SkeletonHelper | undefined;
 const clock = new Clock();
 let group = new Group();
 let lastIndex = -1;
+let lastSh1File = "AR";
+let lastGame = clientState.uiParams.Game;
 let mixers: AnimationMixer[] = [];
 
 const editor = new EditMode();
@@ -542,13 +580,29 @@ const registerAllKeybinds = ({
   );
   keybindManager.addKeybind(
     "arrowup",
-    () => clientState.nextFolder(),
-    "Next folder"
+    () => {
+      if (clientState.uiParams["Game"] === "Silent Hill 1") {
+        gameInput.setValue("Silent Hill 2");
+        render();
+        return;
+      }
+      gameInput.setValue("Silent Hill 1");
+      render();
+    },
+    "Next game"
   );
   keybindManager.addKeybind(
     "arrowdown",
-    () => clientState.previousFolder(),
-    "Previous folder"
+    () => {
+      if (clientState.uiParams["Game"] === "Silent Hill 1") {
+        gameInput.setValue("Silent Hill 2");
+        render();
+        return;
+      }
+      gameInput.setValue("Silent Hill 1");
+      render();
+    },
+    "Previous game"
   );
   keybindManager.addKeybind(
     "f",
@@ -641,19 +695,301 @@ registerAllKeybinds({ animationGui });
 let lightGroup: Group | undefined;
 let renderIsFinished = true;
 
+const renderSh2 = (model: SilentHill2Model) => {
+  group = new Group();
+
+  if (editorState.cachedOriginalModel) {
+    scene.add(editorState.cachedOriginalModel);
+    if (clientState.uiParams["Visualize Skeleton"]) {
+      helper = new SkeletonHelper(editorState.cachedOriginalModel);
+      scene.add(helper);
+    }
+  }
+
+  // temporary: separate into opaque & transparent until specularity is implemented?
+  // likely need to create more materials for most accurate results
+  const opaqueMaterial = createMaterial(
+    model,
+    clientState.uiParams["Render Mode"] as MaterialType,
+    {
+      alphaTest: clientState.uiParams["Alpha Test"],
+      transparent: clientState.uiParams["Visualize Skeleton"],
+      side: RenderSideMap[
+        clientState.uiParams["Render Side"] as
+          | "DoubleSide"
+          | "FrontSide"
+          | "BackSide"
+      ],
+      opacity: clientState.uiParams["Model Opacity"],
+    },
+    clientState.uiParams["Invert Alpha"],
+    WrapMap[
+      clientState.uiParams.Wrapping as
+        | "ClampToEdgeWrapping"
+        | "RepeatWrapping"
+        | "MirroredRepeatWrapping"
+    ] ??
+      (model.modelData.geometry.primitiveHeaders?.[0]?.body.samplerStates[0] ===
+      0x01
+        ? RepeatWrapping
+        : ClampToEdgeWrapping)
+  );
+  const transparentMaterial = createMaterial(
+    model,
+    clientState.uiParams["Render Mode"] as MaterialType,
+    {
+      alphaTest: clientState.uiParams["Alpha Test"],
+      transparent:
+        clientState.uiParams.Transparency ||
+        clientState.uiParams["Visualize Skeleton"],
+      side: RenderSideMap[
+        clientState.uiParams["Render Side"] as
+          | "DoubleSide"
+          | "FrontSide"
+          | "BackSide"
+      ],
+      opacity: clientState.uiParams["Model Opacity"],
+    },
+    clientState.uiParams["Invert Alpha"],
+    WrapMap[
+      clientState.uiParams.Wrapping as
+        | "ClampToEdgeWrapping"
+        | "RepeatWrapping"
+        | "MirroredRepeatWrapping"
+    ] ??
+      (model.modelData.geometry.primitiveHeaders[0]?.body.samplerStates[0] ===
+      0x01
+        ? RepeatWrapping
+        : ClampToEdgeWrapping),
+    opaqueMaterial instanceof Material ? [opaqueMaterial] : opaqueMaterial
+  );
+
+  if (
+    opaqueMaterial instanceof Material &&
+    opaqueMaterial.name === "uv-map" &&
+    clientState.uiParams["Render Mode"] !== MaterialView.UV
+  ) {
+    textureFolder.hide();
+  } else {
+    textureFolder.show();
+  }
+
+  const opaqueGeometry = clientState.uiParams["Render Opaque"]
+    ? createGeometry(
+        model,
+        0,
+        !clientState.uiParams["Show All Hand Poses"]
+          ? clientState.folder === "jms"
+            ? [0, 3, 14]
+            : clientState.folder === "mar"
+            ? [0, 3, 6]
+            : undefined
+          : undefined
+      )
+    : undefined;
+
+  let modelSkeleton: Skeleton | undefined = undefined;
+  let opaqueMesh: SkinnedMesh | Mesh | undefined;
+  if (opaqueGeometry) {
+    opaqueGeometry.name = `${clientState.file}-opaque`;
+
+    if (clientState.uiParams["Skeleton Mode"]) {
+      const { skeleton, rootBoneIndices } = createSkeleton(model);
+      bindSkeletonToGeometry(model, opaqueGeometry);
+
+      opaqueMesh = new SkinnedMesh(opaqueGeometry, opaqueMaterial);
+      rootBoneIndices.forEach((boneIndex) =>
+        opaqueMesh?.add(skeleton.bones[boneIndex])
+      );
+      (opaqueMesh as SkinnedMesh).bind(skeleton);
+      modelSkeleton = skeleton;
+
+      if (clientState.uiParams["Visualize Skeleton"]) {
+        helper = new SkeletonHelper(opaqueMesh);
+        scene.add(helper);
+      }
+    } else {
+      opaqueMesh = new Mesh(opaqueGeometry, opaqueMaterial);
+    }
+    opaqueMesh.renderOrder = 1;
+
+    logger.debug("Added opaque geometry to mesh!", opaqueGeometry);
+    group.add(opaqueMesh);
+  }
+
+  const transparentGeometry = clientState.uiParams["Render Transparent"]
+    ? createGeometry(model, 1)
+    : undefined;
+  let transparentMesh: SkinnedMesh | Mesh | undefined;
+  if (transparentGeometry) {
+    transparentGeometry.name = `${clientState.file}-transparent`;
+
+    if (clientState.uiParams["Skeleton Mode"]) {
+      transparentMesh = new SkinnedMesh(
+        transparentGeometry,
+        transparentMaterial
+      );
+      transparentMesh.frustumCulled = false;
+
+      if (!opaqueGeometry || !modelSkeleton) {
+        const { skeleton, rootBoneIndices } = createSkeleton(model);
+        modelSkeleton = skeleton;
+        rootBoneIndices.forEach((boneIndex) =>
+          transparentMesh?.add(skeleton.bones[boneIndex])
+        );
+      }
+      bindSkeletonToTransparentGeometry(model, transparentGeometry);
+      (transparentMesh as SkinnedMesh).bind(modelSkeleton);
+    } else {
+      transparentMesh = new Mesh(transparentGeometry, transparentMaterial);
+    }
+    transparentMesh.renderOrder = 2;
+
+    if (clientState.uiParams["Visualize Normals"]) {
+      const normalsHelper = new VertexNormalsHelper(
+        transparentMesh,
+        8,
+        0xff0000
+      );
+      scene.add(normalsHelper);
+    }
+
+    logger.debug("Added transparent geometry to mesh!", transparentGeometry);
+    group.add(transparentMesh);
+  }
+
+  group.userData = {
+    silentHillModel: {
+      name: clientState.file,
+      characterId: model.header.characterId,
+    },
+  };
+  logger.debug("Adding group to scene", group);
+  scene.add(group);
+
+  return {
+    group,
+    opaqueGeometry,
+    transparentGeometry,
+    opaqueMesh,
+    transparentMesh,
+    modelSkeleton,
+  };
+};
+
+const renderSh1 = async () => {
+  const MODEL_NAME: string = clientState.uiParams["File (SH1)"];
+  const anmName = ilmToAnmAssoc(MODEL_NAME);
+
+  const ilm = new SilentHill1Model(
+    new KaitaiStream(await fetchRawBytes(`sh1/CHARA/${MODEL_NAME}.ILM`))
+  );
+  const anm = new Sh1anm(
+    new KaitaiStream(await fetchRawBytes(`sh1/ANIM/${anmName}`))
+  );
+  logger.info("Parsed SH1 model and animation", { ilm, anm });
+
+  const skeleton = createSh1Skeleton(anm);
+  const geom = createSh1Geometry(ilm, skeleton);
+
+  let image;
+  try {
+    const ilmToTextureAssoc = (name: string) => {
+      if (name === "SIBYL") {
+        return "SYBIL";
+      }
+      if (name === "DARIA" || name === "TDRA") {
+        return "DAHGUILL";
+      }
+
+      return name;
+    };
+    image = await new TextureLoader().loadAsync(
+      `sh1png/${ilmToTextureAssoc(MODEL_NAME)}.png`
+    );
+    image.minFilter = image.magFilter = NearestFilter;
+    image.wrapS = RepeatWrapping;
+    image.wrapT = RepeatWrapping;
+  } catch (e) {
+    logger.error(e);
+  }
+
+  const material = new MeshStandardMaterial({
+    map:
+      clientState.uiParams["Render Mode"] === MaterialView.Textured ||
+      clientState.uiParams["Render Mode"] === MaterialView.Wireframe
+        ? image
+        : clientState.uiParams["Render Mode"] === MaterialView.UV
+        ? (() => {
+            const t = new DataTexture(defaultDiffuseMap, 128, 128);
+            t.needsUpdate = true;
+            return t;
+          })()
+        : undefined,
+    wireframe: clientState.uiParams["Render Mode"] === MaterialView.Wireframe,
+    alphaTest: clientState.uiParams["Alpha Test"],
+    transparent: clientState.uiParams["Visualize Skeleton"],
+    side: RenderSideMap[
+      clientState.uiParams["Render Side"] as
+        | "DoubleSide"
+        | "FrontSide"
+        | "BackSide"
+    ],
+    opacity: clientState.uiParams["Model Opacity"],
+  });
+
+  const mesh = new SkinnedMesh(geom, material);
+  mesh.add(skeleton.bones[0]);
+  mesh.bind(skeleton);
+  mesh.name = "sh1model";
+
+  if (clientState.uiParams["Visualize Skeleton"]) {
+    helper = new SkeletonHelper(mesh);
+    scene.add(helper);
+  }
+
+  const group = new Group();
+  scene.add(group);
+  group.add(mesh);
+
+  const mixer = new AnimationMixer(group);
+  const tracks = createSh1Animation(anm);
+  const clip = new AnimationClip("AR.ANM", -1, tracks);
+  const clipAction = mixer.clipAction(clip);
+  clipAction.play();
+  mixers.push(mixer);
+  mesh.frustumCulled = false;
+
+  animationGui.hide();
+  loadingMessage.remove();
+
+  return {
+    group,
+    opaqueGeometry: geom,
+    transparentGeometry: undefined,
+    opaqueMesh: mesh,
+    transparentMesh: undefined,
+    modelSkeleton: skeleton,
+  };
+};
+
 const render = () => {
   renderIsFinished = false;
 
-  const modelCallback = (
-    model: SilentHillModel | undefined,
+  const isSh2 = clientState.uiParams.Game === "Silent Hill 2";
+  const isSh1 = clientState.uiParams.Game === "Silent Hill 1";
+
+  const modelCallback = async (
+    model?: SilentHill2Model | undefined,
     cleanupResources = true,
     animation?: SilentHillAnimation,
     dds?: SilentHillDramaDemo,
     name?: string
   ) => {
-    logger.debug("Parsed model structure", model);
-
-    if (model === undefined) {
+    if (model !== undefined) {
+      logger.debug("Parsed model structure", model);
+    }
+    if (model === undefined && isSh2) {
       return;
     }
 
@@ -668,7 +1004,7 @@ const render = () => {
       group.clear();
       scene.clear();
     }
-    group = new Group();
+
     let light = scene.children.find((c) => c.name === "ambient-light");
     if (!light) {
       light = new AmbientLight(
@@ -682,181 +1018,34 @@ const render = () => {
     raycastTargetsGenerated = false;
     raycastTargets.length = 0;
 
-    if (editorState.cachedOriginalModel) {
-      scene.add(editorState.cachedOriginalModel);
-      if (clientState.uiParams["Visualize Skeleton"]) {
-        helper = new SkeletonHelper(editorState.cachedOriginalModel);
-        scene.add(helper);
-      }
-    }
-
-    // temporary: separate into opaque & transparent until specularity is implemented?
-    // likely need to create more materials for most accurate results
-    const opaqueMaterial = createMaterial(
-      model,
-      clientState.uiParams["Render Mode"] as MaterialType,
-      {
-        alphaTest: clientState.uiParams["Alpha Test"],
-        transparent: clientState.uiParams["Visualize Skeleton"],
-        side: RenderSideMap[
-          clientState.uiParams["Render Side"] as
-            | "DoubleSide"
-            | "FrontSide"
-            | "BackSide"
-        ],
-        opacity: clientState.uiParams["Model Opacity"],
-      },
-      clientState.uiParams["Invert Alpha"],
-      WrapMap[
-        clientState.uiParams.Wrapping as
-          | "ClampToEdgeWrapping"
-          | "RepeatWrapping"
-          | "MirroredRepeatWrapping"
-      ] ??
-        (model.modelData.geometry.primitiveHeaders?.[0]?.body
-          .samplerStates[0] === 0x01
-          ? RepeatWrapping
-          : ClampToEdgeWrapping)
-    );
-    const transparentMaterial = createMaterial(
-      model,
-      clientState.uiParams["Render Mode"] as MaterialType,
-      {
-        alphaTest: clientState.uiParams["Alpha Test"],
-        transparent:
-          clientState.uiParams.Transparency ||
-          clientState.uiParams["Visualize Skeleton"],
-        side: RenderSideMap[
-          clientState.uiParams["Render Side"] as
-            | "DoubleSide"
-            | "FrontSide"
-            | "BackSide"
-        ],
-        opacity: clientState.uiParams["Model Opacity"],
-      },
-      clientState.uiParams["Invert Alpha"],
-      WrapMap[
-        clientState.uiParams.Wrapping as
-          | "ClampToEdgeWrapping"
-          | "RepeatWrapping"
-          | "MirroredRepeatWrapping"
-      ] ??
-        (model.modelData.geometry.primitiveHeaders[0]?.body.samplerStates[0] ===
-        0x01
-          ? RepeatWrapping
-          : ClampToEdgeWrapping),
-      opaqueMaterial instanceof Material ? [opaqueMaterial] : opaqueMaterial
-    );
-
-    if (
-      opaqueMaterial instanceof Material &&
-      opaqueMaterial.name === "uv-map" &&
-      clientState.uiParams["Render Mode"] !== MaterialView.UV
-    ) {
-      textureFolder.hide();
+    let result:
+      | ReturnType<typeof renderSh2>
+      | ReturnType<typeof renderSh1>
+      | undefined = undefined;
+    if (isSh1) {
+      result = await renderSh1();
+    } else if (model !== undefined) {
+      result = renderSh2(model);
     } else {
-      textureFolder.show();
+      throw Error("Model is not an instance of SilentHill2Model");
     }
 
-    const opaqueGeometry = clientState.uiParams["Render Opaque"]
-      ? createGeometry(
-          model,
-          0,
-          !clientState.uiParams["Show All Hand Poses"]
-            ? clientState.folder === "jms"
-              ? [0, 3, 14]
-              : clientState.folder === "mar"
-              ? [0, 3, 6]
-              : undefined
-            : undefined
-        )
-      : undefined;
+    const {
+      opaqueGeometry,
+      transparentGeometry,
+      opaqueMesh,
+      transparentMesh,
+      modelSkeleton,
+    } = result;
+    group = result.group;
 
-    let modelSkeleton: Skeleton | undefined = undefined;
-    let opaqueMesh: SkinnedMesh | Mesh | undefined;
-    if (opaqueGeometry) {
-      opaqueGeometry.name = `${clientState.file}-opaque`;
-
-      if (clientState.uiParams["Skeleton Mode"]) {
-        const { skeleton, rootBoneIndices } = createSkeleton(model);
-        bindSkeletonToGeometry(model, opaqueGeometry);
-
-        opaqueMesh = new SkinnedMesh(opaqueGeometry, opaqueMaterial);
-        rootBoneIndices.forEach((boneIndex) =>
-          opaqueMesh?.add(skeleton.bones[boneIndex])
-        );
-        (opaqueMesh as SkinnedMesh).bind(skeleton);
-        modelSkeleton = skeleton;
-
-        if (clientState.uiParams["Visualize Skeleton"]) {
-          helper = new SkeletonHelper(opaqueMesh);
-          scene.add(helper);
-        }
-      } else {
-        opaqueMesh = new Mesh(opaqueGeometry, opaqueMaterial);
-      }
-      opaqueMesh.renderOrder = 1;
-
-      if (clientState.uiParams["Visualize Normals"]) {
-        const normalsHelper = new VertexNormalsHelper(opaqueMesh, 8, 0xff0000);
-        scene.add(normalsHelper);
-      }
-
-      logger.debug("Added opaque geometry to mesh!", opaqueGeometry);
-      group.add(opaqueMesh);
-    }
-
-    const transparentGeometry = clientState.uiParams["Render Transparent"]
-      ? createGeometry(model, 1)
-      : undefined;
-    let transparentMesh: SkinnedMesh | Mesh | undefined;
-    if (transparentGeometry) {
-      transparentGeometry.name = `${clientState.file}-transparent`;
-
-      if (clientState.uiParams["Skeleton Mode"]) {
-        transparentMesh = new SkinnedMesh(
-          transparentGeometry,
-          transparentMaterial
-        );
-        transparentMesh.frustumCulled = false;
-
-        if (!opaqueGeometry || !modelSkeleton) {
-          const { skeleton, rootBoneIndices } = createSkeleton(model);
-          modelSkeleton = skeleton;
-          rootBoneIndices.forEach((boneIndex) =>
-            transparentMesh?.add(skeleton.bones[boneIndex])
-          );
-        }
-        bindSkeletonToTransparentGeometry(model, transparentGeometry);
-        (transparentMesh as SkinnedMesh).bind(modelSkeleton);
-      } else {
-        transparentMesh = new Mesh(transparentGeometry, transparentMaterial);
-      }
-      transparentMesh.renderOrder = 2;
-
-      if (clientState.uiParams["Visualize Normals"]) {
-        const normalsHelper = new VertexNormalsHelper(
-          transparentMesh,
-          8,
-          0xff0000
-        );
-        scene.add(normalsHelper);
-      }
-
-      logger.debug("Added transparent geometry to mesh!", transparentGeometry);
-      group.add(transparentMesh);
-    }
-
-    group.userData = {
-      silentHillModel: {
-        name: clientState.file,
-        characterId: model.header.characterId,
-      },
-    };
-    logger.debug("Adding group to scene", group);
-    scene.add(group);
     clientState.setCurrentObject(group);
     clientState.getTextureViewer()?.attach(group);
+
+    if (clientState.uiParams["Visualize Normals"] && opaqueMesh) {
+      const normalsHelper = new VertexNormalsHelper(opaqueMesh, 8, 0xff0000);
+      scene.add(normalsHelper);
+    }
 
     if (
       !clientState.getCustomModel() &&
@@ -879,21 +1068,29 @@ const render = () => {
       lightAnimate = fancyLightingAnimate;
     }
 
-    if (
-      !clientState.getCustomModel() &&
-      clientState.folder === "favorites" &&
-      clientState.file === "org.mdl"
-    ) {
-      modelSkeleton?.bones[0]?.rotateZ(Math.PI / 2);
-      modelSkeleton?.bones[6]?.rotateZ(-Math.PI / 2);
-      modelSkeleton?.bones[7]?.rotateZ(-Math.PI / 2);
-      modelSkeleton?.bones[8]?.rotateZ(Math.PI / 2);
+    if (isSh2) {
+      if (
+        !clientState.getCustomModel() &&
+        clientState.folder === "favorites" &&
+        clientState.file === "org.mdl"
+      ) {
+        modelSkeleton?.bones[0]?.rotateZ(Math.PI / 2);
+        modelSkeleton?.bones[6]?.rotateZ(-Math.PI / 2);
+        modelSkeleton?.bones[7]?.rotateZ(-Math.PI / 2);
+        modelSkeleton?.bones[8]?.rotateZ(Math.PI / 2);
+      }
     }
 
     const mesh = opaqueMesh ?? transparentMesh;
     let mixer: AnimationMixer | undefined;
 
-    if (clientState.file === "inu.mdl" && animation && mesh && modelSkeleton) {
+    if (
+      isSh2 &&
+      clientState.file === "inu.mdl" &&
+      animation &&
+      mesh &&
+      modelSkeleton
+    ) {
       mixer = new AnimationMixer(mesh);
       mixers.push(mixer);
 
@@ -1074,11 +1271,59 @@ const render = () => {
     return group;
   };
 
-  const filename = clientState.file;
+  if (isSh1) {
+    scenarioInput.hide();
+    folderInput.hide();
+    fileInput.hide();
+    lockToFolder.hide();
+    sh1FileInput.show();
+    wrappingInput.hide();
+    renderOpaqueInput.hide();
+    renderTransparentInput.hide();
+    visualizeNormalsInput.hide();
+    skeletonModeController?.hide();
+    editModeButton.hide();
+    clientState.setMode("viewing");
+    editModeButton.setValue(false);
+    textureViewerButton.show();
+    invertAlphaInput.hide();
+
+    if (clientState.getGlVersion() === 1) {
+      showQuickModal(
+        "<p>WebGL 2 is required for Silent Hill 1 models for now.</p>" +
+          "<p>This is because the models require animations to be properly displayed.</p>"
+      );
+      throw new Error("WebGL 1 not supported for Silent Hill 1 models");
+    }
+  } else {
+    scenarioInput.show();
+    folderInput.show();
+    fileInput.show();
+    lockToFolder.show();
+    sh1FileInput.hide();
+    wrappingInput.show();
+    renderOpaqueInput.show();
+    renderTransparentInput.show();
+    visualizeNormalsInput.show();
+    skeletonModeController?.show();
+    editModeButton.show();
+    invertAlphaInput.show();
+  }
+
+  const filename = isSh2
+    ? clientState.file
+    : clientState.uiParams["File (SH1)"];
   const currentFileIndex = clientState.getFileIndex();
-  if (lastIndex !== currentFileIndex) {
+  if (
+    lastGame !== clientState.uiParams["Game"] ||
+    lastIndex !== currentFileIndex ||
+    (!isSh2 && lastSh1File !== filename)
+  ) {
+    lastSh1File = clientState.uiParams["File (SH1)"];
+    lastGame = clientState.uiParams.Game;
+
     if (
-      clientState.folder !== "favorites" &&
+      ((isSh1 && lastSh1File !== "AR") || clientState.folder !== "favorites") &&
       !clientState.hasAcceptedContentWarning()
     ) {
       showContentWarningModal(
@@ -1090,7 +1335,9 @@ const render = () => {
           clientState.setFileIndex(clientState.defaultStartIndex);
           const controllers = gui.controllersRecursive();
           controllers.forEach((c) => {
-            c.setValue(c.initialValue);
+            if (c !== gameInput) {
+              c.setValue(c.initialValue);
+            }
           });
         }
       );
@@ -1145,8 +1392,8 @@ const render = () => {
       editorState.editorParams["Show Original"] &&
       !editorState.cachedOriginalModel
     ) {
-      loadModelFromUrl(clientState.fullPath).then((original) => {
-        const cachedOriginalModel = modelCallback(original);
+      loadModelFromUrl(clientState.fullPath).then(async (original) => {
+        const cachedOriginalModel = await modelCallback(original);
         if (cachedOriginalModel) {
           cachedOriginalModel.parent = null;
         }
@@ -1183,7 +1430,7 @@ const render = () => {
     return;
   }
 
-  if (clientState.file === "inu.mdl") {
+  if (isSh2 && clientState.file === "inu.mdl") {
     (async () => {
       let bytes,
         path,
@@ -1252,6 +1499,11 @@ const render = () => {
         });
       });
     })();
+    return;
+  }
+
+  if (isSh1) {
+    modelCallback();
     return;
   }
 

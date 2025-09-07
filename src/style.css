@@ -343,6 +343,10 @@ body.viewing .flexbox-container .placeholder .lil-gui.root {
   max-height: 100%;
 }
 
+#sidebar .content.texture-viewer img {
+  width: 100%;
+}
+
 #sidebar .lil-gui.root,
 #sidebar div.children {
   width: 100%;
@@ -409,6 +413,10 @@ body.viewing .flexbox-container .placeholder .lil-gui.root {
   width: 2rem;
   margin: 0.5rem;
   margin-top: 0;
+}
+
+.preview-modal {
+  text-align: center;
 }
 
 .preview-modal img {
