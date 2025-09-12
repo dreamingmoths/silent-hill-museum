@@ -1,7 +1,9 @@
 kaitai_struct_compiler
-node_modules
+kaitai_struct_rust_runtime
 
+node_modules
 public
+assets
 build
 dist
 
@@ -9,3 +11,8 @@ dist
 .vscode
 .venv
 __pycache__
+
+
+# Added by cargo
+
+/target

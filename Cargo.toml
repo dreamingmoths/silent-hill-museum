@@ -1,0 +1,7 @@
+[package]
+name = "silent-hill-museum"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+kaitai = { path = "kaitai_struct_rust_runtime" }
