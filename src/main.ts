@@ -19,6 +19,7 @@ import {
   cameraFix,
   clientState,
   defaultParams,
+  MixerWithActions,
   preferredParams,
   sh1Files,
 } from "./objects/MuseumState";
@@ -58,7 +59,6 @@ import {
   AnimationMixer,
   MeshStandardMaterial,
   FrontSide,
-  AnimationAction,
   TextureLoader,
   NearestFilter,
   DataTexture,
@@ -490,7 +490,6 @@ boneTransformGizmo.setRenderLoop(() => {
 boneTransformGizmo.setOnDrag(disableOrbitControls);
 boneTransformGizmo.setOnStopDrag(enableOrbitControls);
 
-type MixerWithActions = AnimationMixer & { _actions: AnimationAction[] };
 orbitControls.addEventListener("start", () => {
   mixers.forEach((mixer) => {
     const mixerWithActions = mixer as MixerWithActions;
@@ -956,7 +955,7 @@ const renderSh1 = async () => {
 
   const mixer = new AnimationMixer(group);
   const tracks = createSh1Animation(anm);
-  const clip = new AnimationClip("AR.ANM", -1, tracks);
+  const clip = new AnimationClip(anmName, -1, tracks);
   const clipAction = mixer.clipAction(clip);
   clipAction.play();
   mixers.push(mixer);
@@ -1209,6 +1208,10 @@ const render = () => {
         });
       }
     });
+
+    clientState.setCurrentAnimationClipsFromMixers(
+      mixers as MixerWithActions[]
+    );
 
     function animate() {
       if (!renderIsFinished) {
