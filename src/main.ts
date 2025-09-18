@@ -1040,8 +1040,9 @@ const render = () => {
     } = result;
     group = result.group;
 
-    clientState.setCurrentObject(group);
-    clientState.getTextureViewer()?.attach(group);
+    const currentObject = clientState.file === "inu.mdl" ? scene : group;
+    clientState.setCurrentObject(currentObject);
+    clientState.getTextureViewer()?.attach(currentObject);
 
     if (clientState.uiParams["Visualize Normals"] && opaqueMesh) {
       const normalsHelper = new VertexNormalsHelper(opaqueMesh, 8, 0xff0000);
