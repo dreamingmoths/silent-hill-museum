@@ -17,7 +17,7 @@ import {
   Wrapping,
 } from "three";
 import SilentHillModel from "./kaitai/Mdl";
-import { MIN_SIGNED_INT, transformationMatrixToMat4 } from "./utils";
+import { at, MIN_SIGNED_INT, transformationMatrixToMat4 } from "./utils";
 import decodeDXT from "decode-dxt";
 import logger from "./objects/Logger";
 
@@ -74,7 +74,7 @@ const processTransparentPrimitiveHeaders = (
     .map((header) => header.body.primitiveStartIndex)
     .sort((a, b) => a - b);
   const stripIndices = geometryData.transparentTriangleIndices.array;
-  const lastPrimitiveHeader = transparentPrimitiveHeaders.at(-1)!.body;
+  const lastPrimitiveHeader = at(transparentPrimitiveHeaders, -1)!.body;
   const triangleCount =
     lastPrimitiveHeader.primitiveStartIndex +
     lastPrimitiveHeader.primitiveLength;
@@ -151,7 +151,7 @@ const processPrimitiveHeaders = (
     .map((header) => header.body.primitiveStartIndex)
     .sort((a, b) => a - b);
   const stripIndices = geometryData.triangleIndices.array;
-  const lastPrimitiveHeader = primitiveHeaders.at(-1)!.body;
+  const lastPrimitiveHeader = at(primitiveHeaders, -1)!.body;
   const triangleCount =
     lastPrimitiveHeader.primitiveStartIndex +
     lastPrimitiveHeader.primitiveLength;
@@ -368,7 +368,7 @@ export const bindSkeletonToGeometry = (
     .map((header) => header.body.primitiveStartIndex)
     .sort((a, b) => a - b);
   const stripIndices = geometryData.triangleIndices.array;
-  const lastPrimitiveHeader = primitiveHeaders.at(-1)!.body;
+  const lastPrimitiveHeader = at(primitiveHeaders, -1)!.body;
   const triangleCount =
     lastPrimitiveHeader.primitiveStartIndex +
     lastPrimitiveHeader.primitiveLength;
@@ -550,7 +550,7 @@ export const triangleStripToList = (
     currentIndex += 3;
     groupIndexCount += 3;
   }
-  groupData.at(-1)!.count = groupIndexCount;
+  at(groupData, -1)!.count = groupIndexCount;
 
   return { triangleIndices, primitiveVertexSets, groupData };
 };
