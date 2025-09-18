@@ -9,6 +9,7 @@ import {
 } from "three";
 import SilentHillAnimation from "./kaitai/Anm";
 import logger from "./objects/Logger";
+import { ANIMATION_FRAME_DURATION } from "./utils";
 
 type BoneInfo = {
   bone: Bone;
@@ -50,7 +51,7 @@ export const createAnimationTracks = (
         rotation: [],
         rotationTimes: [],
         timeCursor: 0,
-        frameDuration: 5,
+        frameDuration: ANIMATION_FRAME_DURATION,
       };
       const transform = block.transforms[j];
       if (!anmTypes.has(block.header[j].type)) {
@@ -137,8 +138,6 @@ export const processAnimationTransform = (
     return;
   }
   if (boneInfo.position.length) {
-    if (boneInfo.position.length < 100) {
-    }
     boneInfo.position.push(...boneInfo.position.slice(-3));
     positionTimestamp(boneInfo);
   }

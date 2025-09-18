@@ -1,4 +1,5 @@
 import {
+  AnimationClip,
   BackSide,
   Box3,
   ClampToEdgeWrapping,
@@ -210,11 +211,20 @@ export const createDiv = (parent: HTMLElement, className: string) => {
 
 const exporter = new GLTFExporter();
 type GltfCallback = (gltf: ArrayBuffer | { [key: string]: any }) => void;
-export function exportModel(object: Object3D, filename: string): void;
-export function exportModel(object: Object3D, callback: GltfCallback): void;
 export function exportModel(
   object: Object3D,
-  filenameOrCallback: string | GltfCallback
+  filename: string,
+  clips?: AnimationClip[]
+): void;
+export function exportModel(
+  object: Object3D,
+  callback: GltfCallback,
+  clips?: AnimationClip[]
+): void;
+export function exportModel(
+  object: Object3D,
+  filenameOrCallback: string | GltfCallback,
+  clips?: AnimationClip[]
 ) {
   exporter.parse(
     object,
@@ -231,7 +241,7 @@ export function exportModel(
     (error) => {
       logger.warn("Could not export the scene. An error occurred: ", error);
     },
-    { onlyVisible: false, trs: true }
+    { onlyVisible: false, trs: true, animations: clips }
   );
 }
 
@@ -589,3 +599,5 @@ export class UnhandledCaseError extends Error {
     }
   }
 }
+
+export const ANIMATION_FRAME_DURATION = 1 / 24;

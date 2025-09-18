@@ -11,6 +11,7 @@ import {
 import SilentHillDramaDemo from "./kaitai/Dds";
 import F2 from "./kaitai/F2";
 import logger from "./objects/Logger";
+import { ANIMATION_FRAME_DURATION } from "./utils";
 
 export const createCutsceneTracks = (
   dds: SilentHillDramaDemo | undefined,
@@ -69,7 +70,7 @@ export const createCutsceneTracks = (
             position.add(characterOrigin);
           }
           characterPositions.push(-position.x, position.y, -position.z);
-          characterTimes.push(5 * i);
+          characterTimes.push(ANIMATION_FRAME_DURATION * i);
         });
       } else if (
         instruction.ddsBlock instanceof SilentHillDramaDemo.DdsPlayCamera
@@ -85,11 +86,11 @@ export const createCutsceneTracks = (
           } else if (typeof block === "number") {
             zoomOrigin = block;
             cameraFovs.push(getFovAngle(zoomOrigin));
-            cameraFovTimes.push(5 * i);
+            cameraFovTimes.push(ANIMATION_FRAME_DURATION * i);
             return;
           } else if (block instanceof F2) {
             cameraFovs.push(getFovAngle(zoomOrigin + block.floatValue));
-            cameraFovTimes.push(5 * i);
+            cameraFovTimes.push(ANIMATION_FRAME_DURATION * i);
             return;
           }
           let position = new Vector3(block.x, block.y, block.z);
@@ -100,7 +101,7 @@ export const createCutsceneTracks = (
               position.add(cameraOrigin);
             }
             cameraPositions.push(-position.x, position.y, -position.z);
-            cameraTimes.push(5 * i);
+            cameraTimes.push(ANIMATION_FRAME_DURATION * i);
           } else {
             if ((instruction.demoStatus & 0x02) > 0) {
               cameraTargetOrigin = position;
@@ -108,7 +109,7 @@ export const createCutsceneTracks = (
               position.add(cameraTargetOrigin);
             }
             cameraTargets.push(-position.x, position.y, -position.z);
-            cameraTargetTimes.push(5 * i);
+            cameraTargetTimes.push(ANIMATION_FRAME_DURATION * i);
           }
         });
       } else if (
@@ -151,15 +152,15 @@ export const createCutsceneTracks = (
               const v = info.ddsBlock;
               if (info.controlByte === 0x8) {
                 lightInfo.color.colors.push(0.5, 0.5, 0.5);
-                lightInfo.color.times.push(5 * i);
+                lightInfo.color.times.push(ANIMATION_FRAME_DURATION * i);
               } else {
                 lightInfo.position.positions.push(-v.x, v.y, -v.z);
-                lightInfo.position.times.push(5 * i);
+                lightInfo.position.times.push(ANIMATION_FRAME_DURATION * i);
               }
             } else if (info.ddsBlock instanceof SilentHillDramaDemo.F2Vector2) {
               const v = info.ddsBlock;
               lightInfo.range.ranges.push(v.x); //, v.y);
-              lightInfo.range.times.push(5 * i);
+              lightInfo.range.times.push(ANIMATION_FRAME_DURATION * i);
             }
           });
         }
@@ -223,3 +224,5 @@ export const createCutsceneTracks = (
   logger.debug({ ddsLights });
   return { tracks, ddsLights };
 };
+
+export const INU_CUTSCENE_DURATION = 794 / 24;

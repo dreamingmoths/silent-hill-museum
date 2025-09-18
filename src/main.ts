@@ -19,6 +19,7 @@ import {
   cameraFix,
   clientState,
   defaultParams,
+  MuseumMixer,
   preferredParams,
   sh1Files,
 } from "./objects/MuseumState";
@@ -58,7 +59,6 @@ import {
   AnimationMixer,
   MeshStandardMaterial,
   FrontSide,
-  AnimationAction,
   TextureLoader,
   NearestFilter,
   DataTexture,
@@ -94,7 +94,7 @@ import SilentHillDramaDemo from "./kaitai/Dds";
 import { createAnimationTracks } from "./animation";
 import AnimationGui from "./objects/AnimationGui";
 import ddsList from "./assets/dds-list.json";
-import { createCutsceneTracks } from "./cutscene";
+import { createCutsceneTracks, INU_CUTSCENE_DURATION } from "./cutscene";
 import "./style.css";
 import { isMobile } from "./mobile";
 import KeybindManager from "./objects/KeybindManager";
@@ -490,10 +490,9 @@ boneTransformGizmo.setRenderLoop(() => {
 boneTransformGizmo.setOnDrag(disableOrbitControls);
 boneTransformGizmo.setOnStopDrag(enableOrbitControls);
 
-type MixerWithActions = AnimationMixer & { _actions: AnimationAction[] };
 orbitControls.addEventListener("start", () => {
   mixers.forEach((mixer) => {
-    const mixerWithActions = mixer as MixerWithActions;
+    const mixerWithActions = mixer as MuseumMixer;
     const actions = mixerWithActions._actions.filter(
       (action) =>
         action.getClip().name === "camera" ||
@@ -956,7 +955,7 @@ const renderSh1 = async () => {
 
   const mixer = new AnimationMixer(group);
   const tracks = createSh1Animation(anm);
-  const clip = new AnimationClip("AR.ANM", -1, tracks);
+  const clip = new AnimationClip(anmName, -1, tracks);
   const clipAction = mixer.clipAction(clip);
   clipAction.play();
   mixers.push(mixer);
@@ -1041,8 +1040,9 @@ const render = () => {
     } = result;
     group = result.group;
 
-    clientState.setCurrentObject(group);
-    clientState.getTextureViewer()?.attach(group);
+    const currentObject = clientState.file === "inu.mdl" ? scene : group;
+    clientState.setCurrentObject(currentObject);
+    clientState.getTextureViewer()?.attach(currentObject);
 
     if (clientState.uiParams["Visualize Normals"] && opaqueMesh) {
       const normalsHelper = new VertexNormalsHelper(opaqueMesh, 8, 0xff0000);
@@ -1094,10 +1094,11 @@ const render = () => {
       modelSkeleton
     ) {
       mixer = new AnimationMixer(mesh);
+      (mixer as MuseumMixer).isInuAnm = true;
       mixers.push(mixer);
 
       const tracks = createAnimationTracks(animation, modelSkeleton);
-      tracks.forEach((track) => track.trim(0, 5 * 794)); // hardcoded for now
+      tracks.forEach((track) => track.trim(0, INU_CUTSCENE_DURATION));
       const clip = new AnimationClip(
         clientState.file.replace(".mdl", ".anm"),
         -1,
@@ -1210,6 +1211,8 @@ const render = () => {
       }
     });
 
+    clientState.setCurrentAnimationClipsFromMixers(mixers as MuseumMixer[]);
+
     function animate() {
       if (!renderIsFinished) {
         // prevent animation loop if render is not finished
@@ -1217,11 +1220,13 @@ const render = () => {
         return;
       }
 
-      const delta = clock.getDelta() * 120; // targeting 120 fps
+      const delta = clock.getDelta();
       mixers.forEach((mixer) => {
         mixer.update(delta);
-        if (mixer.time >= 5 * 794) {
-          // hardcoded for now
+        if (
+          (mixer as MuseumMixer).isInuAnm &&
+          mixer.time >= INU_CUTSCENE_DURATION
+        ) {
           mixer.setTime(0);
         }
       });

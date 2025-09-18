@@ -17,7 +17,13 @@ import {
 import { MaterialView } from "../model";
 import SilentHillModel from "../kaitai/Mdl";
 import { disposeResources, exportModel, saveArrayBuffer } from "../utils";
-import { Object3D, Vector3 } from "three";
+import {
+  AnimationAction,
+  AnimationClip,
+  AnimationMixer,
+  Object3D,
+  Vector3,
+} from "three";
 import TextureViewer, { TextureViewerStates } from "./TextureViewer";
 import { editorState } from "./EditorState";
 import { renderStructToContainer } from "../visualize-struct";
@@ -84,6 +90,14 @@ export default class MuseumState {
     model: SilentHillModel;
   };
   private currentFile?: File;
+  private currentAnimationClips: AnimationClip[] = [];
+
+  public getCurrentContentName() {
+    if (this.uiParams["Game"] === "Silent Hill 1") {
+      return this.uiParams["File (SH1)"];
+    }
+    return this.file;
+  }
 
   public setFileIndex(index: number) {
     this.fileIndex = index;
@@ -405,6 +419,21 @@ export default class MuseumState {
     return path;
   }
 
+  public setCurrentAnimationClipsFromMixers(mixers: MuseumMixer[]) {
+    const clips: AnimationClip[] = [];
+    for (const mixer of mixers) {
+      for (const action of mixer._actions) {
+        clips.push(action.getClip());
+      }
+    }
+    this.currentAnimationClips = clips;
+    return clips;
+  }
+
+  public getCurrentAnimationClips() {
+    return this.currentAnimationClips;
+  }
+
   public subscribeToUpdates(callback: () => void) {
     this.updateCallbacks.push(callback);
     return () => {
@@ -463,7 +492,11 @@ export default class MuseumState {
       }
       toggleWithBackground("disclaimerModal", true);
       onConfirm(() => {
-        exportModel(object, this.file);
+        exportModel(
+          object,
+          this.getCurrentContentName(),
+          this.getCurrentAnimationClips()
+        );
         toggleWithBackground("blenderExportModal", true);
       });
     },
@@ -580,3 +613,8 @@ export const sh1Files = [
   "SIBYL",
   "KAU",
 ].sort();
+
+export type MuseumMixer = AnimationMixer & {
+  _actions: AnimationAction[];
+  isInuAnm?: boolean;
+};

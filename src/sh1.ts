@@ -21,6 +21,7 @@ import Ilm from "./kaitai/Ilm";
 import Sh1anm from "./kaitai/Sh1anm";
 import { Tuple } from "./types/common";
 import { BufferGeometryUtils } from "three/examples/jsm/Addons.js";
+import { ANIMATION_FRAME_DURATION } from "./utils";
 
 // I mostly just want to quickly create a prototype for sh1 support before
 // making any big structural changes to the code
@@ -232,7 +233,6 @@ const smatrix = (matrix: Matrix4, qMatrix: number[]) => {
 export const createSh1Animation = (anm: Sh1anm) => {
   const boneCount = anm.bonesPerFrame;
 
-  const TIME_SCALE = 5;
   const scale = (x: number) => x * (1 << anm.scaleLog2);
 
   const timeBuffer = new Float32Array(anm.numFrames);
@@ -274,7 +274,7 @@ export const createSh1Animation = (anm: Sh1anm) => {
     }
   }
   for (let i = 0; i < anm.numFrames; i++) {
-    timeBuffer[i] = i * TIME_SCALE;
+    timeBuffer[i] = i * ANIMATION_FRAME_DURATION;
   }
 
   const tracks: Array<KeyframeTrack> = [];
