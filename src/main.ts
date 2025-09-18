@@ -19,7 +19,7 @@ import {
   cameraFix,
   clientState,
   defaultParams,
-  MixerWithActions,
+  MuseumMixer,
   preferredParams,
   sh1Files,
 } from "./objects/MuseumState";
@@ -94,7 +94,7 @@ import SilentHillDramaDemo from "./kaitai/Dds";
 import { createAnimationTracks } from "./animation";
 import AnimationGui from "./objects/AnimationGui";
 import ddsList from "./assets/dds-list.json";
-import { createCutsceneTracks } from "./cutscene";
+import { createCutsceneTracks, INU_CUTSCENE_DURATION } from "./cutscene";
 import "./style.css";
 import { isMobile } from "./mobile";
 import KeybindManager from "./objects/KeybindManager";
@@ -492,7 +492,7 @@ boneTransformGizmo.setOnStopDrag(enableOrbitControls);
 
 orbitControls.addEventListener("start", () => {
   mixers.forEach((mixer) => {
-    const mixerWithActions = mixer as MixerWithActions;
+    const mixerWithActions = mixer as MuseumMixer;
     const actions = mixerWithActions._actions.filter(
       (action) =>
         action.getClip().name === "camera" ||
@@ -1093,10 +1093,11 @@ const render = () => {
       modelSkeleton
     ) {
       mixer = new AnimationMixer(mesh);
+      (mixer as MuseumMixer).isInuAnm = true;
       mixers.push(mixer);
 
       const tracks = createAnimationTracks(animation, modelSkeleton);
-      tracks.forEach((track) => track.trim(0, 5 * 794)); // hardcoded for now
+      tracks.forEach((track) => track.trim(0, INU_CUTSCENE_DURATION));
       const clip = new AnimationClip(
         clientState.file.replace(".mdl", ".anm"),
         -1,
@@ -1209,9 +1210,7 @@ const render = () => {
       }
     });
 
-    clientState.setCurrentAnimationClipsFromMixers(
-      mixers as MixerWithActions[]
-    );
+    clientState.setCurrentAnimationClipsFromMixers(mixers as MuseumMixer[]);
 
     function animate() {
       if (!renderIsFinished) {
@@ -1220,11 +1219,13 @@ const render = () => {
         return;
       }
 
-      const delta = clock.getDelta() * 120; // targeting 120 fps
+      const delta = clock.getDelta();
       mixers.forEach((mixer) => {
         mixer.update(delta);
-        if (mixer.time >= 5 * 794) {
-          // hardcoded for now
+        if (
+          (mixer as MuseumMixer).isInuAnm &&
+          mixer.time >= INU_CUTSCENE_DURATION
+        ) {
           mixer.setTime(0);
         }
       });

@@ -419,7 +419,7 @@ export default class MuseumState {
     return path;
   }
 
-  public setCurrentAnimationClipsFromMixers(mixers: MixerWithActions[]) {
+  public setCurrentAnimationClipsFromMixers(mixers: MuseumMixer[]) {
     const clips: AnimationClip[] = [];
     for (const mixer of mixers) {
       for (const action of mixer._actions) {
@@ -614,4 +614,7 @@ export const sh1Files = [
   "KAU",
 ].sort();
 
-export type MixerWithActions = AnimationMixer & { _actions: AnimationAction[] };
+export type MuseumMixer = AnimationMixer & {
+  _actions: AnimationAction[];
+  isInuAnm?: boolean;
+};

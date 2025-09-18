@@ -599,3 +599,5 @@ export class UnhandledCaseError extends Error {
     }
   }
 }
+
+export const ANIMATION_FRAME_DURATION = 1 / 24;
