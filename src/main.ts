@@ -1275,6 +1275,7 @@ const render = () => {
       renderer.setAnimationLoop(null);
       renderer.setAnimationLoop(animate);
     }
+    onWindowResize();
     return group;
   };
 
