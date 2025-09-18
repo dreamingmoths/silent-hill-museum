@@ -3,7 +3,7 @@ import { expect, test } from "vitest";
 import { loadModelFromUrl } from "../load";
 import { globby } from "globby";
 import SilentHillModel from "../kaitai/Mdl";
-import { transformationMatrixToMat4 } from "../utils";
+import { at, transformationMatrixToMat4 } from "../utils";
 import { BufferGeometry, Skeleton } from "three";
 import {
   bindSkeletonToGeometry,
@@ -176,8 +176,8 @@ test("should recognize unique texture identifiers", () => {
         // we can do this by assuming that the second-to-last item in the
         // filename split is a folder name, and expecting this folder name
         // to match that of the model where this texture was loaded
-        const thisFolderName = file.split("/").at(-2);
-        const originalFolderName = file.split("/").at(-2);
+        const thisFolderName = at(file.split("/"), -2);
+        const originalFolderName = at(file.split("/"), -2);
         expect(thisFolderName).toEqual(originalFolderName);
         skipSprites = true;
         continue;
@@ -259,7 +259,7 @@ test("backface culling field", () => {
     }
 
     let culled = false;
-    model.modelData.geometry.primitiveHeaders.forEach(prim => {
+    model.modelData.geometry.primitiveHeaders.forEach((prim) => {
       if (!prim.body.backfaceCulling && !culled) {
         culled = true;
         culledCount += 1;
@@ -268,10 +268,10 @@ test("backface culling field", () => {
 
     totalCount++;
     if (culled) {
-      logger.debug(file.split("/").at(-1));
+      logger.debug(at(file.split("/"), -1));
     }
   }
   logger.debug(
     `Out of the ${totalCount} files, ${culledCount} have backface culling enabled for some prims.`
   );
-})
+});

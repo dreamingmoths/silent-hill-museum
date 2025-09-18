@@ -22,6 +22,7 @@ import KaitaiStream from "../kaitai/runtime/KaitaiStream";
 import {
   applyDiffToOffsetTable,
   assignPublicProperties,
+  at,
   clamp,
   computeAverageVertex,
   ensureOffsetTableAligned,
@@ -1239,7 +1240,7 @@ export default class SerializableModel {
     } else {
       // mdl already had a texture container here, so just modify it
       const textureMetadata = model.modelData.textureMetadata;
-      const spriteHeader = textureContainer.spriteHeaders.at(-1)!;
+      const spriteHeader = at(textureContainer.spriteHeaders, -1)!;
       oldTextureContainerSize = 64 + spriteHeader.dataSize;
       const textureIndex = textureMetadata.mainTextureIds.indexOf(
         textureContainer.textureId
@@ -1257,7 +1258,7 @@ export default class SerializableModel {
     textureContainer.height2 = height;
     textureContainer.data = Uint8Array.from(compressed);
 
-    const spriteHeader = textureContainer.spriteHeaders.at(-1);
+    const spriteHeader = at(textureContainer.spriteHeaders, -1);
     if (spriteHeader === undefined) {
       throw Error("No sprite header?");
     }

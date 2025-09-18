@@ -5,6 +5,7 @@ import { globby } from "globby";
 import SilentHillDramaDemo from "../kaitai/Dds";
 import F2 from "../kaitai/F2";
 import logger from "../objects/Logger";
+import { at } from "../utils";
 
 test("should parse inu animation ", async () => {
   const inu = loadDramaDemoFromBytes(
@@ -38,7 +39,7 @@ describe("should parse all dds files without error", async () => {
   const inputDir = path.join(__dirname, "../../public/data");
   const folders = (
     await globby([`${inputDir}/*/*`], { onlyDirectories: true })
-  ).map((path) => path.split("data/").at(-1)!);
+  ).map((path) => at(path.split("data/"), -1)!);
 
   for (const folder of folders) {
     const files = await globby([`${inputDir}/${folder}/*.dds`]);
@@ -48,7 +49,7 @@ describe("should parse all dds files without error", async () => {
     describe(folder, async () => {
       for (const file of files) {
         const cutscene = loadDdsWithCache(file);
-        test(file.split("/").at(-1) ?? file, async () => {
+        test(at(file.split("/"), -1) ?? file, async () => {
           await expect(cutscene).resolves.toBeDefined();
         });
       }

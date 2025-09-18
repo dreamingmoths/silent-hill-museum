@@ -9,7 +9,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest",
-    "quick-test": "QUICK=1 npm run test",
+    "quick-test": "QUICK=1 pnpm test",
     "setup": "tsx scripts/setup.ts",
     "kaitai": "tsx scripts/kaitai.ts",
     "ts": "tsc",
@@ -35,5 +35,9 @@
   },
   "peerDependencies": {
     "iconv-lite": "^0.6.3"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "pnpm": ">=9.15.0"
   }
 }

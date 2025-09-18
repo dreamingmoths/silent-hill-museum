@@ -589,6 +589,13 @@ export const isSafari = () => {
   return /^((?!chrome|android).)*safari/i.test(userAgent) === true;
 };
 
+export const at = <T>(array: Array<T>, index: number): T | undefined => {
+  if (index < 0) {
+    return array[array.length + index];
+  }
+  return array[index];
+};
+
 export class UnhandledCaseError extends Error {
   constructor(message: string) {
     super(`Unhandled case: ${message}`);
