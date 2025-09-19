@@ -27,15 +27,27 @@ declare class Ilm {
 }
 
 declare namespace Ilm {
+  class ClutIndex {
+    constructor(io: any, parent?: any, root?: any);
+    __type: "ClutIndex";
+    _io: any;
+
+    x: number;
+    y: number;
+    value: number;
+  }
+}
+
+declare namespace Ilm {
   class IndexPacket {
     constructor(io: any, parent?: any, root?: any);
     __type: "IndexPacket";
     _io: any;
 
     uv0: Ilm.Uv;
-    _unnamed1: number;
+    clutIndex: Ilm.ClutIndex;
     uv1: Ilm.Uv;
-    _unnamed3: number;
+    tpageInfo: number;
     uv2: Ilm.Uv;
     uv3: Ilm.Uv;
     indices: Ilm.PrimIndices;
