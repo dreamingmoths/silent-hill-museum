@@ -5,8 +5,9 @@ import { fetchRawBytes } from "../load";
 import Ilm from "../kaitai/Ilm";
 import Sh1anm from "../kaitai/Sh1anm";
 import KaitaiStream from "../kaitai/runtime/KaitaiStream";
-import { ilmToAnmAssoc, anmToIlmAssoc } from "../sh1";
+import { ilmToAnmAssoc, anmToIlmAssoc, ilmToTextureAssoc } from "../sh1";
 import logger from "../objects/Logger";
+import PsxTim from "../kaitai/PsxTim";
 
 const ILM_PATH = path.join(__dirname, "../../public/sh1/CHARA");
 const ANM_PATH = path.join(__dirname, "../../public/sh1/ANIM");
@@ -49,6 +50,22 @@ describe("ilm + sh1anm", () => {
       const anmStream = new KaitaiStream(anmBytes);
       const anm = new Sh1anm(anmStream);
       expect(anm).toBeDefined();
+    });
+
+    const imageFile =
+      ilmToTextureAssoc(ilmFile.replace(".ILM", ""), true) + ".TIM";
+    test(`${imageFile}`, async () => {
+      let imageBytes;
+      try {
+        imageBytes = await fetchRawBytes(path.join(ILM_PATH, imageFile));
+      } catch (e) {
+        return;
+      }
+
+      const imageStream = new KaitaiStream(imageBytes);
+      const image = new PsxTim(imageStream);
+      expect(image).toBeDefined();
+      expect(image.bpp).toBe(0);
     });
   });
 
