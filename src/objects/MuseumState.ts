@@ -30,6 +30,7 @@ import { renderStructToContainer } from "../visualize-struct";
 import { anmToMdlAssoc } from "../animation";
 import anmList from "../assets/anm-list.json";
 import Ilm from "../kaitai/Ilm";
+import { ilmFiles } from "../sh1";
 
 export const START_INDEX = constructIndex("chr", "favorites", "inu.mdl");
 const START_PATH_ARRAY = destructureIndex(START_INDEX);
@@ -51,7 +52,8 @@ export default class MuseumState {
 
     if (game === "sh1") {
       this.uiParams["Game"] = "Silent Hill 1";
-      this.uiParams["File (SH1)"] = params.get("file") ?? "DARIA";
+      this.uiParams["File (SH1)"] =
+        (params.get("file") as (typeof ilmFiles)[number]) ?? "HERO";
       return;
     }
 
@@ -148,8 +150,8 @@ export default class MuseumState {
   public nextFile() {
     if (this.uiParams["Game"] === "Silent Hill 1") {
       this.uiParams["File (SH1)"] =
-        sh1Files[
-          (sh1Files.indexOf(this.uiParams["File (SH1)"]) + 1) % sh1Files.length
+        ilmFiles[
+          (ilmFiles.indexOf(this.uiParams["File (SH1)"]) + 1) % ilmFiles.length
         ];
       this.onUpdate();
       return;
@@ -167,11 +169,11 @@ export default class MuseumState {
   public previousFile() {
     if (this.uiParams["Game"] === "Silent Hill 1") {
       this.uiParams["File (SH1)"] =
-        sh1Files[
-          (sh1Files.indexOf(this.uiParams["File (SH1)"]) -
+        ilmFiles[
+          (ilmFiles.indexOf(this.uiParams["File (SH1)"]) -
             1 +
-            sh1Files.length) %
-            sh1Files.length
+            ilmFiles.length) %
+            ilmFiles.length
         ];
       this.onUpdate();
       return;
@@ -461,7 +463,7 @@ export default class MuseumState {
 
   public uiParams = {
     Game: Math.random() > 0.5 ? "Silent Hill 1" : "Silent Hill 2",
-    "File (SH1)": "DARIA",
+    "File (SH1)": "MTH" as (typeof ilmFiles)[number],
     Scenario: this.rootFolder === "chr" ? "Main Scenario" : "Born From A Wish",
     Folder: this.folder,
     Filename: this.file,
@@ -603,16 +605,6 @@ export const defaultParams = Object.assign(
     )
   )
 );
-
-export const sh1Files = [
-  "SRL",
-  "AR",
-  "LISA",
-  "BLISA",
-  "DARIA",
-  "SIBYL",
-  "KAU",
-].sort();
 
 export type MuseumMixer = AnimationMixer & {
   _actions: AnimationAction[];

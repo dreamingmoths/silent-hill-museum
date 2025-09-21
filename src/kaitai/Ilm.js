@@ -174,6 +174,35 @@ var Ilm = (function () {
     return Obj;
   })());
 
+  var ClutIndex = (Ilm.ClutIndex = (function () {
+    function ClutIndex(_io, _parent, _root) {
+      this._io = _io;
+      this._parent = _parent;
+      this._root = _root || this;
+
+      this._read();
+    }
+    ClutIndex.prototype._read = function () {
+      this.value = this._io.readS2le();
+    };
+    Object.defineProperty(ClutIndex.prototype, "x", {
+      get: function () {
+        if (this._m_x !== undefined) return this._m_x;
+        this._m_x = (this.value & 63) * 16;
+        return this._m_x;
+      },
+    });
+    Object.defineProperty(ClutIndex.prototype, "y", {
+      get: function () {
+        if (this._m_y !== undefined) return this._m_y;
+        this._m_y = (this.value >>> 6) & 511;
+        return this._m_y;
+      },
+    });
+
+    return ClutIndex;
+  })());
+
   var IndexPacket = (Ilm.IndexPacket = (function () {
     function IndexPacket(_io, _parent, _root) {
       this._io = _io;
@@ -184,9 +213,9 @@ var Ilm = (function () {
     }
     IndexPacket.prototype._read = function () {
       this.uv0 = new Uv(this._io, this, this._root);
-      this._unnamed1 = this._io.readS2le();
+      this.clutIndex = new ClutIndex(this._io, this, this._root);
       this.uv1 = new Uv(this._io, this, this._root);
-      this._unnamed3 = this._io.readS2le();
+      this.tpageInfo = this._io.readS2le();
       this.uv2 = new Uv(this._io, this, this._root);
       this.uv3 = new Uv(this._io, this, this._root);
       this.indices = new PrimIndices(this._io, this, this._root);
@@ -212,6 +241,22 @@ var Ilm = (function () {
     };
 
     return PrimIndices;
+  })());
+
+  var XyPair = (Ilm.XyPair = (function () {
+    function XyPair(_io, _parent, _root) {
+      this._io = _io;
+      this._parent = _parent;
+      this._root = _root || this;
+
+      this._read();
+    }
+    XyPair.prototype._read = function () {
+      this.x = this._io.readS2le();
+      this.y = this._io.readS2le();
+    };
+
+    return XyPair;
   })());
   Object.defineProperty(Ilm.prototype, "idTable", {
     get: function () {

@@ -123,12 +123,14 @@ types:
       - id: uv0
         type: uv
 
-      - type: s2
+      - id: clut_index
+        type: clut_index
 
       - id: uv1
         type: uv
 
-      - type: s2
+      - id: tpage_info
+        type: s2
 
       - id: uv2
         type: uv
@@ -157,3 +159,21 @@ types:
         type: u1
       - id: v3
         type: u1
+
+  xy_pair:
+    seq:
+      - id: x
+        type: s2
+      - id: y
+        type: s2
+
+  clut_index:
+    seq:
+      - id: value
+        type: s2
+
+    instances:
+      x:
+        value: (value & 0x3f) * 0x10
+      y:
+        value: (value >> 6) & 0x1FF

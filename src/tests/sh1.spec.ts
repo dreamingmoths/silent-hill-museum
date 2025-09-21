@@ -5,23 +5,12 @@ import { fetchRawBytes } from "../load";
 import Ilm from "../kaitai/Ilm";
 import Sh1anm from "../kaitai/Sh1anm";
 import KaitaiStream from "../kaitai/runtime/KaitaiStream";
-import { ilmToAnmAssoc, anmToIlmAssoc } from "../sh1";
+import { ilmToAnmAssoc, anmToIlmAssoc, ilmToTextureAssoc } from "../sh1";
 import logger from "../objects/Logger";
+import PsxTim from "../kaitai/PsxTim";
 
 const ILM_PATH = path.join(__dirname, "../../public/sh1/CHARA");
 const ANM_PATH = path.join(__dirname, "../../public/sh1/ANIM");
-
-// just guesses
-
-// TODO: parse the partial animations
-// @ts-ignore
-const parsePartialAnm = (baseAnm: Sh1anm, partialStream: KaitaiStream) => {
-  baseAnm.magic = 0;
-  baseAnm._m_frameData = undefined;
-  baseAnm._io = partialStream;
-  baseAnm.frameData; // access frame data to call setter
-  return baseAnm;
-};
 
 const getFileList = (dir: string, ext: string) => {
   return fs
@@ -49,6 +38,21 @@ describe("ilm + sh1anm", () => {
       const anmStream = new KaitaiStream(anmBytes);
       const anm = new Sh1anm(anmStream);
       expect(anm).toBeDefined();
+    });
+
+    const imageFile = ilmToTextureAssoc(ilmFile.replace(".ILM", "")) + ".TIM";
+    test(`${imageFile}`, async () => {
+      let imageBytes;
+      try {
+        imageBytes = await fetchRawBytes(path.join(ILM_PATH, imageFile));
+      } catch (e) {
+        return;
+      }
+
+      const imageStream = new KaitaiStream(imageBytes);
+      const image = new PsxTim(imageStream);
+      expect(image).toBeDefined();
+      expect(image.bpp).toBe(0);
     });
   });
 

@@ -4,13 +4,17 @@
 import {
   Bone,
   BufferGeometry,
+  DataTexture,
   Float32BufferAttribute,
+  GLSL3,
   InterpolateLinear,
   KeyframeTrack,
   Matrix3,
   Matrix4,
   Quaternion,
   QuaternionKeyframeTrack,
+  RawShaderMaterial,
+  RedFormat,
   Skeleton,
   Uint16BufferAttribute,
   Vector3,
@@ -22,13 +26,21 @@ import Sh1anm from "./kaitai/Sh1anm";
 import { Tuple } from "./types/common";
 import { BufferGeometryUtils } from "three/examples/jsm/Addons.js";
 import { ANIMATION_FRAME_DURATION } from "./utils";
+import PsxTim from "./kaitai/PsxTim";
 
 // I mostly just want to quickly create a prototype for sh1 support before
 // making any big structural changes to the code
 
 // 🔺 ------- model building ------- 🔺
 
-export const createSh1Geometry = (ilm: Ilm, skeleton: Skeleton) => {
+type GeometryInit = {
+  ilm: Ilm;
+  skeleton: Skeleton;
+  psxTim: PsxTim;
+};
+
+export const createSh1Geometry = (init: GeometryInit) => {
+  const { ilm, skeleton, psxTim } = init;
   let geom = new BufferGeometry();
   const bones = skeleton.bones;
   for (const bone of bones) {
@@ -37,7 +49,6 @@ export const createSh1Geometry = (ilm: Ilm, skeleton: Skeleton) => {
 
   // first pass: collect metadata before making buffers
   let vertexBufferSize = 0;
-  let uvBufferSize = 0;
   let boneBufferSize = 0;
 
   for (let objectIndex = 0; objectIndex < ilm.numObjs; objectIndex++) {
@@ -50,12 +61,10 @@ export const createSh1Geometry = (ilm: Ilm, skeleton: Skeleton) => {
 
       if (isTriangle) {
         vertexBufferSize += 9;
-        uvBufferSize += 6;
         boneBufferSize += 12;
       } else {
         // split quads into two triangles. the PSX GPU does this as well
         vertexBufferSize += 18;
-        uvBufferSize += 12;
         boneBufferSize += 24;
       }
     }
@@ -64,7 +73,7 @@ export const createSh1Geometry = (ilm: Ilm, skeleton: Skeleton) => {
   // second pass: make buffers
   const scratchpadBuffer = new Float32Array(128 * 4);
   const vertexBuffer = new Float32Array(vertexBufferSize);
-  const uvBuffer = new Float32Array(uvBufferSize);
+  const uvBuffer = new Float32Array(boneBufferSize);
   const skinIndexBuffer = new Uint16Array(boneBufferSize);
   const skinWeightBuffer = new Float32Array(skinIndexBuffer);
 
@@ -72,9 +81,15 @@ export const createSh1Geometry = (ilm: Ilm, skeleton: Skeleton) => {
   let uvIndex = 0;
   let skinIndex = 0;
 
-  const u = (x: number) => x / 0xff;
-  const v = (x: number) => 2 * (1.0 - x / 0xff);
-  const loadFromScratchpad = (uv: Ilm.Uv, index: number) => {
+  const u = (x: number) => x / (psxTim.img.width * 4);
+  const v = (x: number) => x / psxTim.img.height;
+
+  const loadFromScratchpad = (
+    clut: Ilm.ClutIndex,
+    tpage: number,
+    uv: Ilm.Uv,
+    index: number
+  ) => {
     vertexBuffer[vertexIndex] = scratchpadBuffer[index];
     vertexBuffer[vertexIndex + 1] = scratchpadBuffer[index + 1];
     vertexBuffer[vertexIndex + 2] = scratchpadBuffer[index + 2];
@@ -82,7 +97,9 @@ export const createSh1Geometry = (ilm: Ilm, skeleton: Skeleton) => {
 
     uvBuffer[uvIndex] = u(uv.u);
     uvBuffer[uvIndex + 1] = v(uv.v);
-    uvIndex += 2;
+    uvBuffer[uvIndex + 2] = (tpage & 0x60) >> 4; //clut.x / psxTim.clut.width;
+    uvBuffer[uvIndex + 3] = clut.y / psxTim.clut.height;
+    uvIndex += 4;
 
     skinIndexBuffer[skinIndex] = scratchpadBuffer[index + 3];
     skinIndexBuffer[skinIndex + 1] = 0;
@@ -124,6 +141,7 @@ export const createSh1Geometry = (ilm: Ilm, skeleton: Skeleton) => {
     // now build non-indexed triangle list and uvs
     for (let primIndex = 0; primIndex < info.numPrims; primIndex++) {
       const prim = info.prims[primIndex];
+      const clutIndex = prim.clutIndex;
 
       const indices = prim.indices;
       let [i0, i1, i2, i3] = [
@@ -133,9 +151,12 @@ export const createSh1Geometry = (ilm: Ilm, skeleton: Skeleton) => {
         indices.v3 * 4,
       ];
 
-      // temporary patch until the active bone indices flag is implemented
+      // temporary patch
       if (
         object.name.includes("RHAND2") ||
+        object.name.includes("RHAND3") ||
+        object.name.includes("RHAND4") ||
+        object.name.includes("LHAND2") ||
         object.name.includes("FLAURO") ||
         object.name.includes("KEY") ||
         object.name.includes("RAGLA")
@@ -149,24 +170,24 @@ export const createSh1Geometry = (ilm: Ilm, skeleton: Skeleton) => {
 
       // 2 -> 1 -> 0
       // ---------- 2 ----------
-      loadFromScratchpad(prim.uv2, i2);
+      loadFromScratchpad(clutIndex, prim.tpageInfo, prim.uv2, i2);
 
       // ---------- 1 ----------
-      loadFromScratchpad(prim.uv1, i1);
+      loadFromScratchpad(clutIndex, prim.tpageInfo, prim.uv1, i1);
 
       // ---------- 0 ----------
-      loadFromScratchpad(prim.uv0, i0);
+      loadFromScratchpad(clutIndex, prim.tpageInfo, prim.uv0, i0);
 
       if (isQuad) {
         // 1 -> 2 -> 3
         // ---------- 1 ----------
-        loadFromScratchpad(prim.uv1, i1);
+        loadFromScratchpad(clutIndex, prim.tpageInfo, prim.uv1, i1);
 
         // ---------- 2 ----------
-        loadFromScratchpad(prim.uv2, i2);
+        loadFromScratchpad(clutIndex, prim.tpageInfo, prim.uv2, i2);
 
         // ---------- 3 ----------
-        loadFromScratchpad(prim.uv3, i3);
+        loadFromScratchpad(clutIndex, prim.tpageInfo, prim.uv3, i3);
       }
     }
   }
@@ -177,7 +198,7 @@ export const createSh1Geometry = (ilm: Ilm, skeleton: Skeleton) => {
     "skinWeight",
     new Float32BufferAttribute(skinWeightBuffer, 4)
   );
-  geom.setAttribute("uv", new Float32BufferAttribute(uvBuffer, 2));
+  geom.setAttribute("uv", new Float32BufferAttribute(uvBuffer, 4));
   geom = BufferGeometryUtils.mergeVertices(geom);
 
   return geom;
@@ -189,33 +210,40 @@ export const createSh1Skeleton = (anm: Sh1anm) => {
   const bones: Array<Bone> = [];
 
   const scale = (x: number) => x * (1 << anm.scaleLog2);
+  const frameInfo = anm.frames[0];
+
   for (let i = 0; i < anm.numBones; i++) {
-    const restPose = anm.bindPoses[i];
-    const parentBoneIndex = restPose.bone;
-
-    // use the first frame as initial matrices
-    const matrix = new Matrix4();
-    const frameInfo = anm.frameData[i];
-
-    let t: Vector3Like;
-    if (frameInfo instanceof Sh1anm.Rotation) {
-      t = restPose.translation;
-
-      smatrix(matrix, frameInfo.value);
-    } else {
-      t = frameInfo;
-    }
-    matrix.setPosition(scale(t.x), scale(t.y), scale(t.z));
+    const boneInfo = anm.bones[i];
 
     const bone = new Bone();
     bone.name = `${i}`;
+
+    // use the first frame as initial matrices
+    const matrix = new Matrix4();
+
+    let t: Vector3Like | undefined = undefined;
+    if (boneInfo.rotationIndex >= 0) {
+      t = boneInfo.bindTranslation;
+
+      smatrix(matrix, frameInfo.rotations[boneInfo.rotationIndex].value);
+    } else {
+      t =
+        frameInfo.translations[boneInfo.translationIndex] ??
+        boneInfo.bindTranslation;
+    }
+    matrix.setPosition(scale(t.x), scale(t.y), scale(t.z));
+
     bone.applyMatrix4(matrix);
 
-    if (parentBoneIndex !== 0xff) {
-      bones[parentBoneIndex].add(bone);
-    }
-
     bones.push(bone);
+  }
+
+  for (let i = 0; i < anm.numBones; i++) {
+    const restPose = anm.bones[i];
+    const parentBoneIndex = restPose.parent;
+    if (parentBoneIndex >= 0) {
+      bones[parentBoneIndex].add(bones[i]);
+    }
   }
 
   return new Skeleton(bones);
@@ -231,46 +259,63 @@ const smatrix = (matrix: Matrix4, qMatrix: number[]) => {
 // 🎬 ------- animation building ------- 🎬
 
 export const createSh1Animation = (anm: Sh1anm) => {
-  const boneCount = anm.bonesPerFrame;
+  const boneCount = anm.numBones;
 
   const scale = (x: number) => x * (1 << anm.scaleLog2);
 
   const timeBuffer = new Float32Array(anm.numFrames);
-  const transformBuffers: Array<Float32Array> = [];
+  const transformBuffers: Array<{
+    translations?: Float32Array;
+    rotations?: Float32Array;
+  }> = [];
 
-  for (let boneIndex = 0; boneIndex < anm.numTranslationBones; boneIndex++) {
-    transformBuffers[boneIndex] = new Float32Array(3 * anm.numFrames);
-  }
-  for (
-    let boneIndex = anm.numTranslationBones;
-    boneIndex < anm.bonesPerFrame;
-    boneIndex++
-  ) {
-    transformBuffers[boneIndex] = new Float32Array(4 * anm.numFrames);
-  }
-
-  for (let i = 0; i < anm.frameData.length; i++) {
-    const transform = anm.frameData[i];
-    const boneIndex = i % boneCount;
-    const frameIndex = Math.floor(i / boneCount);
-
-    if (transform instanceof Sh1anm.Translation) {
-      const buffer = transformBuffers[boneIndex];
-      const bufferIndex = 3 * frameIndex;
-      buffer[bufferIndex] = scale(transform.x);
-      buffer[bufferIndex + 1] = scale(transform.y);
-      buffer[bufferIndex + 2] = scale(transform.z);
-    } else {
-      const quat = new Quaternion().setFromRotationMatrix(
-        smatrix(new Matrix4(), transform.value)
+  for (let boneIndex = 0; boneIndex < anm.numBones; boneIndex++) {
+    const bone = anm.bones[boneIndex];
+    transformBuffers[boneIndex] = {};
+    if (bone.translationIndex >= 0) {
+      transformBuffers[boneIndex].translations = new Float32Array(
+        3 * anm.numFrames
       );
+    }
+    if (bone.rotationIndex >= 0) {
+      transformBuffers[boneIndex].rotations = new Float32Array(
+        4 * anm.numFrames
+      );
+    }
+  }
 
-      const buffer = transformBuffers[boneIndex];
-      const bufferIndex = 4 * frameIndex;
-      buffer[bufferIndex] = quat.x;
-      buffer[bufferIndex + 1] = quat.y;
-      buffer[bufferIndex + 2] = quat.z;
-      buffer[bufferIndex + 3] = quat.w;
+  for (let frameIndex = 0; frameIndex < anm.frames.length; frameIndex++) {
+    const frame = anm.frames[frameIndex];
+
+    for (let boneIndex = 0; boneIndex < boneCount; boneIndex++) {
+      const bone = anm.bones[boneIndex];
+      const translations = transformBuffers[boneIndex].translations;
+      const rotations = transformBuffers[boneIndex].rotations;
+
+      if (translations && (boneIndex === 0 || bone.translationIndex !== 0)) {
+        const transform = frame.translations[bone.translationIndex];
+
+        const buffer = translations;
+        const bufferIndex = 3 * frameIndex;
+        buffer[bufferIndex] = scale(transform.x);
+        buffer[bufferIndex + 1] = scale(transform.y);
+        buffer[bufferIndex + 2] = scale(transform.z);
+      }
+
+      if (rotations) {
+        const transform = frame.rotations[bone.rotationIndex];
+
+        const quat = new Quaternion().setFromRotationMatrix(
+          smatrix(new Matrix4(), transform.value)
+        );
+
+        const buffer = rotations;
+        const bufferIndex = 4 * frameIndex;
+        buffer[bufferIndex] = quat.x;
+        buffer[bufferIndex + 1] = quat.y;
+        buffer[bufferIndex + 2] = quat.z;
+        buffer[bufferIndex + 3] = quat.w;
+      }
     }
   }
   for (let i = 0; i < anm.numFrames; i++) {
@@ -278,37 +323,122 @@ export const createSh1Animation = (anm: Sh1anm) => {
   }
 
   const tracks: Array<KeyframeTrack> = [];
-  for (let boneIndex = 0; boneIndex < anm.numTranslationBones; boneIndex++) {
-    tracks.push(
-      new VectorKeyframeTrack(
-        `sh1model.bones[${boneIndex}].position`,
-        timeBuffer,
-        transformBuffers[boneIndex],
-        InterpolateLinear
-      )
-    );
-  }
-  for (
-    let boneIndex = anm.numTranslationBones;
-    boneIndex < anm.bonesPerFrame;
-    boneIndex++
-  ) {
-    tracks.push(
-      new QuaternionKeyframeTrack(
-        `sh1model.bones[${boneIndex}].quaternion`,
-        timeBuffer,
-        transformBuffers[boneIndex],
-        InterpolateLinear
-      )
-    );
+  for (let boneIndex = 0; boneIndex < anm.numBones; boneIndex++) {
+    const translations = transformBuffers[boneIndex].translations;
+    const rotations = transformBuffers[boneIndex].rotations;
+    if (translations) {
+      tracks.push(
+        new VectorKeyframeTrack(
+          `sh1model.bones[${boneIndex}].position`,
+          timeBuffer,
+          translations,
+          InterpolateLinear
+        )
+      );
+    }
+    if (rotations) {
+      tracks.push(
+        new QuaternionKeyframeTrack(
+          `sh1model.bones[${boneIndex}].quaternion`,
+          timeBuffer,
+          rotations,
+          InterpolateLinear
+        )
+      );
+    }
   }
 
   return tracks;
 };
 
+// psx tim parsing
+
+const clut = (x: number) => (x / 31) * 255;
+
+import psx_frag from "./glsl/psx_frag.glsl?raw";
+import psx_vert from "./glsl/psx_vert.glsl?raw";
+import { clientState } from "./objects/MuseumState";
+
+export const texture = (psxTim: PsxTim, bpp = 4) => {
+  if (bpp !== 4) {
+    throw new Error("BPP must be 4");
+  }
+
+  const clutInfo = psxTim.clut;
+  const clutWidth = clutInfo.width;
+  const clutHeight = clutInfo.height;
+  const clutTexture = new Uint8Array(4 * clutWidth * clutHeight);
+
+  let clutIndex = 0;
+  for (let i = 0; i < psxTim.clut.body.length; i += 2) {
+    const clut16 = psxTim.clut.body[i] | (psxTim.clut.body[i + 1] << 8);
+    const r = clut(clut16 & 0x1f);
+    const g = clut((clut16 >> 5) & 0x1f);
+    const b = clut((clut16 >> 10) & 0x1f);
+    clutTexture[clutIndex] = r;
+    clutTexture[clutIndex + 1] = g;
+    clutTexture[clutIndex + 2] = b;
+    clutTexture[clutIndex + 3] = clut16 === 0 ? 0 : 255;
+
+    clutIndex += 4;
+  }
+
+  const imageWidth = psxTim.img.width * 4;
+  const imageHeight = psxTim.img.height;
+  const imageTexture = new Uint8Array(imageWidth * imageHeight);
+
+  let pixelIndex = 0;
+  for (let i = 0; i < psxTim.img.body.length; i += 2) {
+    const clut4 = psxTim.img.body[i] | (psxTim.img.body[i + 1] << 8);
+    imageTexture[pixelIndex] = clut4 & 0xf;
+    imageTexture[pixelIndex + 1] = (clut4 >> 4) & 0xf;
+    imageTexture[pixelIndex + 2] = (clut4 >> 8) & 0xf;
+    imageTexture[pixelIndex + 3] = (clut4 >> 12) & 0xf;
+    pixelIndex += 4;
+  }
+
+  const viewer = clientState.getTextureViewer();
+  console.debug(viewer);
+  if (viewer) {
+    viewer.addDataTexture(imageTexture, imageWidth, imageHeight, {
+      grayscale: true,
+      interpolation: "nearest",
+    });
+    viewer.addDataTexture(clutTexture, clutWidth, clutHeight, {
+      grayscale: false,
+      interpolation: "nearest",
+    });
+  }
+
+  const clutDataTexture = new DataTexture(clutTexture, clutWidth, clutHeight);
+  clutDataTexture.needsUpdate = true;
+
+  const imgDataTexture = new DataTexture(
+    imageTexture,
+    imageWidth,
+    imageHeight,
+    RedFormat
+  );
+  imgDataTexture.needsUpdate = true;
+
+  const mat = new RawShaderMaterial({
+    vertexShader: psx_vert,
+    fragmentShader: psx_frag,
+    uniforms: {
+      tClutTexture: { value: clutDataTexture },
+      imgTexture: { value: imgDataTexture },
+    },
+    glslVersion: GLSL3,
+    transparent: true,
+  });
+
+  mat.uniformsNeedUpdate = true;
+
+  return mat;
+};
+
 // 🗂️ ------- file structure associations ------- 🗂️
 export const ilmToAnmArray = [
-  ["HERO", "HR"],
   ["BOS", "BOS"],
   ["BOS2", "BOS"],
   ["TDRA", "TDA"],
@@ -328,8 +458,9 @@ export const ilmToAnmArray = [
   ["KAU", "KAU"],
   ["SIBYL", "SBL2"],
   ["HERO", "HR_E01"],
+  ["HERO", "HR"],
   ["SIBYL", "SBL_LAST"],
-  ["SNK", "SPD"],
+  // ["SNK", "SPD"],
 ] as const;
 type SpecialIlmName = (typeof ilmToAnmArray)[number][0];
 type SpecialAnmName = (typeof ilmToAnmArray)[number][1];
@@ -359,3 +490,67 @@ export const anmToIlmAssoc = (anmName: string) => {
 
   return name + ".ILM";
 };
+
+export const ilmToTextureAssoc = (name: string) => {
+  switch (name) {
+    case "WRM":
+      return "WORM";
+    case "BIRD":
+      return "BD2";
+    case "MTH":
+      return "MOTH";
+    case "MAN":
+      return "HERO";
+  }
+  return name;
+};
+
+export const ilmFiles = [
+  "AR",
+  "BAR",
+  "BD2",
+  // "BFLU",
+  // "BIG",
+  "BIRD",
+  "BLISA",
+  "BOS",
+  "BTFY",
+  "CAT",
+  "CKN",
+  "CLD1",
+  "CLD2",
+  "CLD3",
+  "CLD4",
+  "COC",
+  "DARIA",
+  "DEAD",
+  "DG2",
+  "DOB",
+  "DOC",
+  "DOG",
+  "EI",
+  "FAT",
+  "FRG",
+  "HERO",
+  "ICU",
+  "JACK",
+  "KAU",
+  "LISA",
+  "LITL",
+  // "MAN",
+  "MAR",
+  "MKY",
+  "MSB",
+  "MTH",
+  "OST",
+  "PRS",
+  "PRSD",
+  "ROD",
+  "SIBYL",
+  "SLT",
+  "SNK",
+  "SRL",
+  "TAR",
+  "TDRA",
+  "WRM",
+] as const;
