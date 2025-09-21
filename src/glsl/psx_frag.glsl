@@ -1,7 +1,7 @@
 precision mediump float;
 precision mediump int;
-in vec4 vUv;
 
+in vec4 vUv;
 uniform sampler2D tClutTexture;
 uniform sampler2D imgTexture;
 
