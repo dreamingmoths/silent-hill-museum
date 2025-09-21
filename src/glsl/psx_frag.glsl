@@ -2,8 +2,10 @@ precision mediump float;
 precision mediump int;
 
 in vec4 vUv;
+uniform vec3 ambientLightColor;
 uniform sampler2D tClutTexture;
 uniform sampler2D imgTexture;
+uniform float opacity;
 
 layout(location = 0) out highp vec4 pc_fragColor;
 
@@ -12,7 +14,7 @@ void main() {
     float palette_idx = texture(imgTexture, img_xy).r;
 
     vec2 clut_xy = vec2(palette_idx * 255.0 / 16.0, vUv.w);
-    vec4 j = texture(tClutTexture, clut_xy);
+    vec4 color = texture(tClutTexture, clut_xy);
 
-    pc_fragColor = j;
+    pc_fragColor = vec4(color.rgb * ambientLightColor, opacity);
 }

@@ -59,6 +59,7 @@ import {
   MeshStandardMaterial,
   FrontSide,
   DataTexture,
+  RawShaderMaterial,
 } from "three";
 import {
   GLTFLoader,
@@ -105,7 +106,7 @@ import {
   ilmFiles,
   ilmToAnmAssoc,
   ilmToTextureAssoc,
-  texture as createSh1Material,
+  createSh1Material,
 } from "./sh1";
 import PsxTim from "./kaitai/PsxTim";
 
@@ -369,7 +370,7 @@ textureFolder
 
 textureFolder.addColor(clientState.uiParams, "Ambient Color");
 textureFolder.add(clientState.uiParams, "Ambient Intensity", 0, 8);
-textureFolder
+const fancyLightingController = textureFolder
   .add(clientState.uiParams, "Fancy Lighting")
   .onFinishChange((value: boolean) => {
     if (!value && lightGroup) {
@@ -916,6 +917,16 @@ const renderSh1 = async () => {
   const shaderMaterial = createSh1Material(psxTim);
   shaderMaterial.needsUpdate = true;
   shaderMaterial.uniformsNeedUpdate = true;
+  shaderMaterial.transparent = clientState.uiParams["Transparency"];
+
+  const side =
+    RenderSideMap[
+      clientState.uiParams["Render Side"] as
+        | "DoubleSide"
+        | "FrontSide"
+        | "BackSide"
+    ];
+  shaderMaterial.side = side;
 
   const material =
     clientState.uiParams["Render Mode"] === MaterialView.Textured
@@ -933,12 +944,7 @@ const renderSh1 = async () => {
             clientState.uiParams["Render Mode"] === MaterialView.Wireframe,
           alphaTest: clientState.uiParams["Alpha Test"],
           transparent: clientState.uiParams["Visualize Skeleton"],
-          side: RenderSideMap[
-            clientState.uiParams["Render Side"] as
-              | "DoubleSide"
-              | "FrontSide"
-              | "BackSide"
-          ],
+          side,
           opacity: clientState.uiParams["Model Opacity"],
         });
 
@@ -1257,6 +1263,13 @@ const render = () => {
         light.color = new Color(clientState.uiParams["Ambient Color"]);
         light.intensity = clientState.uiParams["Ambient Intensity"];
       }
+      if (opaqueMesh?.material instanceof RawShaderMaterial) {
+        const uniforms = opaqueMesh.material.uniforms;
+        uniforms.opacity.value = clientState.uiParams["Model Opacity"];
+        uniforms.ambientLightColor.value = new Color(
+          clientState.uiParams["Ambient Color"]
+        ).multiplyScalar(clientState.uiParams["Ambient Intensity"]);
+      }
       lightAnimate?.(delta);
 
       if (
@@ -1300,6 +1313,7 @@ const render = () => {
     editModeButton.setValue(false);
     textureViewerButton.show();
     invertAlphaInput.hide();
+    fancyLightingController.hide();
 
     exportToGltfButton.name("[export temporarily unavailable]");
     exportToGltfButton.disable();
@@ -1324,6 +1338,7 @@ const render = () => {
     skeletonModeController?.show();
     editModeButton.show();
     invertAlphaInput.show();
+    fancyLightingController.show();
 
     exportToGltfButton.name("Export to GLTF");
     exportToGltfButton.enable();

@@ -27,6 +27,9 @@ import { Tuple } from "./types/common";
 import { BufferGeometryUtils } from "three/examples/jsm/Addons.js";
 import { ANIMATION_FRAME_DURATION } from "./utils";
 import PsxTim from "./kaitai/PsxTim";
+import psx_frag from "./glsl/psx_frag.glsl?raw";
+import psx_vert from "./glsl/psx_vert.glsl?raw";
+import { clientState } from "./objects/MuseumState";
 
 // I mostly just want to quickly create a prototype for sh1 support before
 // making any big structural changes to the code
@@ -351,15 +354,11 @@ export const createSh1Animation = (anm: Sh1anm) => {
   return tracks;
 };
 
-// psx tim parsing
+// 🌠 ------- texture building ------- 🌠
 
 const clut = (x: number) => (x / 31) * 255;
 
-import psx_frag from "./glsl/psx_frag.glsl?raw";
-import psx_vert from "./glsl/psx_vert.glsl?raw";
-import { clientState } from "./objects/MuseumState";
-
-export const texture = (psxTim: PsxTim, bpp = 4) => {
+export const createSh1Material = (psxTim: PsxTim, bpp = 4) => {
   if (bpp !== 4) {
     throw new Error("BPP must be 4");
   }
@@ -428,9 +427,11 @@ export const texture = (psxTim: PsxTim, bpp = 4) => {
     uniforms: {
       tClutTexture: { value: clutDataTexture },
       imgTexture: { value: imgDataTexture },
+      ambientLightColor: { value: new Vector3(1, 1, 1) },
+      opacity: { value: 1 },
     },
-    glslVersion: GLSL3,
     transparent: true,
+    glslVersion: GLSL3,
   });
 
   mat.uniformsNeedUpdate = true;
