@@ -142,6 +142,24 @@ export default class TextureViewer {
         this.contentWindow.appendChild(image);
       });
     });
+
+    for (const image of this.dataImages) {
+      this.contentWindow.appendChild(image);
+    }
+    this.dataImages = [];
+  }
+
+  private dataImages: HTMLImageElement[] = [];
+  public addDataTexture(
+    array: Uint8Array,
+    width: number,
+    height: number,
+    options?: { grayscale?: boolean; interpolation?: "nearest" | "linear" }
+  ) {
+    const image = this.renderUint8ArrayAsImage(array, width, height, options);
+    this.attachPointerListener(image);
+    console.debug(image);
+    this.dataImages.push(image);
   }
 
   private attachPointerListener(image: HTMLImageElement) {
@@ -153,23 +171,50 @@ export default class TextureViewer {
   private renderUint8ArrayAsImage(
     uint8Array: Uint8Array,
     width: number,
-    height: number
+    height: number,
+    options?: { grayscale?: boolean; interpolation?: "nearest" | "linear" }
   ) {
+    const { grayscale, interpolation } = options ?? {};
+
     const canvas = this.canvas;
     canvas.width = width;
     canvas.height = height;
     const ctx = canvas.getContext("2d");
+
+    if (grayscale) {
+      if (width * height !== uint8Array.byteLength) {
+        throw new Error("Cannot convert grayscale image");
+      }
+
+      const original = uint8Array;
+      uint8Array = new Uint8Array(width * height * 4);
+      for (let i = 0; i < uint8Array.length; i += 4) {
+        const v = (255 / 16) * original[i / 4];
+        uint8Array[i] = v;
+        uint8Array[i + 1] = v;
+        uint8Array[i + 2] = v;
+        uint8Array[i + 3] = v;
+      }
+    }
+
     const imageData = new ImageData(
       new Uint8ClampedArray(uint8Array),
       width,
       height
     );
     ctx?.putImageData(imageData, 0, 0);
+
     const img = document.createElement("img");
     img.src = canvas.toDataURL();
     img.alt = "Model texture";
     img.className = "texture-image";
+
+    if (interpolation === "nearest") {
+      img.style.imageRendering = "pixelated";
+    }
+
     ctx?.clearRect(0, 0, width, height);
+
     return img;
   }
 }

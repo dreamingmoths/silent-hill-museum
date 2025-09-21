@@ -21,7 +21,6 @@ import {
   defaultParams,
   MuseumMixer,
   preferredParams,
-  sh1Files,
 } from "./objects/MuseumState";
 import {
   createRainbowLights,
@@ -59,8 +58,6 @@ import {
   AnimationMixer,
   MeshStandardMaterial,
   FrontSide,
-  TextureLoader,
-  NearestFilter,
   DataTexture,
 } from "three";
 import {
@@ -105,8 +102,12 @@ import {
   createSh1Animation,
   createSh1Geometry,
   createSh1Skeleton,
+  ilmFiles,
   ilmToAnmAssoc,
+  ilmToTextureAssoc,
+  texture as createSh1Material,
 } from "./sh1";
+import PsxTim from "./kaitai/PsxTim";
 
 const appContainer = document.getElementById("app");
 if (!(appContainer instanceof HTMLDivElement)) {
@@ -153,7 +154,11 @@ const gameInput = dataGuiFolder
     render();
   });
 const sh1FileInput = dataGuiFolder
-  .add(clientState.uiParams, "File (SH1)", sh1Files)
+  .add(
+    clientState.uiParams,
+    "File (SH1)",
+    ilmFiles.map((x) => x.replace(".ILM", ""))
+  )
   .hide()
   .onFinishChange(() => render())
   .listen();
@@ -878,11 +883,11 @@ const renderSh2 = (model: SilentHill2Model) => {
 };
 
 const renderSh1 = async () => {
-  const MODEL_NAME: string = clientState.uiParams["File (SH1)"];
-  const anmName = ilmToAnmAssoc(MODEL_NAME);
+  const modelName: string = clientState.uiParams["File (SH1)"];
+  const anmName = ilmToAnmAssoc(modelName);
 
   const ilm = new SilentHill1Model(
-    new KaitaiStream(await fetchRawBytes(`sh1/CHARA/${MODEL_NAME}.ILM`))
+    new KaitaiStream(await fetchRawBytes(`sh1/CHARA/${modelName}.ILM`))
   );
   clientState.setCurrentViewerIlm(ilm);
   const anm = new Sh1anm(
@@ -890,54 +895,50 @@ const renderSh1 = async () => {
   );
   logger.info("Parsed SH1 model and animation", { ilm, anm });
 
-  const skeleton = createSh1Skeleton(anm);
-  const geom = createSh1Geometry(ilm, skeleton);
-
-  let image;
+  let psxTim: PsxTim | undefined = undefined;
   try {
-    const ilmToTextureAssoc = (name: string) => {
-      if (name === "SIBYL") {
-        return "SYBIL";
-      }
-      if (name === "DARIA" || name === "TDRA") {
-        return "DAHGUILL";
-      }
-
-      return name;
-    };
-    image = await new TextureLoader().loadAsync(
-      `sh1png/${ilmToTextureAssoc(MODEL_NAME)}.png`
+    psxTim = new PsxTim(
+      new KaitaiStream(
+        await fetchRawBytes(
+          `sh1/CHARA/${ilmToTextureAssoc(modelName).split("/")[0]}.TIM`
+        )
+      )
     );
-    image.minFilter = image.magFilter = NearestFilter;
-    image.wrapS = RepeatWrapping;
-    image.wrapT = RepeatWrapping;
   } catch (e) {
+    psxTim = new PsxTim(
+      new KaitaiStream(await fetchRawBytes(`sh1/CHARA/HERO.TIM`))
+    );
     logger.error(e);
   }
 
-  const material = new MeshStandardMaterial({
-    map:
-      clientState.uiParams["Render Mode"] === MaterialView.Textured ||
-      clientState.uiParams["Render Mode"] === MaterialView.Wireframe
-        ? image
-        : clientState.uiParams["Render Mode"] === MaterialView.UV
-        ? (() => {
+  const skeleton = createSh1Skeleton(anm);
+  const geom = createSh1Geometry({ ilm, skeleton, psxTim });
+
+  const shaderMaterial = createSh1Material(psxTim);
+  shaderMaterial.needsUpdate = true;
+  shaderMaterial.uniformsNeedUpdate = true;
+
+  const material =
+    clientState.uiParams["Render Mode"] === MaterialView.Textured
+      ? shaderMaterial
+      : new MeshStandardMaterial({
+          map: (() => {
             const t = new DataTexture(defaultDiffuseMap, 128, 128);
             t.needsUpdate = true;
             return t;
-          })()
-        : undefined,
-    wireframe: clientState.uiParams["Render Mode"] === MaterialView.Wireframe,
-    alphaTest: clientState.uiParams["Alpha Test"],
-    transparent: clientState.uiParams["Visualize Skeleton"],
-    side: RenderSideMap[
-      clientState.uiParams["Render Side"] as
-        | "DoubleSide"
-        | "FrontSide"
-        | "BackSide"
-    ],
-    opacity: clientState.uiParams["Model Opacity"],
-  });
+          })(),
+          wireframe:
+            clientState.uiParams["Render Mode"] === MaterialView.Wireframe,
+          alphaTest: clientState.uiParams["Alpha Test"],
+          transparent: clientState.uiParams["Visualize Skeleton"],
+          side: RenderSideMap[
+            clientState.uiParams["Render Side"] as
+              | "DoubleSide"
+              | "FrontSide"
+              | "BackSide"
+          ],
+          opacity: clientState.uiParams["Model Opacity"],
+        });
 
   const mesh = new SkinnedMesh(geom, material);
   mesh.add(skeleton.bones[0]);
@@ -1331,7 +1332,7 @@ const render = () => {
     lastGame = clientState.uiParams.Game;
 
     if (
-      ((isSh1 && lastSh1File === "BLISA") ||
+      ((isSh1 && lastSh1File !== "HERO") ||
         clientState.folder !== "favorites") &&
       !clientState.hasAcceptedContentWarning()
     ) {
