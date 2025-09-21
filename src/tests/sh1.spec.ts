@@ -12,18 +12,6 @@ import PsxTim from "../kaitai/PsxTim";
 const ILM_PATH = path.join(__dirname, "../../public/sh1/CHARA");
 const ANM_PATH = path.join(__dirname, "../../public/sh1/ANIM");
 
-// just guesses
-
-// TODO: parse the partial animations
-// @ts-ignore
-const parsePartialAnm = (baseAnm: Sh1anm, partialStream: KaitaiStream) => {
-  baseAnm.magic = 0;
-  baseAnm._m_frameData = undefined;
-  baseAnm._io = partialStream;
-  baseAnm.frameData; // access frame data to call setter
-  return baseAnm;
-};
-
 const getFileList = (dir: string, ext: string) => {
   return fs
     .readdirSync(dir)
@@ -52,8 +40,7 @@ describe("ilm + sh1anm", () => {
       expect(anm).toBeDefined();
     });
 
-    const imageFile =
-      ilmToTextureAssoc(ilmFile.replace(".ILM", ""), true) + ".TIM";
+    const imageFile = ilmToTextureAssoc(ilmFile.replace(".ILM", "")) + ".TIM";
     test(`${imageFile}`, async () => {
       let imageBytes;
       try {
