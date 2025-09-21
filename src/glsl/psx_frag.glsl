@@ -6,6 +6,7 @@ uniform vec3 ambientLightColor;
 uniform sampler2D tClutTexture;
 uniform sampler2D imgTexture;
 uniform float opacity;
+uniform float alphaTest;
 
 layout(location = 0) out highp vec4 pc_fragColor;
 
@@ -16,5 +17,10 @@ void main() {
     vec2 clut_xy = vec2(palette_idx * 255.0 / 16.0, vUv.w);
     vec4 color = texture(tClutTexture, clut_xy);
 
-    pc_fragColor = vec4(color.rgb * ambientLightColor, opacity);
+    float alpha = opacity * color.a;
+    if(alpha <= alphaTest) {
+        discard;
+    }
+
+    pc_fragColor = vec4(color.rgb * ambientLightColor, alpha);
 }

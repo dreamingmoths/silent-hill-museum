@@ -374,10 +374,19 @@ export const createSh1Material = (psxTim: PsxTim, bpp = 4) => {
     const r = clut(clut16 & 0x1f);
     const g = clut((clut16 >> 5) & 0x1f);
     const b = clut((clut16 >> 10) & 0x1f);
+    const a = (clut16 >> 15) & 0x1;
     clutTexture[clutIndex] = r;
     clutTexture[clutIndex + 1] = g;
     clutTexture[clutIndex + 2] = b;
-    clutTexture[clutIndex + 3] = clut16 === 0 ? 0 : 255;
+
+    const rgbIsZero = r + g + b === 0;
+    if (rgbIsZero && a === 0) {
+      clutTexture[clutIndex + 3] = 0;
+    } else if (!rgbIsZero || a === 1) {
+      clutTexture[clutIndex + 3] = 255;
+    } else {
+      clutTexture[clutIndex + 3] = 128;
+    }
 
     clutIndex += 4;
   }
@@ -429,6 +438,7 @@ export const createSh1Material = (psxTim: PsxTim, bpp = 4) => {
       imgTexture: { value: imgDataTexture },
       ambientLightColor: { value: new Vector3(1, 1, 1) },
       opacity: { value: 1 },
+      alphaTest: { value: 0.01 },
     },
     transparent: true,
     glslVersion: GLSL3,

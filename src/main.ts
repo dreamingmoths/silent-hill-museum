@@ -1269,6 +1269,7 @@ const render = () => {
         uniforms.ambientLightColor.value = new Color(
           clientState.uiParams["Ambient Color"]
         ).multiplyScalar(clientState.uiParams["Ambient Intensity"]);
+        uniforms.alphaTest.value = clientState.uiParams["Alpha Test"];
       }
       lightAnimate?.(delta);
 
