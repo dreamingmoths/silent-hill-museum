@@ -398,16 +398,17 @@ export const texture = (psxTim: PsxTim, bpp = 4) => {
   }
 
   const viewer = clientState.getTextureViewer();
-  console.debug(viewer);
   if (viewer) {
-    viewer.addDataTexture(imageTexture, imageWidth, imageHeight, {
-      grayscale: true,
-      interpolation: "nearest",
-    });
-    viewer.addDataTexture(clutTexture, clutWidth, clutHeight, {
-      grayscale: false,
-      interpolation: "nearest",
-    });
+    viewer.attach([
+      viewer.createDataTexture(imageTexture, imageWidth, imageHeight, {
+        grayscale: true,
+        interpolation: "nearest",
+      }),
+      viewer.createDataTexture(clutTexture, clutWidth, clutHeight, {
+        grayscale: false,
+        interpolation: "nearest",
+      }),
+    ]);
   }
 
   const clutDataTexture = new DataTexture(clutTexture, clutWidth, clutHeight);

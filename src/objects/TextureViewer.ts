@@ -18,6 +18,7 @@ export default class TextureViewer {
   private mouseIsOver = false;
   private firstOpen = true;
   private hoverable = false;
+  private dataImages: HTMLImageElement[] = [];
 
   public constructor(
     private guiWindow: HTMLDivElement,
@@ -93,8 +94,13 @@ export default class TextureViewer {
     this.contentWindow.innerHTML = "";
   }
 
-  public attach(object: Object3D) {
-    this.currentObject = object;
+  public attach(attachment: Object3D | HTMLImageElement[]) {
+    if (attachment instanceof Object3D) {
+      this.currentObject = attachment;
+      this.dataImages = [];
+    } else {
+      this.dataImages = attachment;
+    }
     if (this.state !== TextureViewerStates.Inactive) {
       this.renderTextures();
     }
@@ -102,9 +108,18 @@ export default class TextureViewer {
 
   public renderTextures() {
     this.reset();
+
+    if (this.dataImages.length) {
+      for (const image of this.dataImages) {
+        this.contentWindow.appendChild(image);
+      }
+      return;
+    }
+
     if (!this.currentObject) {
       return;
     }
+
     this.currentObject.traverse((object) => {
       if (!(object instanceof Mesh)) {
         return;
@@ -142,15 +157,9 @@ export default class TextureViewer {
         this.contentWindow.appendChild(image);
       });
     });
-
-    for (const image of this.dataImages) {
-      this.contentWindow.appendChild(image);
-    }
-    this.dataImages = [];
   }
 
-  private dataImages: HTMLImageElement[] = [];
-  public addDataTexture(
+  public createDataTexture(
     array: Uint8Array,
     width: number,
     height: number,
@@ -158,8 +167,7 @@ export default class TextureViewer {
   ) {
     const image = this.renderUint8ArrayAsImage(array, width, height, options);
     this.attachPointerListener(image);
-    console.debug(image);
-    this.dataImages.push(image);
+    return image;
   }
 
   private attachPointerListener(image: HTMLImageElement) {
