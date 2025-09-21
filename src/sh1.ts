@@ -378,7 +378,7 @@ export const texture = (psxTim: PsxTim, bpp = 4) => {
     clutTexture[clutIndex] = r;
     clutTexture[clutIndex + 1] = g;
     clutTexture[clutIndex + 2] = b;
-    clutTexture[clutIndex + 3] = 255;
+    clutTexture[clutIndex + 3] = clut16 === 0 ? 0 : 255;
 
     clutIndex += 4;
   }
