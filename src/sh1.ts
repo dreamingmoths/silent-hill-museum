@@ -439,7 +439,6 @@ export const texture = (psxTim: PsxTim, bpp = 4) => {
 
 // 🗂️ ------- file structure associations ------- 🗂️
 export const ilmToAnmArray = [
-  ["HERO", "HR"],
   ["BOS", "BOS"],
   ["BOS2", "BOS"],
   ["TDRA", "TDA"],
@@ -459,6 +458,7 @@ export const ilmToAnmArray = [
   ["KAU", "KAU"],
   ["SIBYL", "SBL2"],
   ["HERO", "HR_E01"],
+  ["HERO", "HR"],
   ["SIBYL", "SBL_LAST"],
   // ["SNK", "SPD"],
 ] as const;
@@ -509,8 +509,8 @@ export const ilmFiles = [
   "AR",
   "BAR",
   "BD2",
-  "BFLU",
-  "BIG",
+  // "BFLU",
+  // "BIG",
   "BIRD",
   "BLISA",
   "BOS",
@@ -537,7 +537,7 @@ export const ilmFiles = [
   "KAU",
   "LISA",
   "LITL",
-  "MAN",
+  // "MAN",
   "MAR",
   "MKY",
   "MSB",

@@ -463,7 +463,7 @@ export default class MuseumState {
 
   public uiParams = {
     Game: Math.random() > 0.5 ? "Silent Hill 1" : "Silent Hill 2",
-    "File (SH1)": "DARIA" as (typeof ilmFiles)[number],
+    "File (SH1)": "MTH" as (typeof ilmFiles)[number],
     Scenario: this.rootFolder === "chr" ? "Main Scenario" : "Born From A Wish",
     Folder: this.folder,
     Filename: this.file,
@@ -605,25 +605,6 @@ export const defaultParams = Object.assign(
     )
   )
 );
-
-export const sh1Files = [
-  "AR",
-  "BAR",
-  "BLISA",
-  "BOS",
-  "BTFY",
-  "CAT",
-  "CKN",
-  "DARIA",
-  "FRG",
-  "HERO",
-  "KAU",
-  "LISA",
-  "MAR",
-  "SIBYL",
-  "SRL",
-  "WRM",
-].sort();
 
 export type MuseumMixer = AnimationMixer & {
   _actions: AnimationAction[];

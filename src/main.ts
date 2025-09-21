@@ -154,11 +154,7 @@ const gameInput = dataGuiFolder
     render();
   });
 const sh1FileInput = dataGuiFolder
-  .add(
-    clientState.uiParams,
-    "File (SH1)",
-    ilmFiles.map((x) => x.replace(".ILM", ""))
-  )
+  .add(clientState.uiParams, "File (SH1)", ilmFiles)
   .hide()
   .onFinishChange(() => render())
   .listen();
@@ -229,7 +225,10 @@ dataGuiFolder.add(clientState.uiParams, "View Structure 🔎");
 dataGuiFolder.add(clientState.uiParams, "Next File");
 dataGuiFolder.add(clientState.uiParams, "Previous File");
 dataGuiFolder.add(clientState.uiParams, "Save Image");
-dataGuiFolder.add(clientState.uiParams, "Export to GLTF");
+const exportToGltfButton = dataGuiFolder.add(
+  clientState.uiParams,
+  "Export to GLTF"
+);
 fileInput.onFinishChange((file: (typeof possibleFilenames)[number]) => {
   clientState.file = file;
 });
@@ -922,11 +921,14 @@ const renderSh1 = async () => {
     clientState.uiParams["Render Mode"] === MaterialView.Textured
       ? shaderMaterial
       : new MeshStandardMaterial({
-          map: (() => {
-            const t = new DataTexture(defaultDiffuseMap, 128, 128);
-            t.needsUpdate = true;
-            return t;
-          })(),
+          map:
+            clientState.uiParams["Render Mode"] === MaterialView.UV
+              ? (() => {
+                  const t = new DataTexture(defaultDiffuseMap, 128, 128);
+                  t.needsUpdate = true;
+                  return t;
+                })()
+              : undefined,
           wireframe:
             clientState.uiParams["Render Mode"] === MaterialView.Wireframe,
           alphaTest: clientState.uiParams["Alpha Test"],
@@ -1297,6 +1299,9 @@ const render = () => {
     textureViewerButton.show();
     invertAlphaInput.hide();
 
+    exportToGltfButton.name("[export temporarily unavailable]");
+    exportToGltfButton.disable();
+
     if (clientState.getGlVersion() === 1) {
       showQuickModal(
         "<p>WebGL 2 is required for Silent Hill 1 models for now.</p>" +
@@ -1317,6 +1322,9 @@ const render = () => {
     skeletonModeController?.show();
     editModeButton.show();
     invertAlphaInput.show();
+
+    exportToGltfButton.name("Export to GLTF");
+    exportToGltfButton.enable();
   }
 
   const filename = isSh2
@@ -1332,7 +1340,7 @@ const render = () => {
     lastGame = clientState.uiParams.Game;
 
     if (
-      ((isSh1 && lastSh1File !== "HERO") ||
+      ((isSh1 && lastSh1File !== "MTH") ||
         clientState.folder !== "favorites") &&
       !clientState.hasAcceptedContentWarning()
     ) {
