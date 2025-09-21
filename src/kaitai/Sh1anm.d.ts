@@ -14,13 +14,12 @@ declare class Sh1anm {
   constructor(io: any, parent?: any, root?: any);
   __type: "Sh1anm";
   _io: any;
-  _m_frameData: Array<Sh1anm.Translation | Sh1anm.Rotation> | undefined;
 
-  bonesPerFrame: number;
-  frameData: Array<Sh1anm.Translation | Sh1anm.Rotation>;
+  frames: Sh1anm.Frame[];
+  transformsPerFrame: number;
   magic: number;
-  numRotationBones: number;
-  numTranslationBones: number;
+  numRotations: number;
+  numTranslations: number;
   frameSize: number;
   numBones: number;
   flags: number;
@@ -32,19 +31,31 @@ declare class Sh1anm {
    */
   scaleLog2: number;
   _unnamed9: number;
-  bindPoses: Sh1anm.BindPose[];
+  bones: Sh1anm.Bone[];
 }
 
 declare namespace Sh1anm {
-  class BindPose {
+  class Bone {
     constructor(io: any, parent?: any, root?: any);
-    __type: "BindPose";
+    __type: "Bone";
     _io: any;
 
-    bone: number;
-    _unnamed1: number;
-    _unnamed2: number;
-    translation: Sh1anm.Translation;
+    parent: number;
+    rotationIndex: number;
+    translationIndex: number;
+    bindTranslation: Sh1anm.Translation;
+  }
+}
+
+declare namespace Sh1anm {
+  class Frame {
+    constructor(io: any, parent?: any, root?: any);
+    __type: "Frame";
+    _io: any;
+
+    translations: Sh1anm.Translation[];
+    rotations: Sh1anm.Rotation[];
+    frameIndex: number;
   }
 }
 

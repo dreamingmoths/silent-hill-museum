@@ -17,14 +17,16 @@ seq:
   - id: magic
     type: s2
 
-  - id: num_rotation_bones
+  - id: num_rotations
     type: u1
 
-  - id: num_translation_bones
+  - id: num_translations
     type: u1
 
   - id: frame_size
     type: s2
+    valid:
+      eq: num_rotations * 9 + num_translations * 3
 
   - id: num_bones
     type: s2
@@ -44,35 +46,48 @@ seq:
 
   - type: u1
 
-  - id: bind_poses
-    type: bind_pose
+  - id: bones
+    type: bone
     repeat: expr
     repeat-expr: num_bones
 
 instances:
-  frame_data:
-    type:
-      switch-on: _index % bones_per_frame >= num_translation_bones
-      cases:
-        true: rotation
-        false: translation
+  frames:
+    type: frame(_index)
     pos: magic
     repeat: expr
-    repeat-expr: num_frames * bones_per_frame
+    repeat-expr: num_frames
 
-  bones_per_frame:
-    value: num_rotation_bones + num_translation_bones
+  transforms_per_frame:
+    value: num_rotations + num_translations
 
 types:
-  bind_pose:
+  frame:
+    params:
+      - id: frame_index
+        type: u2
     seq:
-      - id: bone
-        type: u1
+      - id: translations
+        type: translation
+        repeat: expr
+        repeat-expr: _root.num_translations
+      - id: rotations
+        type: rotation
+        repeat: expr
+        repeat-expr: _root.num_rotations
 
-      - type: u1
-      - type: u1
+  bone:
+    seq:
+      - id: parent
+        type: s1
 
-      - id: translation
+      - id: rotation_index
+        type: s1
+
+      - id: translation_index
+        type: s1
+
+      - id: bind_translation
         type: translation
 
   translation:
