@@ -384,8 +384,6 @@ export const createSh1Material = (psxTim: PsxTim, bpp = 4) => {
       clutTexture[clutIndex + 3] = 0;
     } else if (!rgbIsZero || a === 1) {
       clutTexture[clutIndex + 3] = 255;
-    } else {
-      clutTexture[clutIndex + 3] = 128;
     }
 
     clutIndex += 4;
