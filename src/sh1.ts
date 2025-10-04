@@ -7,6 +7,7 @@ import {
   DataTexture,
   Float32BufferAttribute,
   GLSL3,
+  Int32BufferAttribute,
   InterpolateLinear,
   KeyframeTrack,
   Matrix3,
@@ -14,9 +15,11 @@ import {
   Quaternion,
   QuaternionKeyframeTrack,
   RawShaderMaterial,
-  RedFormat,
+  RedIntegerFormat,
   Skeleton,
   Uint16BufferAttribute,
+  UnsignedIntType,
+  Vector2,
   Vector3,
   Vector3Like,
   VectorKeyframeTrack,
@@ -53,6 +56,7 @@ export const createSh1Geometry = (init: GeometryInit) => {
   // first pass: collect metadata before making buffers
   let vertexBufferSize = 0;
   let boneBufferSize = 0;
+  let uvBufferSize = 0;
 
   for (let objectIndex = 0; objectIndex < ilm.numObjs; objectIndex++) {
     const object = ilm.objs[objectIndex];
@@ -63,10 +67,12 @@ export const createSh1Geometry = (init: GeometryInit) => {
       const isTriangle = prim.indices.v3 === 255;
 
       if (isTriangle) {
+        uvBufferSize += 6;
         vertexBufferSize += 9;
         boneBufferSize += 12;
       } else {
         // split quads into two triangles. the PSX GPU does this as well
+        uvBufferSize += 12;
         vertexBufferSize += 18;
         boneBufferSize += 24;
       }
@@ -76,7 +82,8 @@ export const createSh1Geometry = (init: GeometryInit) => {
   // second pass: make buffers
   const scratchpadBuffer = new Float32Array(128 * 4);
   const vertexBuffer = new Float32Array(vertexBufferSize);
-  const uvBuffer = new Float32Array(boneBufferSize);
+  const uvBuffer = new Float32Array(uvBufferSize);
+  const texInfoBuffer = new Int32Array(uvBufferSize);
   const skinIndexBuffer = new Uint16Array(boneBufferSize);
   const skinWeightBuffer = new Float32Array(skinIndexBuffer);
 
@@ -100,9 +107,9 @@ export const createSh1Geometry = (init: GeometryInit) => {
 
     uvBuffer[uvIndex] = u(uv.u);
     uvBuffer[uvIndex + 1] = v(uv.v);
-    uvBuffer[uvIndex + 2] = (tpage & 0x60) >> 4; //clut.x / psxTim.clut.width;
-    uvBuffer[uvIndex + 3] = clut.y / psxTim.clut.height;
-    uvIndex += 4;
+    texInfoBuffer[uvIndex] = (tpage & 0x60) >> 4;
+    texInfoBuffer[uvIndex + 1] = clut.y;
+    uvIndex += 2;
 
     skinIndexBuffer[skinIndex] = scratchpadBuffer[index + 3];
     skinIndexBuffer[skinIndex + 1] = 0;
@@ -201,7 +208,8 @@ export const createSh1Geometry = (init: GeometryInit) => {
     "skinWeight",
     new Float32BufferAttribute(skinWeightBuffer, 4)
   );
-  geom.setAttribute("uv", new Float32BufferAttribute(uvBuffer, 4));
+  geom.setAttribute("uv", new Float32BufferAttribute(uvBuffer, 2));
+  geom.setAttribute("texInfo", new Int32BufferAttribute(texInfoBuffer, 2));
   geom = BufferGeometryUtils.mergeVertices(geom);
 
   return geom;
@@ -421,10 +429,11 @@ export const createSh1Material = (psxTim: PsxTim, bpp = 4) => {
   clutDataTexture.needsUpdate = true;
 
   const imgDataTexture = new DataTexture(
-    imageTexture,
+    new Uint32Array(imageTexture),
     imageWidth,
     imageHeight,
-    RedFormat
+    RedIntegerFormat,
+    UnsignedIntType
   );
   imgDataTexture.needsUpdate = true;
 
@@ -432,8 +441,9 @@ export const createSh1Material = (psxTim: PsxTim, bpp = 4) => {
     vertexShader: psx_vert,
     fragmentShader: psx_frag,
     uniforms: {
-      tClutTexture: { value: clutDataTexture },
+      clutTexture: { value: clutDataTexture },
       imgTexture: { value: imgDataTexture },
+      imgSize: { value: new Vector2(imageWidth, imageHeight) },
       ambientLightColor: { value: new Vector3(1, 1, 1) },
       opacity: { value: 1 },
       alphaTest: { value: 0.01 },
