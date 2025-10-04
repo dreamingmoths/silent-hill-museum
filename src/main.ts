@@ -699,6 +699,7 @@ registerAllKeybinds({ animationGui });
 
 let lightGroup: Group | undefined;
 let renderIsFinished = true;
+let renderTicket = 0;
 
 const renderSh2 = (model: SilentHill2Model) => {
   group = new Group();
@@ -883,6 +884,9 @@ const renderSh2 = (model: SilentHill2Model) => {
 };
 
 const renderSh1 = async () => {
+  const ticket = ++renderTicket;
+
+  /* begin async stuff */
   const modelName: string = clientState.uiParams["File (SH1)"];
   const anmName = ilmToAnmAssoc(modelName);
 
@@ -909,6 +913,11 @@ const renderSh1 = async () => {
       new KaitaiStream(await fetchRawBytes(`sh1/CHARA/HERO.TIM`))
     );
     logger.error(e);
+  }
+
+  /* end async stuff */
+  if (renderTicket !== ticket) {
+    return null;
   }
 
   const skeleton = createSh1Skeleton(anm);
@@ -1033,7 +1042,11 @@ const render = () => {
       | ReturnType<typeof renderSh1>
       | undefined = undefined;
     if (isSh1) {
-      result = await renderSh1();
+      const maybeResult = await renderSh1();
+      if (!maybeResult) {
+        return;
+      }
+      result = maybeResult;
     } else if (model !== undefined) {
       result = renderSh2(model);
     } else {

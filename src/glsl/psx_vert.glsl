@@ -1,8 +1,9 @@
-precision mediump float;
-precision mediump int;
+precision highp float;
+precision highp int;
 
 in vec3 position;
-in vec4 uv;
+in vec2 uv;
+in ivec2 texInfo;
 in vec4 skinIndex;
 in vec4 skinWeight;
 
@@ -12,7 +13,8 @@ uniform mat4 bindMatrix;
 uniform mat4 bindMatrixInverse;
 uniform highp sampler2D boneTexture;
 
-out vec4 vUv;
+out vec2 vUv;
+flat out ivec2 vTexInfo;
 
 mat4 getBoneMatrix(const in float i) {
     int size = textureSize(boneTexture, 0).x;
@@ -28,6 +30,7 @@ mat4 getBoneMatrix(const in float i) {
 
 void main() {
     vUv = uv;
+    vTexInfo = texInfo;
 
     vec3 transformed = vec3(position);
     mat4 boneMatX = getBoneMatrix(skinIndex.x);
