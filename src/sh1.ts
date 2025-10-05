@@ -235,6 +235,8 @@ export const createSh1Skeleton = (anm: Sh1anm) => {
     let t: Vector3Like | undefined = undefined;
     if (boneInfo.rotationIndex >= 0) {
       t = boneInfo.bindTranslation;
+
+      smatrix(matrix, frameInfo.rotations[boneInfo.rotationIndex].value);
     } else {
       t =
         frameInfo.translations[boneInfo.translationIndex] ??
