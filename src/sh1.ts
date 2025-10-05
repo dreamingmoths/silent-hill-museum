@@ -235,8 +235,6 @@ export const createSh1Skeleton = (anm: Sh1anm) => {
     let t: Vector3Like | undefined = undefined;
     if (boneInfo.rotationIndex >= 0) {
       t = boneInfo.bindTranslation;
-
-      smatrix(matrix, frameInfo.rotations[boneInfo.rotationIndex].value);
     } else {
       t =
         frameInfo.translations[boneInfo.translationIndex] ??
@@ -390,7 +388,9 @@ export const createSh1Material = (psxTim: PsxTim, bpp = 4) => {
     const rgbIsZero = r + g + b === 0;
     if (rgbIsZero && a === 0) {
       clutTexture[clutIndex + 3] = 0;
-    } else if (!rgbIsZero || a === 1) {
+    } else if (!rgbIsZero && a === 1) {
+      clutTexture[clutIndex + 3] = 255; // should be semi-transparent
+    } else {
       clutTexture[clutIndex + 3] = 255;
     }
 
@@ -448,7 +448,6 @@ export const createSh1Material = (psxTim: PsxTim, bpp = 4) => {
       opacity: { value: 1 },
       alphaTest: { value: 0.01 },
     },
-    transparent: true,
     glslVersion: GLSL3,
   });
 
@@ -514,23 +513,23 @@ export const anmToIlmAssoc = (anmName: string) => {
 export const ilmToTextureAssoc = (name: string) => {
   switch (name) {
     case "WRM":
-      return "WORM";
+      return "CHARA/WORM";
     case "BIRD":
-      return "REBIRD";
+      return "CHARA/REBIRD";
     case "MTH":
-      return "MOTH";
+      return "CHARA/MOTH";
     case "MAN":
-      return "HERO";
+      return "TEST/DEV";
   }
-  return name;
+  return `CHARA/${name}`;
 };
 
 export const ilmFiles = [
   "AR",
   "BAR",
   "BD2",
-  // "BFLU",
-  // "BIG",
+  "BFLU",
+  "BIG",
   "BIRD",
   "BLISA",
   "BOS",
@@ -557,7 +556,7 @@ export const ilmFiles = [
   "KAU",
   "LISA",
   "LITL",
-  // "MAN",
+  "MAN",
   "MAR",
   "MKY",
   "MSB",

@@ -355,10 +355,9 @@ textureFolder
   .add(clientState.uiParams, "Model Opacity", 0, 1, 0.01)
   .onFinishChange(() => render())
   .listen();
-textureFolder
+const transparencyInput = textureFolder
   .add(clientState.uiParams, "Transparency")
-  .onFinishChange(() => render())
-  .listen();
+  .onFinishChange(() => render());
 const invertAlphaInput = textureFolder
   .add(clientState.uiParams, "Invert Alpha")
   .onFinishChange(() => render())
@@ -903,9 +902,7 @@ const renderSh1 = async () => {
   try {
     psxTim = new PsxTim(
       new KaitaiStream(
-        await fetchRawBytes(
-          `sh1/CHARA/${ilmToTextureAssoc(modelName).split("/")[0]}.TIM`
-        )
+        await fetchRawBytes(`sh1/${ilmToTextureAssoc(modelName)}.TIM`)
       )
     );
   } catch (e) {
@@ -1328,6 +1325,7 @@ const render = () => {
     textureViewerButton.show();
     invertAlphaInput.hide();
     fancyLightingController.hide();
+    transparencyInput.hide();
 
     exportToGltfButton.name("[export temporarily unavailable]");
     exportToGltfButton.disable();
@@ -1353,6 +1351,7 @@ const render = () => {
     editModeButton.show();
     invertAlphaInput.show();
     fancyLightingController.show();
+    transparencyInput.show();
 
     exportToGltfButton.name("Export to GLTF");
     exportToGltfButton.enable();
