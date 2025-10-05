@@ -516,7 +516,7 @@ export const ilmToTextureAssoc = (name: string) => {
     case "WRM":
       return "WORM";
     case "BIRD":
-      return "BD2";
+      return "REBIRD";
     case "MTH":
       return "MOTH";
     case "MAN":
