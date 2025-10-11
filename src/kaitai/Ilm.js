@@ -141,7 +141,10 @@ var Ilm = (function () {
         this._io.readBytes(2),
         "ASCII"
       );
-      this.name = KaitaiStream.bytesToStr(this._io.readBytes(6), "ASCII");
+      this.name = KaitaiStream.bytesToStr(
+        KaitaiStream.bytesTerminate(this._io.readBytes(6), 0, false),
+        "ASCII"
+      );
       this._unnamed2 = this._io.readU1();
       this.baseIndex = this._io.readU1();
       this._unnamed4 = this._io.readU1();
@@ -151,7 +154,7 @@ var Ilm = (function () {
     Object.defineProperty(Obj.prototype, "boneIndex", {
       get: function () {
         if (this._m_boneIndex !== undefined) return this._m_boneIndex;
-        this._m_boneIndex = parseInt(this.boneIndexAscii);
+        this._m_boneIndex = Number.parseInt(this.boneIndexAscii, 10);
         return this._m_boneIndex;
       },
     });

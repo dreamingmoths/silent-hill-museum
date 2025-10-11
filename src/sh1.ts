@@ -43,10 +43,11 @@ type GeometryInit = {
   ilm: Ilm;
   skeleton: Skeleton;
   psxTim: PsxTim;
+  subset?: Record<string, boolean>;
 };
 
 export const createSh1Geometry = (init: GeometryInit) => {
-  const { ilm, skeleton, psxTim } = init;
+  const { ilm, skeleton, psxTim, subset } = init;
   let geom = new BufferGeometry();
   const bones = skeleton.bones;
   for (const bone of bones) {
@@ -161,16 +162,7 @@ export const createSh1Geometry = (init: GeometryInit) => {
         indices.v3 * 4,
       ];
 
-      // temporary patch
-      if (
-        object.name.includes("RHAND2") ||
-        object.name.includes("RHAND3") ||
-        object.name.includes("RHAND4") ||
-        object.name.includes("LHAND2") ||
-        object.name.includes("FLAURO") ||
-        object.name.includes("KEY") ||
-        object.name.includes("RAGLA")
-      ) {
+      if (subset?.[object.name] === false) {
         i0 = 0;
         i1 = 0;
         i2 = 0;
