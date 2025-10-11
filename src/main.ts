@@ -240,11 +240,6 @@ fileInput.onFinishChange((file: (typeof possibleFilenames)[number]) => {
 dataGuiFolder.open();
 
 const controlsGuiFolder = gui.addFolder("Controls");
-gui.onOpenClose(() => {
-  if (!isMobileLayout) {
-    return;
-  }
-});
 export const toggleEditMode = (value: boolean) => {
   clientState.setMode(value ? "edit" : "viewing");
   if (value) {
@@ -329,7 +324,7 @@ if (clientState.getGlVersion() === 2) {
 const visualizeNormalsInput = geometryFolder
   .add(clientState.uiParams, "Visualize Normals")
   .onFinishChange(() => render());
-const submeshFolder = geometryFolder.addFolder("Submeshes").hide();
+const submeshFolder = geometryFolder.addFolder("Submeshes").hide().close();
 
 const textureFolder = gui.addFolder("Texture");
 textureFolder
@@ -1094,6 +1089,7 @@ const renderSh1 = async () => {
       submeshFolder.add(prsButtons, "Puppet II");
       submeshFolder.add(prsButtons, "Puppet III");
       preset = prsButtons["Puppet I"];
+      submeshFolder.openAnimated();
     }
 
     for (const submesh of ilm.objs) {
@@ -1118,6 +1114,7 @@ const renderSh1 = async () => {
     }
 
     preset();
+    submeshFolder.show();
     submeshListNeedsUpdate = false;
   }
   // #endregion <submesh folder>
@@ -1469,7 +1466,6 @@ const render = () => {
     invertAlphaInput.hide();
     fancyLightingController.hide();
     transparencyInput.hide();
-    submeshFolder.show();
 
     exportToGltfButton.name("[export temporarily unavailable]");
     exportToGltfButton.disable();
@@ -1563,6 +1559,7 @@ const render = () => {
       children[i].destroy();
     }
     submeshListNeedsUpdate = true;
+    submeshFolder.openAnimated(false);
 
     disposeResources(lightGroup);
     lightGroup = undefined;
