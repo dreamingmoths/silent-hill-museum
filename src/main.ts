@@ -1427,6 +1427,7 @@ const render = () => {
     invertAlphaInput.show();
     fancyLightingController.show();
     transparencyInput.show();
+    animationsFolder.hide();
 
     exportToGltfButton.name("Export to GLTF");
     exportToGltfButton.enable();
