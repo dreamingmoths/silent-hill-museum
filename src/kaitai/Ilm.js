@@ -32,11 +32,11 @@ var Ilm = (function () {
     }
     this.isInitialized = this._io.readU1();
     this._unnamed2 = this._io.readU1();
-    this.unkOfs = this._io.readU4le();
-    if (!(this.unkOfs == 20)) {
+    this.nameOfs = this._io.readU4le();
+    if (!(this.nameOfs == 20)) {
       throw new KaitaiStream.ValidationNotEqualError(
         20,
-        this.unkOfs,
+        this.nameOfs,
         this._io,
         "/seq/3"
       );
@@ -44,11 +44,10 @@ var Ilm = (function () {
     this.numObjs = this._io.readU4le();
     this.objTableOfs = this._io.readU4le();
     this.idTableOfs = this._io.readU4le();
-    this.name = KaitaiStream.bytesToStr(this._io.readBytes(24), "ASCII");
-    this.objs = [];
-    for (var i = 0; i < this.numObjs; i++) {
-      this.objs.push(new Obj(this._io, this, this._root));
-    }
+    this.name = KaitaiStream.bytesToStr(
+      this._io.readBytesTerm(0, false, true, true),
+      "ASCII"
+    );
   };
 
   var Uv = (Ilm.Uv = (function () {
@@ -258,6 +257,19 @@ var Ilm = (function () {
 
     return XyPair;
   })());
+  Object.defineProperty(Ilm.prototype, "objs", {
+    get: function () {
+      if (this._m_objs !== undefined) return this._m_objs;
+      var _pos = this._io.pos;
+      this._io.seek(this.objTableOfs);
+      this._m_objs = [];
+      for (var i = 0; i < this.numObjs; i++) {
+        this._m_objs.push(new Obj(this._io, this, this._root));
+      }
+      this._io.seek(_pos);
+      return this._m_objs;
+    },
+  });
   Object.defineProperty(Ilm.prototype, "idTable", {
     get: function () {
       if (this._m_idTable !== undefined) return this._m_idTable;

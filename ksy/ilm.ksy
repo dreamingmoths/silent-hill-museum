@@ -22,7 +22,7 @@ seq:
 
   - type: u1
 
-  - id: unk_ofs
+  - id: name_ofs
     type: u4
     valid: 0x14
 
@@ -36,15 +36,15 @@ seq:
     type: u4
 
   - id: name
-    type: str
-    size: 24
+    type: strz
 
-  - id: objs
+instances:
+  objs:
+    pos: obj_table_ofs
     type: obj
     repeat: expr
     repeat-expr: num_objs
 
-instances:
   id_table:
     pos: id_table_ofs
     type: u1
