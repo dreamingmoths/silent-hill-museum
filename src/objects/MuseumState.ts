@@ -530,6 +530,7 @@ export default class MuseumState {
     "Content Warning Accepted": this.hasAcceptedContentWarning(),
 
     "Current Animation": "[none]",
+    "Submeshes To Show": {} as Record<string, Record<string, boolean>>,
   };
 }
 

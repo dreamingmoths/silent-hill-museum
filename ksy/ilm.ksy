@@ -59,7 +59,7 @@ types:
         size: 2
 
       - id: name
-        type: str
+        type: strz
         size: 6
 
       - type: u1
@@ -75,7 +75,7 @@ types:
 
     instances:
       bone_index:
-        value: bone_index_ascii.as<u1>
+        value: bone_index_ascii.to_i
 
       body:
         pos: ofs
