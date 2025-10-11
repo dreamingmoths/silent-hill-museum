@@ -921,9 +921,70 @@ const renderSh1 = async () => {
     return null;
   }
 
+  // #region <submesh folder>
   const submeshTable = clientState.uiParams["Submeshes To Show"];
   submeshTable[ilm.name] ??= {};
   const submeshList = submeshTable[ilm.name];
+  if (submeshListNeedsUpdate) {
+    let preset: (() => void) | null = null;
+
+    if (ilm.name.startsWith("PRS")) {
+      const makePrsFilter = (i: number, rerender = true) => {
+        return () => {
+          for (const submesh of ilm.objs) {
+            const name = submesh.name;
+            if (name.startsWith("RHAND")) {
+              submeshList[name] = name[5] === "2";
+              continue;
+            }
+            if (!name.startsWith("HEAD") && !name.startsWith("NECK")) {
+              submeshList[name] = true;
+              continue;
+            }
+            const int = parseInt(name[4]);
+            submeshList[name] = int === i || int > 3;
+          }
+          if (rerender) {
+            render();
+          }
+        };
+      };
+      const prsButtons = {
+        "Puppet I": makePrsFilter(1),
+        "Puppet II": makePrsFilter(2),
+        "Puppet III": makePrsFilter(3),
+      } as const;
+      submeshFolder.add(prsButtons, "Puppet I");
+      submeshFolder.add(prsButtons, "Puppet II");
+      submeshFolder.add(prsButtons, "Puppet III");
+      preset = prsButtons["Puppet I"];
+      makePrsFilter(1, false)();
+      submeshFolder.openAnimated();
+    }
+    for (const submesh of ilm.objs) {
+      const name = submesh.name;
+      if (!preset) {
+        submeshList[name] = true;
+        if (
+          !["BTFY", "COC", "MOTH", "WORM"].includes(ilm.name) &&
+          (name.includes("RHAND2") ||
+            name.includes("RHAND3") ||
+            name.includes("RHAND4") ||
+            name.includes("LHAND2") ||
+            name.includes("FLAURO") ||
+            name.includes("KEY") ||
+            name.includes("RAGLA"))
+        ) {
+          submeshList[name] = false;
+        }
+      }
+      submeshFolder.add(submeshList, name).onChange(() => render());
+    }
+
+    submeshFolder.show();
+    submeshListNeedsUpdate = false;
+  }
+  // #endregion <submesh folder>
 
   const skeleton = createSh1Skeleton(anm);
   const geom = createSh1Geometry({
@@ -1060,64 +1121,6 @@ const renderSh1 = async () => {
 
   animationGui.show();
   loadingMessage.remove();
-
-  // #region <submesh folder>
-  if (submeshListNeedsUpdate) {
-    let preset = () => {};
-
-    if (ilm.name.startsWith("PRS")) {
-      const makePrsFilter = (i: number) => {
-        return () => {
-          for (const submesh of ilm.objs) {
-            const name = submesh.name;
-            if (!name.startsWith("HEAD") && !name.startsWith("NECK")) {
-              submeshList[name] = true;
-              continue;
-            }
-            const int = parseInt(name[4]);
-            submeshList[name] = int === i || int > 3;
-          }
-          render();
-        };
-      };
-      const prsButtons = {
-        "Puppet I": makePrsFilter(1),
-        "Puppet II": makePrsFilter(2),
-        "Puppet III": makePrsFilter(3),
-      } as const;
-      submeshFolder.add(prsButtons, "Puppet I");
-      submeshFolder.add(prsButtons, "Puppet II");
-      submeshFolder.add(prsButtons, "Puppet III");
-      preset = prsButtons["Puppet I"];
-      submeshFolder.openAnimated();
-    }
-
-    for (const submesh of ilm.objs) {
-      const name = submesh.name;
-      if (
-        name.includes("RHAND2") ||
-        name.includes("RHAND3") ||
-        name.includes("RHAND4") ||
-        name.includes("LHAND2") ||
-        name.includes("FLAURO") ||
-        name.includes("KEY") ||
-        name.includes("RAGLA")
-      ) {
-        submeshList[name] = false;
-      } else {
-        submeshList[name] = true;
-      }
-      submeshFolder
-        .add(submeshList, name)
-        .onChange(() => render())
-        .listen();
-    }
-
-    preset();
-    submeshFolder.show();
-    submeshListNeedsUpdate = false;
-  }
-  // #endregion <submesh folder>
 
   return {
     group,
