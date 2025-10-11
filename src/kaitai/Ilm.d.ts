@@ -15,15 +15,15 @@ declare class Ilm {
   _io: any;
 
   idTable: number[];
+  objs: Ilm.Obj[];
   magic: Uint8Array;
   isInitialized: number;
   _unnamed2: number;
-  unkOfs: number;
+  nameOfs: number;
   numObjs: number;
   objTableOfs: number;
   idTableOfs: number;
   name: string;
-  objs: Ilm.Obj[];
 }
 
 declare namespace Ilm {

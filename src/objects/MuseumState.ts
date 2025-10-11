@@ -528,6 +528,8 @@ export default class MuseumState {
 
     "Render This Frame": false,
     "Content Warning Accepted": this.hasAcceptedContentWarning(),
+
+    "Current Animation": "[none]",
   };
 }
 

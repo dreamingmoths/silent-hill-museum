@@ -23,6 +23,7 @@ import {
   preferredParams,
 } from "./objects/MuseumState";
 import {
+  ANIMATION_FRAME_DURATION,
   createRainbowLights,
   disposeResources,
   exportCanvas,
@@ -60,6 +61,8 @@ import {
   FrontSide,
   DataTexture,
   RawShaderMaterial,
+  AnimationAction,
+  KeyframeTrack,
 } from "three";
 import {
   GLTFLoader,
@@ -109,6 +112,7 @@ import {
   createSh1Material,
 } from "./sh1";
 import PsxTim from "./kaitai/PsxTim";
+import { NO_VALUE, Sh1AnimInfo } from "./sh1-animinfo";
 
 const appContainer = document.getElementById("app");
 if (!(appContainer instanceof HTMLDivElement)) {
@@ -381,6 +385,8 @@ const fancyLightingController = textureFolder
       render();
     }
   });
+
+const animationsFolder = gui.addFolder("Animation");
 
 const loadingMessage = document.createElement("div");
 loadingMessage.className = "loading-message";
@@ -958,6 +964,7 @@ const renderSh1 = async () => {
   mesh.add(skeleton.bones[0]);
   mesh.bind(skeleton);
   mesh.name = "sh1model";
+  mesh.frustumCulled = false;
 
   if (clientState.uiParams["Visualize Skeleton"]) {
     helper = new SkeletonHelper(mesh);
@@ -970,11 +977,79 @@ const renderSh1 = async () => {
 
   const mixer = new AnimationMixer(group);
   const tracks = createSh1Animation(anm);
-  const clip = new AnimationClip(anmName, -1, tracks);
-  const clipAction = mixer.clipAction(clip);
-  clipAction.play();
+
+  // #region <anim info section>
+  const clips: AnimationClip[] = [];
+  const actions: AnimationAction[] = [];
+
+  const animInfos = Sh1AnimInfo[ilm.name as keyof typeof Sh1AnimInfo];
+  if (animInfos) {
+    const animMap: Record<string, () => void> = {};
+
+    for (let i = 0; i < animInfos.length; i++) {
+      const animInfo = animInfos[i];
+      let animStart = animInfo[1];
+      const animEnd = animInfo[2];
+
+      let type = "animation";
+      if (animStart === NO_VALUE) {
+        animStart = animEnd;
+        type = "start frame";
+        // just skipping these for now
+        continue;
+      }
+
+      // TODO: use the duration?
+      // const animDuration =
+      //   typeof animInfo[0] === "number" ? animInfo[0] : animInfo[0]();
+      // const frameDelta = 30 / FROM_Q12(animDuration);
+
+      const trim = (t: KeyframeTrack) => {
+        const start = animStart * ANIMATION_FRAME_DURATION;
+        const end = animEnd * ANIMATION_FRAME_DURATION;
+        const snippet = t.clone().trim(start, end).shift(-start);
+        return snippet;
+      };
+
+      const clip = new AnimationClip(anmName, -1, tracks.map(trim));
+      const clipAction = mixer.clipAction(clip);
+      clips.push(clip);
+      actions.push(clipAction);
+
+      const key = `${type} ${i}`;
+      animMap[key] = () => {
+        mixer.stopAllAction();
+        clipAction.play();
+      };
+    }
+
+    // destroy all previous buttons and show
+    const animationChildren = animationsFolder.children.slice();
+    for (const element of animationChildren) {
+      element.destroy();
+    }
+    const animationController = animationsFolder.add(
+      clientState.uiParams,
+      "Current Animation",
+      Object.keys(animMap)
+    );
+    animationController.onFinishChange((animation: keyof typeof animMap) => {
+      animMap[animation]();
+    });
+    animationsFolder.show();
+  } else {
+    animationsFolder.hide();
+  }
+
+  if (!animInfos || clientState.uiParams["Current Animation"] === "[none]") {
+    // just play whole file
+    const clip = new AnimationClip(anmName, -1, tracks);
+    const clipAction = mixer.clipAction(clip);
+    clipAction.play();
+  }
+  // #endregion <anim info section>
+
   mixers.push(mixer);
-  mesh.frustumCulled = false;
 
   animationGui.hide();
   loadingMessage.remove();
@@ -1402,6 +1477,7 @@ const render = () => {
       Object.assign(clientState.uiParams, defaultParams);
     }
     clientState.uiParams["Selected Bone"] = 0;
+    clientState.uiParams["Current Animation"] = "[none]";
 
     fileInput.setValue(clientState.file);
     scenarioInput.setValue(
