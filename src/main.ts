@@ -386,7 +386,7 @@ const fancyLightingController = textureFolder
     }
   });
 
-const animationsFolder = gui.addFolder("Animation");
+const animationsFolder = gui.addFolder("Animation").hide();
 
 const loadingMessage = document.createElement("div");
 loadingMessage.className = "loading-message";
@@ -1051,7 +1051,7 @@ const renderSh1 = async () => {
 
   mixers.push(mixer);
 
-  animationGui.hide();
+  animationGui.show();
   loadingMessage.remove();
 
   return {
