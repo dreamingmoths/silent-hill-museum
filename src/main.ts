@@ -385,6 +385,7 @@ textureFolder
   });
 
 const animationsFolder = gui.addFolder("Animation").hide();
+let animationController: Controller | undefined = undefined;
 
 let animationsPaused = false;
 const animationControls = {
@@ -983,10 +984,24 @@ const renderSh1 = async () => {
       submeshFolder.add(prsButtons, "Puppet I");
       submeshFolder.add(prsButtons, "Puppet II");
       submeshFolder.add(prsButtons, "Puppet III");
-      preset = prsButtons["Puppet I"];
-      makePrsFilter(1, false)();
-      submeshFolder.openAnimated();
+      preset = makePrsFilter(1, false);
+    } else if (ilm.name === "FAT") {
+      preset = () => {
+        for (const submesh of ilm.objs) {
+          const name = submesh.name;
+          if (
+            (name.startsWith("LHEAD") || name.startsWith("RHEAD")) &&
+            parseInt(name[5]) > 4
+          ) {
+            submeshList[name] = false;
+            continue;
+          }
+          submeshList[name] = true;
+        }
+      };
     }
+    preset?.();
+
     for (const submesh of ilm.objs) {
       const name = submesh.name;
       if (!preset) {
@@ -1117,19 +1132,15 @@ const renderSh1 = async () => {
       };
     }
 
-    // destroy all previous buttons and show
-    const animationChildren = animationsFolder.children.slice();
-    for (const element of animationChildren) {
-      element.destroy();
-    }
-    const animationController = animationsFolder.add(
-      clientState.uiParams,
-      "Current Animation",
-      Object.keys(animMap)
-    );
+    animationController?.destroy();
+    animationController = animationsFolder
+      .add(clientState.uiParams, "Current Animation", Object.keys(animMap))
+      .show();
     animationController.onFinishChange((animation: keyof typeof animMap) => {
       animMap[animation]();
     });
+  } else {
+    animationController?.hide();
   }
   animationsFolder.show();
 
