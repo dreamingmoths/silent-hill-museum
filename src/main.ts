@@ -110,6 +110,7 @@ import {
   ilmToAnmAssoc,
   ilmToTextureAssoc,
   createSh1Material,
+  Sh1LightingMode,
 } from "./sh1";
 import PsxTim from "./kaitai/PsxTim";
 import { NO_VALUE, Sh1AnimInfo } from "./sh1-animinfo";
@@ -1208,7 +1209,7 @@ const render = () => {
       clientState.getTextureViewer()?.attach(currentObject);
     }
 
-    if (clientState.uiParams["Visualize Normals"] && opaqueMesh) {
+    if (clientState.uiParams["Visualize Normals"] && opaqueMesh && isSh2) {
       const normalsHelper = new VertexNormalsHelper(opaqueMesh, 8, 0xff0000);
       scene.add(normalsHelper);
     }
@@ -1423,6 +1424,15 @@ const render = () => {
           clientState.uiParams["Ambient Color"]
         ).multiplyScalar(clientState.uiParams["Ambient Intensity"]);
         uniforms.alphaTest.value = clientState.uiParams["Alpha Test"];
+        uniforms.uTime.value += delta;
+        if (clientState.uiParams["Fancy Lighting"]) {
+          uniforms.lightingMode.value = Sh1LightingMode.Diffuse;
+        } else {
+          uniforms.lightingMode.value = Sh1LightingMode.Matte;
+        }
+        if (clientState.uiParams["Visualize Normals"]) {
+          uniforms.lightingMode.value = Sh1LightingMode.NormalMap;
+        }
       }
       lightAnimate?.(delta);
 
@@ -1460,14 +1470,14 @@ const render = () => {
     wrappingInput.hide();
     renderOpaqueInput.hide();
     renderTransparentInput.hide();
-    visualizeNormalsInput.hide();
+    // visualizeNormalsInput.hide();
     skeletonModeController?.hide();
     editModeButton.hide();
     clientState.setMode("viewing");
     editModeButton.setValue(false);
     textureViewerButton.show();
     invertAlphaInput.hide();
-    fancyLightingController.hide();
+    // fancyLightingController.hide();
     transparencyInput.hide();
 
     exportToGltfButton.name("[export temporarily unavailable]");

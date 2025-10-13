@@ -2,6 +2,7 @@ precision highp float;
 precision highp int;
 
 in vec3 position;
+in vec3 normal;
 in vec2 uv;
 in ivec2 texInfo;
 in vec4 skinIndex;
@@ -9,10 +10,12 @@ in vec4 skinWeight;
 
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
+uniform mat3 normalMatrix;
 uniform mat4 bindMatrix;
 uniform mat4 bindMatrixInverse;
 uniform highp sampler2D boneTexture;
 
+out vec3 vNormal;
 out vec2 vUv;
 flat out ivec2 vTexInfo;
 
@@ -33,10 +36,16 @@ void main() {
     vTexInfo = texInfo;
 
     vec3 transformed = vec3(position);
+    vec3 transformedNormal = normal;
+
     mat4 boneMatX = getBoneMatrix(skinIndex.x);
     vec4 skinVertex = bindMatrix * vec4(transformed, 1.0);
     vec4 skinned = boneMatX * skinVertex * skinWeight.x;
     transformed = (bindMatrixInverse * skinned).xyz;
 
-    gl_Position = (projectionMatrix * modelViewMatrix * vec4(transformed, 1.0));
+    mat3 boneMatX3 = mat3(boneMatX);
+    transformedNormal = (bindMatrixInverse * vec4(boneMatX3 * (mat3(bindMatrix) * normal), 0.0)).xyz;
+    vNormal = normalMatrix * transformedNormal;
+
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(transformed, 1.0);
 }

@@ -29,7 +29,7 @@ seq:
   - id: num_objs
     type: u4
 
-  - id: obj_table_ofs
+  - id: objs_ofs
     type: u4
 
   - id: id_table_ofs
@@ -40,7 +40,7 @@ seq:
 
 instances:
   objs:
-    pos: obj_table_ofs
+    pos: objs_ofs
     type: obj
     repeat: expr
     repeat-expr: num_objs
@@ -68,8 +68,11 @@ types:
         type: u1
         doc: all quad/triangle indices for the object are offset by this value
 
+      - id: normal_base_index
+        type: u1
+
       - type: u1
-      - type: u1
+
       - id: ofs
         type: u4
 
@@ -87,7 +90,7 @@ types:
         type: u1
       - id: num_vertices
         type: u1
-      - id: num_vertices_2
+      - id: num_normals
         type: u1
       - type: u1
       - id: prims_ofs
@@ -96,7 +99,7 @@ types:
         type: u4
       - id: vertex_z_ofs
         type: u4
-      - id: normal_section_ofs
+      - id: normals_ofs
         type: u4
       - id: next_ofs
         type: u4
@@ -117,6 +120,11 @@ types:
         type: s2
         repeat: expr
         repeat-expr: num_vertices
+      normals:
+        pos: normals_ofs
+        type: svector
+        repeat: expr
+        repeat-expr: num_normals
 
   index_packet:
     seq:
@@ -134,13 +142,15 @@ types:
 
       - id: uv2
         type: uv
+
       - id: uv3
         type: uv
 
       - id: indices
         type: prim_indices
 
-      - size: 4
+      - id: normal_indices
+        type: prim_indices
 
   uv:
     seq:
@@ -166,6 +176,26 @@ types:
         type: s2
       - id: y
         type: s2
+
+  svector:
+    seq:
+      - id: x_int
+        type: s1
+      - id: y_int
+        type: s1
+      - id: z_int
+        type: s1
+      - id: count
+        type: u1
+    instances:
+      x:
+        value: x_int.as<f4> / 128.0
+      y:
+        value: y_int.as<f4> / 128.0
+      z:
+        value: z_int.as<f4> / 128.0
+      length_sq:
+        value: x*x + y*y + z*z
 
   clut_index:
     seq:

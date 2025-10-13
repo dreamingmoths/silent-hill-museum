@@ -42,7 +42,7 @@ var Ilm = (function () {
       );
     }
     this.numObjs = this._io.readU4le();
-    this.objTableOfs = this._io.readU4le();
+    this.objsOfs = this._io.readU4le();
     this.idTableOfs = this._io.readU4le();
     this.name = KaitaiStream.bytesToStr(
       this._io.readBytesTerm(0, false, true, true),
@@ -77,12 +77,12 @@ var Ilm = (function () {
     ObjBody.prototype._read = function () {
       this.numPrims = this._io.readU1();
       this.numVertices = this._io.readU1();
-      this.numVertices2 = this._io.readU1();
+      this.numNormals = this._io.readU1();
       this._unnamed3 = this._io.readU1();
       this.primsOfs = this._io.readU4le();
       this.vertexXyOfs = this._io.readU4le();
       this.vertexZOfs = this._io.readU4le();
-      this.normalSectionOfs = this._io.readU4le();
+      this.normalsOfs = this._io.readU4le();
       this.nextOfs = this._io.readU4le();
     };
     Object.defineProperty(ObjBody.prototype, "prims", {
@@ -124,6 +124,19 @@ var Ilm = (function () {
         return this._m_vertexZ;
       },
     });
+    Object.defineProperty(ObjBody.prototype, "normals", {
+      get: function () {
+        if (this._m_normals !== undefined) return this._m_normals;
+        var _pos = this._io.pos;
+        this._io.seek(this.normalsOfs);
+        this._m_normals = [];
+        for (var i = 0; i < this.numNormals; i++) {
+          this._m_normals.push(new Svector(this._io, this, this._root));
+        }
+        this._io.seek(_pos);
+        return this._m_normals;
+      },
+    });
 
     return ObjBody;
   })());
@@ -147,7 +160,7 @@ var Ilm = (function () {
       );
       this._unnamed2 = this._io.readU1();
       this.baseIndex = this._io.readU1();
-      this._unnamed4 = this._io.readU1();
+      this.normalBaseIndex = this._io.readU1();
       this._unnamed5 = this._io.readU1();
       this.ofs = this._io.readU4le();
     };
@@ -174,6 +187,52 @@ var Ilm = (function () {
      */
 
     return Obj;
+  })());
+
+  var Svector = (Ilm.Svector = (function () {
+    function Svector(_io, _parent, _root) {
+      this._io = _io;
+      this._parent = _parent;
+      this._root = _root || this;
+
+      this._read();
+    }
+    Svector.prototype._read = function () {
+      this.xInt = this._io.readS1();
+      this.yInt = this._io.readS1();
+      this.zInt = this._io.readS1();
+      this.count = this._io.readU1();
+    };
+    Object.defineProperty(Svector.prototype, "x", {
+      get: function () {
+        if (this._m_x !== undefined) return this._m_x;
+        this._m_x = this.xInt / 128.0;
+        return this._m_x;
+      },
+    });
+    Object.defineProperty(Svector.prototype, "y", {
+      get: function () {
+        if (this._m_y !== undefined) return this._m_y;
+        this._m_y = this.yInt / 128.0;
+        return this._m_y;
+      },
+    });
+    Object.defineProperty(Svector.prototype, "z", {
+      get: function () {
+        if (this._m_z !== undefined) return this._m_z;
+        this._m_z = this.zInt / 128.0;
+        return this._m_z;
+      },
+    });
+    Object.defineProperty(Svector.prototype, "lengthSq", {
+      get: function () {
+        if (this._m_lengthSq !== undefined) return this._m_lengthSq;
+        this._m_lengthSq = this.x * this.x + this.y * this.y + this.z * this.z;
+        return this._m_lengthSq;
+      },
+    });
+
+    return Svector;
   })());
 
   var ClutIndex = (Ilm.ClutIndex = (function () {
@@ -221,7 +280,7 @@ var Ilm = (function () {
       this.uv2 = new Uv(this._io, this, this._root);
       this.uv3 = new Uv(this._io, this, this._root);
       this.indices = new PrimIndices(this._io, this, this._root);
-      this._unnamed7 = this._io.readBytes(4);
+      this.normalIndices = new PrimIndices(this._io, this, this._root);
     };
 
     return IndexPacket;
@@ -264,7 +323,7 @@ var Ilm = (function () {
     get: function () {
       if (this._m_objs !== undefined) return this._m_objs;
       var _pos = this._io.pos;
-      this._io.seek(this.objTableOfs);
+      this._io.seek(this.objsOfs);
       this._m_objs = [];
       for (var i = 0; i < this.numObjs; i++) {
         this._m_objs.push(new Obj(this._io, this, this._root));

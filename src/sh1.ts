@@ -58,6 +58,7 @@ export const createSh1Geometry = (init: GeometryInit) => {
   let vertexBufferSize = 0;
   let boneBufferSize = 0;
   let uvBufferSize = 0;
+  let normalScratchpadSize = 0;
 
   for (let objectIndex = 0; objectIndex < ilm.numObjs; objectIndex++) {
     const object = ilm.objs[objectIndex];
@@ -78,11 +79,18 @@ export const createSh1Geometry = (init: GeometryInit) => {
         boneBufferSize += 24;
       }
     }
+
+    normalScratchpadSize += 3 * info.numNormals;
   }
 
   // second pass: make buffers
-  const scratchpadBuffer = new Float32Array(128 * 4);
+  const SCRATCHPAD_STRIDE = 4 as const;
+  const NORMAL_OFFSET = 128 * SCRATCHPAD_STRIDE;
+  const SCRATCHPAD_SIZE = 256 * SCRATCHPAD_STRIDE;
+
+  const scratchpadBuffer = new Float32Array(SCRATCHPAD_SIZE);
   const vertexBuffer = new Float32Array(vertexBufferSize);
+  const normalBuffer = new Float32Array(vertexBufferSize);
   const uvBuffer = new Float32Array(uvBufferSize);
   const texInfoBuffer = new Int32Array(uvBufferSize);
   const skinIndexBuffer = new Uint16Array(boneBufferSize);
@@ -99,11 +107,16 @@ export const createSh1Geometry = (init: GeometryInit) => {
     clut: Ilm.ClutIndex,
     tpage: number,
     uv: Ilm.Uv,
-    index: number
+    vIndex: number,
+    nIndex: number
   ) => {
-    vertexBuffer[vertexIndex] = scratchpadBuffer[index];
-    vertexBuffer[vertexIndex + 1] = scratchpadBuffer[index + 1];
-    vertexBuffer[vertexIndex + 2] = scratchpadBuffer[index + 2];
+    vertexBuffer[vertexIndex] = scratchpadBuffer[vIndex];
+    vertexBuffer[vertexIndex + 1] = scratchpadBuffer[vIndex + 1];
+    vertexBuffer[vertexIndex + 2] = scratchpadBuffer[vIndex + 2];
+
+    normalBuffer[vertexIndex] = scratchpadBuffer[nIndex];
+    normalBuffer[vertexIndex + 1] = scratchpadBuffer[nIndex + 1];
+    normalBuffer[vertexIndex + 2] = scratchpadBuffer[nIndex + 2];
     vertexIndex += 3;
 
     uvBuffer[uvIndex] = u(uv.u);
@@ -112,7 +125,7 @@ export const createSh1Geometry = (init: GeometryInit) => {
     texInfoBuffer[uvIndex + 1] = clut.y;
     uvIndex += 2;
 
-    skinIndexBuffer[skinIndex] = scratchpadBuffer[index + 3];
+    skinIndexBuffer[skinIndex] = scratchpadBuffer[vIndex + 3];
     skinIndexBuffer[skinIndex + 1] = 0;
     skinIndexBuffer[skinIndex + 2] = 0;
     skinIndexBuffer[skinIndex + 3] = 0;
@@ -132,13 +145,16 @@ export const createSh1Geometry = (init: GeometryInit) => {
     // load vertices into the "scratchpad"
     const xy = info.vertexXy;
     const z = info.vertexZ;
+    const normals = info.normals;
     const baseIndex = object.baseIndex;
+
+    const worldMatrix = bones[boneIndex].matrixWorld;
     for (let zIndex = 0; zIndex < z.length; zIndex++) {
       const xyIndex = zIndex * 2;
-      const bufferIndex = (zIndex + baseIndex) * 4;
+      const bufferIndex = (zIndex + baseIndex) * SCRATCHPAD_STRIDE;
 
       const vertex = new Vector3(xy[xyIndex], xy[xyIndex + 1], z[zIndex]);
-      vertex.applyMatrix4(bones[boneIndex].matrixWorld);
+      vertex.applyMatrix4(worldMatrix);
 
       scratchpadBuffer[bufferIndex] = vertex.x;
       scratchpadBuffer[bufferIndex + 1] = vertex.y;
@@ -149,52 +165,73 @@ export const createSh1Geometry = (init: GeometryInit) => {
       scratchpadBuffer[bufferIndex + 3] = boneIndex;
     }
 
+    const normalMatrix = new Matrix3().getNormalMatrix(worldMatrix);
+    for (let normalsIndex = 0; normalsIndex < normals.length; normalsIndex++) {
+      const svector = normals[normalsIndex];
+      const nbufferIndex =
+        NORMAL_OFFSET + (normalsIndex + object.normalBaseIndex) * 3;
+      const normal = new Vector3(-svector.x, -svector.y, -svector.z);
+      normal.applyNormalMatrix(normalMatrix);
+      scratchpadBuffer[nbufferIndex] = normal.x;
+      scratchpadBuffer[nbufferIndex + 1] = normal.y;
+      scratchpadBuffer[nbufferIndex + 2] = normal.z;
+    }
+
     // now build non-indexed triangle list and uvs
     for (let primIndex = 0; primIndex < info.numPrims; primIndex++) {
       const prim = info.prims[primIndex];
       const clutIndex = prim.clutIndex;
 
-      const indices = prim.indices;
+      const vIndices = prim.indices;
       let [i0, i1, i2, i3] = [
-        indices.v0 * 4,
-        indices.v1 * 4,
-        indices.v2 * 4,
-        indices.v3 * 4,
+        vIndices.v0 * SCRATCHPAD_STRIDE,
+        vIndices.v1 * SCRATCHPAD_STRIDE,
+        vIndices.v2 * SCRATCHPAD_STRIDE,
+        vIndices.v3 * SCRATCHPAD_STRIDE,
+      ];
+      const nIndices = prim.normalIndices;
+      let [i4, i5, i6, i7] = [
+        nIndices.v0 * 3 + NORMAL_OFFSET,
+        nIndices.v1 * 3 + NORMAL_OFFSET,
+        nIndices.v2 * 3 + NORMAL_OFFSET,
+        nIndices.v3 * 3 + NORMAL_OFFSET,
       ];
 
       if (subset?.[object.name] === false) {
         i0 = 0;
         i1 = 0;
         i2 = 0;
+        i3 = 0;
       }
 
-      const isQuad = indices.v3 != 0xff;
+      const isQuad = vIndices.v3 != 0xff;
 
       // 2 -> 1 -> 0
       // ---------- 2 ----------
-      loadFromScratchpad(clutIndex, prim.tpageInfo, prim.uv2, i2);
+      loadFromScratchpad(clutIndex, prim.tpageInfo, prim.uv2, i2, i6);
 
       // ---------- 1 ----------
-      loadFromScratchpad(clutIndex, prim.tpageInfo, prim.uv1, i1);
+      loadFromScratchpad(clutIndex, prim.tpageInfo, prim.uv1, i1, i5);
 
       // ---------- 0 ----------
-      loadFromScratchpad(clutIndex, prim.tpageInfo, prim.uv0, i0);
+      loadFromScratchpad(clutIndex, prim.tpageInfo, prim.uv0, i0, i4);
 
       if (isQuad) {
         // 1 -> 2 -> 3
         // ---------- 1 ----------
-        loadFromScratchpad(clutIndex, prim.tpageInfo, prim.uv1, i1);
+        loadFromScratchpad(clutIndex, prim.tpageInfo, prim.uv1, i1, i5);
 
         // ---------- 2 ----------
-        loadFromScratchpad(clutIndex, prim.tpageInfo, prim.uv2, i2);
+        loadFromScratchpad(clutIndex, prim.tpageInfo, prim.uv2, i2, i6);
 
         // ---------- 3 ----------
-        loadFromScratchpad(clutIndex, prim.tpageInfo, prim.uv3, i3);
+        loadFromScratchpad(clutIndex, prim.tpageInfo, prim.uv3, i3, i7);
       }
     }
   }
 
   geom.setAttribute("position", new Float32BufferAttribute(vertexBuffer, 3));
+  geom.setAttribute("normal", new Float32BufferAttribute(normalBuffer, 3));
   geom.setAttribute("skinIndex", new Uint16BufferAttribute(skinIndexBuffer, 4));
   geom.setAttribute(
     "skinWeight",
@@ -441,6 +478,8 @@ export const createSh1Material = (psxTim: PsxTim, bpp = 4) => {
       ambientLightColor: { value: new Vector3(1, 1, 1) },
       opacity: { value: 1 },
       alphaTest: { value: 0.01 },
+      uTime: { value: 0 },
+      lightingMode: { value: Sh1LightingMode.Matte },
     },
     glslVersion: GLSL3,
   });
@@ -449,6 +488,13 @@ export const createSh1Material = (psxTim: PsxTim, bpp = 4) => {
 
   return mat;
 };
+
+export const Sh1LightingMode = {
+  Matte: 0,
+  Diffuse: 1,
+  Fancy: 2,
+  NormalMap: 3,
+} as const;
 
 // 🗂️ ------- file structure associations ------- 🗂️
 export const ilmToAnmArray = [
