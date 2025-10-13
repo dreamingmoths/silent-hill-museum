@@ -21,7 +21,7 @@ declare class Ilm {
   _unnamed2: number;
   nameOfs: number;
   numObjs: number;
-  objTableOfs: number;
+  objsOfs: number;
   idTableOfs: number;
   name: string;
 }
@@ -51,7 +51,7 @@ declare namespace Ilm {
     uv2: Ilm.Uv;
     uv3: Ilm.Uv;
     indices: Ilm.PrimIndices;
-    _unnamed7: Uint8Array;
+    normalIndices: Ilm.PrimIndices;
   }
 }
 
@@ -71,7 +71,7 @@ declare namespace Ilm {
      * all quad/triangle indices for the object are offset by this value
      */
     baseIndex: number;
-    _unnamed4: number;
+    normalBaseIndex: number;
     _unnamed5: number;
     ofs: number;
   }
@@ -83,17 +83,18 @@ declare namespace Ilm {
     __type: "ObjBody";
     _io: any;
 
+    normals: Ilm.Svector[];
     prims: Ilm.IndexPacket[];
     vertexXy: number[];
     vertexZ: number[];
     numPrims: number;
     numVertices: number;
-    numVertices2: number;
+    numNormals: number;
     _unnamed3: number;
     primsOfs: number;
     vertexXyOfs: number;
     vertexZOfs: number;
-    normalSectionOfs: number;
+    normalsOfs: number;
     nextOfs: number;
   }
 }
@@ -108,6 +109,23 @@ declare namespace Ilm {
     v1: number;
     v2: number;
     v3: number;
+  }
+}
+
+declare namespace Ilm {
+  class Svector {
+    constructor(io: any, parent?: any, root?: any);
+    __type: "Svector";
+    _io: any;
+
+    lengthSq: number;
+    x: number;
+    y: number;
+    z: number;
+    xInt: number;
+    yInt: number;
+    zInt: number;
+    count: number;
   }
 }
 

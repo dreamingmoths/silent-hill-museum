@@ -110,6 +110,7 @@ import {
   ilmToAnmAssoc,
   ilmToTextureAssoc,
   createSh1Material,
+  Sh1LightingMode,
 } from "./sh1";
 import PsxTim from "./kaitai/PsxTim";
 import { NO_VALUE, Sh1AnimInfo } from "./sh1-animinfo";
@@ -321,7 +322,7 @@ if (clientState.getGlVersion() === 2) {
   controlsGuiFolder.hide();
   geometryFolder.add(clientState.uiParams, "Auto-Rotate");
 }
-const visualizeNormalsInput = geometryFolder
+geometryFolder
   .add(clientState.uiParams, "Visualize Normals")
   .onFinishChange(() => render());
 const submeshFolder = geometryFolder.addFolder("Submeshes").hide().close();
@@ -370,7 +371,7 @@ textureFolder
 
 textureFolder.addColor(clientState.uiParams, "Ambient Color");
 textureFolder.add(clientState.uiParams, "Ambient Intensity", 0, 8);
-const fancyLightingController = textureFolder
+textureFolder
   .add(clientState.uiParams, "Fancy Lighting")
   .onFinishChange((value: boolean) => {
     if (!value && lightGroup) {
@@ -384,6 +385,31 @@ const fancyLightingController = textureFolder
   });
 
 const animationsFolder = gui.addFolder("Animation").hide();
+
+let animationsPaused = false;
+const animationControls = {
+  "Play/Pause": () => {
+    for (const mixer of mixers) {
+      if (mixer.timeScale) {
+        mixer.timeScale = 0;
+        animationsPaused = true;
+        if (clientState.uiParams["Visualize Normals"]) {
+          render();
+        }
+      } else {
+        animationsPaused = false;
+        mixer.timeScale = 1;
+      }
+    }
+  },
+  Reset: () => {
+    for (const mixer of mixers) {
+      mixer.setTime(0);
+    }
+  },
+};
+animationsFolder.add(animationControls, "Play/Pause");
+animationsFolder.add(animationControls, "Reset");
 
 const loadingMessage = document.createElement("div");
 loadingMessage.className = "loading-message";
@@ -1104,16 +1130,17 @@ const renderSh1 = async () => {
     animationController.onFinishChange((animation: keyof typeof animMap) => {
       animMap[animation]();
     });
-    animationsFolder.show();
-  } else {
-    animationsFolder.hide();
   }
+  animationsFolder.show();
 
   if (!animInfos || clientState.uiParams["Current Animation"] === "[none]") {
     // just play whole file
     const clip = new AnimationClip(anmName, -1, tracks);
     const clipAction = mixer.clipAction(clip);
     clipAction.play();
+    if (animationsPaused) {
+      mixer.timeScale = 0.0;
+    }
   }
   // #endregion <anim info section>
 
@@ -1208,7 +1235,11 @@ const render = () => {
       clientState.getTextureViewer()?.attach(currentObject);
     }
 
-    if (clientState.uiParams["Visualize Normals"] && opaqueMesh) {
+    if (
+      clientState.uiParams["Visualize Normals"] &&
+      opaqueMesh &&
+      (isSh2 || animationsPaused)
+    ) {
       const normalsHelper = new VertexNormalsHelper(opaqueMesh, 8, 0xff0000);
       scene.add(normalsHelper);
     }
@@ -1423,6 +1454,15 @@ const render = () => {
           clientState.uiParams["Ambient Color"]
         ).multiplyScalar(clientState.uiParams["Ambient Intensity"]);
         uniforms.alphaTest.value = clientState.uiParams["Alpha Test"];
+        uniforms.uTime.value += delta;
+        if (clientState.uiParams["Fancy Lighting"]) {
+          uniforms.lightingMode.value = Sh1LightingMode.Diffuse;
+        } else {
+          uniforms.lightingMode.value = Sh1LightingMode.Matte;
+        }
+        if (clientState.uiParams["Visualize Normals"]) {
+          uniforms.lightingMode.value = Sh1LightingMode.NormalMap;
+        }
       }
       lightAnimate?.(delta);
 
@@ -1460,14 +1500,12 @@ const render = () => {
     wrappingInput.hide();
     renderOpaqueInput.hide();
     renderTransparentInput.hide();
-    visualizeNormalsInput.hide();
     skeletonModeController?.hide();
     editModeButton.hide();
     clientState.setMode("viewing");
     editModeButton.setValue(false);
     textureViewerButton.show();
     invertAlphaInput.hide();
-    fancyLightingController.hide();
     transparencyInput.hide();
 
     exportToGltfButton.name("[export temporarily unavailable]");
@@ -1489,11 +1527,9 @@ const render = () => {
     wrappingInput.show();
     renderOpaqueInput.show();
     renderTransparentInput.show();
-    visualizeNormalsInput.show();
     skeletonModeController?.show();
     editModeButton.show();
     invertAlphaInput.show();
-    fancyLightingController.show();
     transparencyInput.show();
     animationsFolder.hide();
     submeshFolder.hide();
