@@ -492,8 +492,7 @@ export const createSh1Material = (psxTim: PsxTim, bpp = 4) => {
 export const Sh1LightingMode = {
   Matte: 0,
   Diffuse: 1,
-  Fancy: 2,
-  NormalMap: 3,
+  NormalMap: 2,
 } as const;
 
 // 🗂️ ------- file structure associations ------- 🗂️
