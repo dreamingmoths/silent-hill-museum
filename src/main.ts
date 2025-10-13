@@ -1035,9 +1035,17 @@ const renderSh1 = async () => {
     subset: submeshList,
   });
 
-  const shaderMaterial = createSh1Material(psxTim);
-  shaderMaterial.needsUpdate = true;
-  shaderMaterial.uniformsNeedUpdate = true;
+  const image = createSh1Material(psxTim, { renderer, geom }) as [
+    Uint8Array,
+    number,
+    number
+  ];
+  logger.debug({ image });
+  const dataTexture = new DataTexture(...image);
+  const shaderMaterial = new MeshStandardMaterial({
+    map: dataTexture,
+  });
+  dataTexture.needsUpdate = true;
   shaderMaterial.transparent = clientState.uiParams["Transparency"];
 
   const side =
@@ -1493,6 +1501,7 @@ const render = () => {
         clientState.uiParams["Render This Frame"] = false;
       }
     }
+
     renderIsFinished = true;
     if (!dds || name === clientState.file) {
       renderer.setAnimationLoop(null);
@@ -1519,8 +1528,8 @@ const render = () => {
     invertAlphaInput.hide();
     transparencyInput.hide();
 
-    exportToGltfButton.name("[export temporarily unavailable]");
-    exportToGltfButton.disable();
+    // exportToGltfButton.name("[export temporarily unavailable]");
+    // exportToGltfButton.disable();
 
     if (clientState.getGlVersion() === 1) {
       showQuickModal(
