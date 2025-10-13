@@ -33,18 +33,18 @@ void main() {
     vec4 color = texelFetch(clutTexture, clutXy, 0);
 
     float alpha = opacity * color.a;
-    if(alpha <= alphaTest) {
+    if (alpha <= alphaTest) {
         discard;
     }
 
     /* lighting */
     vec3 normal = vNormal;
-    if(lightingMode > NORMAL_MAP) {
+    if (lightingMode > NORMAL_MAP) {
         pc_fragColor = vec4(normal, 1.0);
         return;
     }
     vec3 diffuse = vec3(0.0);
-    if(lightingMode > DIFFUSE) {
+    if (lightingMode > DIFFUSE) {
         float t = LIGHT_SPEED * uTime;
         vec3 lightDir = vec3(sin(t), 0., cos(t));
         diffuse += max(dot(lightDir, normal), 0.0);
