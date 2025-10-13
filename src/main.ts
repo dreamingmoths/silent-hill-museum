@@ -393,6 +393,9 @@ const animationControls = {
       if (mixer.timeScale) {
         mixer.timeScale = 0;
         animationsPaused = true;
+        if (clientState.uiParams["Visualize Normals"]) {
+          render();
+        }
       } else {
         animationsPaused = false;
         mixer.timeScale = 1;
