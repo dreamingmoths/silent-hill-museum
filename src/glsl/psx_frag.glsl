@@ -33,7 +33,7 @@ void main() {
     vec4 color = texelFetch(clutTexture, clutXy, 0);
 
     float alpha = opacity * color.a;
-    if (alpha <= alphaTest) {
+    if (alpha < alphaTest) {
         discard;
     }
 
