@@ -159,7 +159,7 @@ export default class TextureViewer {
     });
   }
 
-  public createDataTexture(
+  public createFromUint8Array(
     array: Uint8Array,
     width: number,
     height: number,

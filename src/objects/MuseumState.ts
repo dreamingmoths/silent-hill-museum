@@ -84,6 +84,7 @@ export default class MuseumState {
   private saveRequested = false;
   private updateCallbacks: Array<() => void> = [];
   private onModeUpdate?: (previousMode: "viewing" | "edit") => void;
+  public onAfterRender?: () => void;
 
   private currentViewerModel?: SilentHillModel;
   private currentViewerIlm?: Ilm;
@@ -448,6 +449,11 @@ export default class MuseumState {
     };
   }
 
+  public notifyRenderFinished() {
+    this.onAfterRender?.();
+    this.onAfterRender = undefined;
+  }
+
   private onUpdate() {
     this.updateCallbacks.forEach((callback) => callback());
   }
@@ -492,15 +498,28 @@ export default class MuseumState {
       if (object === undefined) {
         return;
       }
-      toggleWithBackground("disclaimerModal", true);
-      onConfirm(() => {
-        exportModel(
-          object,
-          this.getCurrentContentName(),
-          this.getCurrentAnimationClips()
-        );
-        toggleWithBackground("blenderExportModal", true);
-      });
+      const onReady = () => {
+        toggleWithBackground("disclaimerModal", true);
+        onConfirm(() => {
+          exportModel(
+            object,
+            this.getCurrentContentName(),
+            this.getCurrentAnimationClips()
+          );
+          toggleWithBackground("blenderExportModal", true);
+        });
+      };
+      if (
+        this.uiParams.Game === "Silent Hill 1" &&
+        clientState.uiParams["CLUT Rendering"] !== "Atlas"
+      ) {
+        clientState.uiParams["Texture Viewer 👀"] = true;
+        clientState.uiParams["CLUT Rendering"] = "Atlas";
+        this.onAfterRender = onReady;
+        this.onUpdate();
+      } else {
+        onReady();
+      }
     },
 
     "Auto-Rotate": false,
@@ -515,6 +534,7 @@ export default class MuseumState {
     "Visualize Skeleton": false,
     "Visualize Normals": false,
 
+    "CLUT Rendering": "PSX Shader",
     "Render Mode": MaterialView.Textured as string,
     "Ambient Color": 0xffffff,
     "Ambient Intensity": 1.0,

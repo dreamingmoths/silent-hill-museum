@@ -12,6 +12,7 @@ import {
   KeyframeTrack,
   Matrix3,
   Matrix4,
+  MeshStandardMaterial,
   Quaternion,
   QuaternionKeyframeTrack,
   RawShaderMaterial,
@@ -32,7 +33,7 @@ import { ANIMATION_FRAME_DURATION } from "./utils";
 import PsxTim from "./kaitai/PsxTim";
 import psx_frag from "./glsl/psx_frag.glsl?raw";
 import psx_vert from "./glsl/psx_vert.glsl?raw";
-import { clientState } from "./objects/MuseumState";
+import { ceilPowerOfTwo } from "three/src/math/MathUtils.js";
 
 // I mostly just want to quickly create a prototype for sh1 support before
 // making any big structural changes to the code
@@ -197,7 +198,8 @@ export const createSh1Geometry = (init: GeometryInit) => {
         nIndices.v3 * 3 + NORMAL_OFFSET,
       ];
 
-      if (subset?.[object.name] === false) {
+      const discard = subset?.[object.name] === false;
+      if (discard) {
         i0 = 0;
         i1 = 0;
         i2 = 0;
@@ -393,16 +395,28 @@ export const createSh1Animation = (anm: Sh1anm) => {
 
 // 🌠 ------- texture building ------- 🌠
 
+type Sh1MaterialOptions =
+  | {
+      type: "shader";
+    }
+  | {
+      type: "atlas";
+      geometry: BufferGeometry;
+    };
+
 const clut = (x: number) => (x / 31) * 255;
 
-export const createSh1Material = (psxTim: PsxTim, bpp = 4) => {
-  if (bpp !== 4) {
+export const createSh1Material = (
+  psxTim: PsxTim,
+  options: Sh1MaterialOptions = { type: "shader" }
+) => {
+  if (psxTim.bpp !== 0 /* 4bpp */) {
     throw new Error("BPP must be 4");
   }
 
-  const clutInfo = psxTim.clut;
-  const clutWidth = clutInfo.width;
-  const clutHeight = clutInfo.height;
+  const clutBitmap = psxTim.clut;
+  const clutWidth = clutBitmap.width;
+  const clutHeight = clutBitmap.height;
   const clutTexture = new Uint8Array(4 * clutWidth * clutHeight);
 
   let clutIndex = 0;
@@ -430,7 +444,8 @@ export const createSh1Material = (psxTim: PsxTim, bpp = 4) => {
 
   const imageWidth = psxTim.img.width * 4;
   const imageHeight = psxTim.img.height;
-  const imageTexture = new Uint8Array(imageWidth * imageHeight);
+  const imageResolution = imageWidth * imageHeight;
+  const imageTexture = new Uint8Array(imageResolution);
 
   let pixelIndex = 0;
   for (let i = 0; i < psxTim.img.body.length; i += 2) {
@@ -442,38 +457,100 @@ export const createSh1Material = (psxTim: PsxTim, bpp = 4) => {
     pixelIndex += 4;
   }
 
-  const viewer = clientState.getTextureViewer();
-  if (viewer) {
-    viewer.attach([
-      viewer.createDataTexture(imageTexture, imageWidth, imageHeight, {
-        grayscale: true,
-        interpolation: "nearest",
-      }),
-      viewer.createDataTexture(clutTexture, clutWidth, clutHeight, {
-        grayscale: false,
-        interpolation: "nearest",
-      }),
-    ]);
+  const imageInfo = [
+    imageTexture,
+    imageWidth,
+    imageHeight,
+    { interpolation: "nearest", grayscale: true },
+  ] as const;
+  const clutInfo = [
+    clutTexture,
+    clutWidth,
+    clutHeight,
+    { interpolation: "nearest" },
+  ] as const;
+
+  if (options.type === "atlas") {
+    const tileCount = clutHeight;
+
+    const atlasWidth = ceilPowerOfTwo(imageWidth * Math.sqrt(clutHeight));
+    const tileCountX = atlasWidth / imageWidth;
+    const tileCountY = Math.ceil(clutHeight / tileCountX);
+    const atlasHeight = tileCountY * imageHeight;
+
+    const atlasResolution = atlasHeight * atlasWidth * 4;
+    const atlas = new Uint8Array(atlasResolution);
+    for (let tileIndex = 0; tileIndex < tileCount; tileIndex++) {
+      const x = imageWidth * (tileIndex % tileCountX);
+      const y = imageHeight * Math.floor(tileIndex / tileCountX);
+      const xy = x + y * atlasWidth;
+
+      for (let index = 0; index < imageTexture.length; index++) {
+        const i = index % imageWidth;
+        const j = Math.floor(index / imageWidth);
+        const ij = i + atlasWidth * j;
+
+        const pixel = 4 * (xy + ij);
+        const clutX = imageTexture[index];
+        const clutY = tileIndex;
+        const color = 4 * (clutX + clutY * clutWidth);
+        atlas[pixel] = clutTexture[color];
+        atlas[pixel + 1] = clutTexture[color + 1];
+        atlas[pixel + 2] = clutTexture[color + 2];
+        atlas[pixel + 3] = clutTexture[color + 3];
+      }
+    }
+
+    const atlasInfo = [
+      atlas,
+      atlasWidth,
+      atlasHeight,
+      { interpolation: "nearest" },
+    ] as const;
+    const dataTexture = new DataTexture(atlas, atlasWidth, atlasHeight);
+    dataTexture.needsUpdate = true;
+    const material = new MeshStandardMaterial({
+      map: dataTexture,
+    });
+
+    // scale and translate UV into texture based on clut row
+    const geometry = options.geometry;
+    const uv = geometry.getAttribute("uv").array as Float32Array;
+    const texInfo = geometry.getAttribute("texInfo").array as Int32Array;
+
+    for (let i = 0; i < uv.length; i += 2) {
+      const clutRow = texInfo[i + 1];
+      const tileX = clutRow % tileCountX;
+      const tileY = Math.floor(clutRow / tileCountX);
+
+      uv[i] = (uv[i] + tileX) / tileCountX;
+      uv[i + 1] = (uv[i + 1] + tileY) / tileCountY;
+    }
+
+    // delete unnecessary texInfo attribute in case we try to export
+    geometry.deleteAttribute("texInfo");
+
+    return { textures: [imageInfo, clutInfo, atlasInfo], material };
   }
 
   const clutDataTexture = new DataTexture(clutTexture, clutWidth, clutHeight);
   clutDataTexture.needsUpdate = true;
 
-  const imgDataTexture = new DataTexture(
+  const imageDataTexture = new DataTexture(
     new Uint32Array(imageTexture),
     imageWidth,
     imageHeight,
     RedIntegerFormat,
     UnsignedIntType
   );
-  imgDataTexture.needsUpdate = true;
+  imageDataTexture.needsUpdate = true;
 
-  const mat = new RawShaderMaterial({
+  const material = new RawShaderMaterial({
     vertexShader: psx_vert,
     fragmentShader: psx_frag,
     uniforms: {
       clutTexture: { value: clutDataTexture },
-      imgTexture: { value: imgDataTexture },
+      imgTexture: { value: imageDataTexture },
       imgSize: { value: new Vector2(imageWidth, imageHeight) },
       ambientLightColor: { value: new Vector3(1, 1, 1) },
       opacity: { value: 1 },
@@ -483,10 +560,10 @@ export const createSh1Material = (psxTim: PsxTim, bpp = 4) => {
     },
     glslVersion: GLSL3,
   });
+  material.name = "psx-shader";
+  material.uniformsNeedUpdate = true;
 
-  mat.uniformsNeedUpdate = true;
-
-  return mat;
+  return { material, textures: [imageInfo, clutInfo] };
 };
 
 export const Sh1LightingMode = {
