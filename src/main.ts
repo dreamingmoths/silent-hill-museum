@@ -1035,17 +1035,20 @@ const renderSh1 = async () => {
     subset: submeshList,
   });
 
-  const image = createSh1Material(psxTim, { renderer, geom }) as [
-    Uint8Array,
-    number,
-    number
-  ];
-  logger.debug({ image });
-  const dataTexture = new DataTexture(...image);
-  const shaderMaterial = new MeshStandardMaterial({
-    map: dataTexture,
+  const materialResult = createSh1Material(psxTim, {
+    type: "atlas",
+    geometry: geom,
   });
-  dataTexture.needsUpdate = true;
+  const viewer = clientState.getTextureViewer();
+  if (viewer) {
+    viewer.attach(
+      materialResult.textures.map((info) =>
+        viewer.createFromUint8Array(...info)
+      )
+    );
+  }
+
+  const shaderMaterial = materialResult.material;
   shaderMaterial.transparent = clientState.uiParams["Transparency"];
 
   const side =
