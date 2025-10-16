@@ -231,10 +231,7 @@ dataGuiFolder.add(clientState.uiParams, "View Structure 🔎");
 dataGuiFolder.add(clientState.uiParams, "Next File");
 dataGuiFolder.add(clientState.uiParams, "Previous File");
 dataGuiFolder.add(clientState.uiParams, "Save Image");
-const exportToGltfButton = dataGuiFolder.add(
-  clientState.uiParams,
-  "Export to GLTF"
-);
+dataGuiFolder.add(clientState.uiParams, "Export to GLTF");
 fileInput.onFinishChange((file: (typeof possibleFilenames)[number]) => {
   clientState.file = file;
 });
@@ -1531,9 +1528,6 @@ const render = () => {
     invertAlphaInput.hide();
     transparencyInput.hide();
 
-    // exportToGltfButton.name("[export temporarily unavailable]");
-    // exportToGltfButton.disable();
-
     if (clientState.getGlVersion() === 1) {
       showQuickModal(
         "<p>WebGL 2 is required for Silent Hill 1 models for now.</p>" +
@@ -1556,9 +1550,6 @@ const render = () => {
     transparencyInput.show();
     animationsFolder.hide();
     submeshFolder.hide();
-
-    exportToGltfButton.name("Export to GLTF");
-    exportToGltfButton.enable();
   }
 
   const filename = isSh2
