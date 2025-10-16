@@ -506,9 +506,7 @@ export default class MuseumState {
             this.getCurrentContentName(),
             this.getCurrentAnimationClips()
           );
-          if (this.uiParams.Game === "Silent Hill 2") {
-            toggleWithBackground("blenderExportModal", true);
-          }
+          toggleWithBackground("blenderExportModal", true);
         });
       };
       if (
