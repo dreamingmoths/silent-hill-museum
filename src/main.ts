@@ -324,8 +324,12 @@ geometryFolder
   .onFinishChange(() => render());
 const submeshFolder = geometryFolder.addFolder("Submeshes").hide().close();
 
-const textureFolder = gui.addFolder("Texture");
-textureFolder
+const materialFolder = gui.addFolder("Material");
+materialFolder
+  .add(clientState.uiParams, "CLUT Rendering", ["PSX Shader", "Atlas"])
+  .listen()
+  .onFinishChange(() => render());
+materialFolder
   .add(clientState.uiParams, "Render Mode", [
     MaterialView.Flat,
     MaterialView.UV,
@@ -333,7 +337,7 @@ textureFolder
     MaterialView.Textured,
   ])
   .onFinishChange(() => render());
-textureFolder
+materialFolder
   .add(clientState.uiParams, "Render Side", [
     "DoubleSide",
     "FrontSide",
@@ -341,7 +345,7 @@ textureFolder
   ])
   .onFinishChange(() => render())
   .listen();
-const wrappingInput = textureFolder
+const wrappingInput = materialFolder
   .add(clientState.uiParams, "Wrapping", [
     "ClampToEdge",
     "Repeat",
@@ -350,25 +354,25 @@ const wrappingInput = textureFolder
   .onFinishChange(() => render())
   .listen()
   .setValue(clientState.uiParams.Wrapping.replace("Wrapping", ""));
-textureFolder
+materialFolder
   .add(clientState.uiParams, "Model Opacity", 0, 1, 0.01)
   .onFinishChange(() => render())
   .listen();
-const transparencyInput = textureFolder
+const transparencyInput = materialFolder
   .add(clientState.uiParams, "Transparency")
   .onFinishChange(() => render());
-const invertAlphaInput = textureFolder
+const invertAlphaInput = materialFolder
   .add(clientState.uiParams, "Invert Alpha")
   .onFinishChange(() => render())
   .listen();
-textureFolder
+materialFolder
   .add(clientState.uiParams, "Alpha Test", 0, 1, 0.01)
   .onFinishChange(() => render())
   .listen();
 
-textureFolder.addColor(clientState.uiParams, "Ambient Color");
-textureFolder.add(clientState.uiParams, "Ambient Intensity", 0, 8);
-textureFolder
+materialFolder.addColor(clientState.uiParams, "Ambient Color");
+materialFolder.add(clientState.uiParams, "Ambient Intensity", 0, 8);
+materialFolder
   .add(clientState.uiParams, "Fancy Lighting")
   .onFinishChange((value: boolean) => {
     if (!value && lightGroup) {
@@ -802,9 +806,9 @@ const renderSh2 = (model: SilentHill2Model) => {
     opaqueMaterial.name === "uv-map" &&
     clientState.uiParams["Render Mode"] !== MaterialView.UV
   ) {
-    textureFolder.hide();
+    materialFolder.hide();
   } else {
-    textureFolder.show();
+    materialFolder.show();
   }
 
   const opaqueGeometry = clientState.uiParams["Render Opaque"]
@@ -1032,10 +1036,14 @@ const renderSh1 = async () => {
     subset: submeshList,
   });
 
-  const materialResult = createSh1Material(psxTim, {
-    type: "atlas",
-    geometry: geom,
-  });
+  const materialOptions =
+    clientState.uiParams["CLUT Rendering"] === "PSX Shader"
+      ? ({ type: "shader" } as const)
+      : ({
+          type: "atlas",
+          geometry: geom,
+        } as const);
+  const materialResult = createSh1Material(psxTim, materialOptions);
   const viewer = clientState.getTextureViewer();
   if (viewer) {
     viewer.attach(
@@ -1503,6 +1511,7 @@ const render = () => {
     }
 
     renderIsFinished = true;
+    clientState.notifyRenderFinished();
     if (!dds || name === clientState.file) {
       renderer.setAnimationLoop(null);
       renderer.setAnimationLoop(animate);
