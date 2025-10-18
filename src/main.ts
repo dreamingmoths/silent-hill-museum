@@ -127,11 +127,6 @@ const animationGuiContainer = document.querySelector(".quick-access");
 if (!(animationGuiContainer instanceof HTMLDivElement)) {
   throw new Error("The quick access container was not found!");
 }
-const versionText = document.getElementById("version-text");
-if (!(versionText instanceof HTMLParagraphElement)) {
-  throw new Error("The version text element was not found!");
-}
-versionText.innerText = `version ${process.env.APP_VERSION} (experimental)`;
 export const animationGui = new AnimationGui(animationGuiContainer);
 
 initializeModals();

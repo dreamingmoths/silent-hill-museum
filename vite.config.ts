@@ -7,7 +7,9 @@ export default defineConfig({
   },
 
   define: {
-    "process.env.APP_VERSION": JSON.stringify(process.env.npm_package_version),
+    "import.meta.env.APP_VERSION": JSON.stringify(
+      process.env.npm_package_version
+    ),
   },
 
   build: {
