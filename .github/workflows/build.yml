@@ -1,6 +1,9 @@
 name: Run Build
 
-on: push
+on:
+  push:
+    branches-ignore:
+      - main
 
 jobs:
   build:
