@@ -347,7 +347,7 @@ export const createSkeleton = (model: SilentHillModel) => {
     }
     const parentBone = bones[parentBoneIndex];
     if (parentBone === undefined) {
-      throw Error("Invalid skeleton tree.");
+      throw new Error("Invalid skeleton tree.");
     }
     const bone = new Bone();
     bone.applyMatrix4(transformationMatrixToMat4(initialMatrices[i]));
@@ -408,7 +408,7 @@ export const bindSkeletonToGeometry = (
         const boneRelationship =
           model.modelData.bonePairs[bonePairIndicesArray[bonePairIndex]];
         if (boneRelationship === undefined) {
-          throw Error(
+          throw new Error(
             `Bone pair ${bonePairIndex} was specified,` +
               `but primitive ${primitiveIndex} has ${bonePairIndicesArray.length} pairs!`
           );

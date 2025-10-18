@@ -328,7 +328,7 @@ export const fileCallback = (file: File) => {
     });
     return true;
   } else if (!file.name.endsWith(".mdl")) {
-    throw Error("Not a mdl!");
+    throw new Error("Not a mdl!");
   }
   readFile(file, readCustomStruct);
   return true;

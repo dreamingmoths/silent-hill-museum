@@ -16,14 +16,11 @@
     "postinstall": "patch-package"
   },
   "devDependencies": {
-    "@types/offscreencanvas": "^2019.7.3",
     "@types/three": "^0.162.0",
-    "globby": "^14.0.2",
     "patch-package": "^8.0.0",
     "tsx": "^4.19.0",
     "typescript": "^5.2.2",
     "vite": "^5.3.4",
-    "vite-plugin-html": "^3.2.2",
     "vitest": "^2.0.4"
   },
   "dependencies": {
@@ -31,10 +28,7 @@
     "lil-gui": "^0.19.2",
     "three": "^0.162.0"
   },
-  "peerDependencies": {
-    "iconv-lite": "^0.6.3"
-  },
-  "packageManager": "pnpm@9.15.0",
+  "packageManager": "pnpm@10.18.3+sha256.797d0059bc5fc3356d79c681615a137c7b35e4efc03a4449a8a1abfcbcc4bdc7",
   "engines": {
     "pnpm": ">=9.15.0"
   }

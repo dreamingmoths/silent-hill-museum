@@ -40,7 +40,7 @@ export default class ImageLibrary {
 
   constructor(canvas?: HTMLCanvasElement | OffscreenCanvas) {
     if (!canvas && typeof document === "undefined") {
-      throw Error(
+      throw new Error(
         "Provide an offscreen canvas if running in a context without DOM access"
       );
     }

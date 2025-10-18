@@ -117,16 +117,21 @@ import { NO_VALUE, Sh1AnimInfo } from "./sh1-animinfo";
 
 const appContainer = document.getElementById("app");
 if (!(appContainer instanceof HTMLDivElement)) {
-  throw Error("The app container was not found!");
+  throw new Error("The app container was not found!");
 }
 const uiContainer = document.getElementById("ui-container");
 if (!(uiContainer instanceof HTMLDivElement)) {
-  throw Error("The UI container was not found!");
+  throw new Error("The UI container was not found!");
 }
 const animationGuiContainer = document.querySelector(".quick-access");
 if (!(animationGuiContainer instanceof HTMLDivElement)) {
-  throw Error("The quick access coontainer was not found!");
+  throw new Error("The quick access container was not found!");
 }
+const versionText = document.getElementById("version-text");
+if (!(versionText instanceof HTMLParagraphElement)) {
+  throw new Error("The version text element was not found!");
+}
+versionText.innerText = `version ${process.env.APP_VERSION} (experimental)`;
 export const animationGui = new AnimationGui(animationGuiContainer);
 
 initializeModals();
@@ -141,7 +146,7 @@ if (!bypassAboutModal && localStorage.getItem("visited") === null) {
 let glVersion: 0 | 1 | 2 = 0;
 if (!WebGL.isWebGLAvailable()) {
   showNotSupportedModal(glVersion);
-  throw Error("WebGL is not available on this browser.");
+  throw new Error("WebGL is not available on this browser.");
 } else if (!WebGL.isWebGL2Available()) {
   glVersion = 1;
   showNotSupportedModal(glVersion);
@@ -1248,7 +1253,7 @@ const render = () => {
       }
       result = maybeResult;
     } else {
-      throw Error("Model is not an instance of SilentHill2Model");
+      throw new Error("Model is not an instance of SilentHill2Model");
     }
 
     const {
