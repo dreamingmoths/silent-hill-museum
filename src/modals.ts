@@ -31,41 +31,41 @@ export const addUiElement = (
 export const initializeModals = () => {
   const aboutModal = document.getElementById("about-modal");
   if (!(aboutModal instanceof HTMLDivElement)) {
-    throw Error("Did not find the about modal!");
+    throw new Error("Did not find the about modal!");
   }
   const blurBackground = document.getElementById("blur-background");
   if (!(blurBackground instanceof HTMLDivElement)) {
-    throw Error("Did not find the background element!");
+    throw new Error("Did not find the background element!");
   }
   const openAboutModal = document.getElementById("open-about-modal");
   if (!(openAboutModal instanceof HTMLAnchorElement)) {
-    throw Error("Did not find the about modal open link!");
+    throw new Error("Did not find the about modal open link!");
   }
   const disclaimerModal = document.getElementById("disclaimer-modal");
   if (!(disclaimerModal instanceof HTMLDivElement)) {
-    throw Error("Did not find the disclaimer modal!");
+    throw new Error("Did not find the disclaimer modal!");
   }
   const blenderExportModal = document.getElementById("blender-export-modal");
   if (!(blenderExportModal instanceof HTMLDivElement)) {
-    throw Error("Did not find the blender export modal!");
+    throw new Error("Did not find the blender export modal!");
   }
   const keybindsModal = document.getElementById("keybinds-modal");
   if (!(keybindsModal instanceof HTMLDivElement)) {
-    throw Error("Did not find the keybinds modal!");
+    throw new Error("Did not find the keybinds modal!");
   }
   const contentWarningModal = document.getElementById("content-warning-modal");
   if (!(contentWarningModal instanceof HTMLDivElement)) {
-    throw Error("Did not find the content warning modal!");
+    throw new Error("Did not find the content warning modal!");
   }
   const webglNotSupportedModal = document.getElementById(
     "webgl-not-supported-modal"
   );
   if (!(webglNotSupportedModal instanceof HTMLDivElement)) {
-    throw Error("Did not find the support message modal!");
+    throw new Error("Did not find the support message modal!");
   }
   const quickModal = document.getElementById("quick-modal");
   if (!(quickModal instanceof HTMLDivElement)) {
-    throw Error("Did not find the quick modal!");
+    throw new Error("Did not find the quick modal!");
   }
   addUiElement("aboutModal", aboutModal);
   addUiElement("blurBackground", blurBackground);
@@ -152,7 +152,7 @@ export const onConfirm = (
 ) => {
   const confirmButton = document.querySelector(".modal.active .confirm-button");
   if (!(confirmButton instanceof HTMLButtonElement)) {
-    throw Error("Did not find confirm button!");
+    throw new Error("Did not find confirm button!");
   }
   if (confirmButton.getAttribute("eventListenerAdded")) {
     return;
@@ -189,7 +189,7 @@ export const showContentWarningModal = (
 export const showNotSupportedModal = (glVersion = 0, queue = true) => {
   const element = uiDescriptions.webglNotSupportedModal.element;
   if (!element) {
-    throw Error("Could not find support message modal!");
+    throw new Error("Could not find support message modal!");
   }
   if (element.innerHTML === "" && !glVersion) {
     let html = "";
@@ -221,12 +221,12 @@ export const showQuickModal = (
 ) => {
   const element = uiDescriptions.quickModal.element;
   if (!element) {
-    throw Error("Could not find quick modal element!");
+    throw new Error("Could not find quick modal element!");
   }
 
   const content = element.querySelector(".content");
   if (!content) {
-    throw Error("Could not find quick modal content element!");
+    throw new Error("Could not find quick modal content element!");
   }
 
   if (html !== undefined) {

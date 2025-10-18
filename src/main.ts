@@ -146,7 +146,7 @@ if (!bypassAboutModal && localStorage.getItem("visited") === null) {
 let glVersion: 0 | 1 | 2 = 0;
 if (!WebGL.isWebGLAvailable()) {
   showNotSupportedModal(glVersion);
-  throw Error("WebGL is not available on this browser.");
+  throw new Error("WebGL is not available on this browser.");
 } else if (!WebGL.isWebGL2Available()) {
   glVersion = 1;
   showNotSupportedModal(glVersion);
@@ -1253,7 +1253,7 @@ const render = () => {
       }
       result = maybeResult;
     } else {
-      throw Error("Model is not an instance of SilentHill2Model");
+      throw new Error("Model is not an instance of SilentHill2Model");
     }
 
     const {

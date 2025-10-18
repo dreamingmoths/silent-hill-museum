@@ -379,7 +379,7 @@ export default class SerializableModel {
       // compute triangle strip
       const meshTriangles = meshGeometry.getIndex()?.array;
       if (meshTriangles === undefined) {
-        throw Error(`Mesh ${index} did not have any triangles.`);
+        throw new Error(`Mesh ${index} did not have any triangles.`);
       }
       const vertexCount = meshVertices.length / 3;
       const triangles = await stripifier.triangleStripFromList(
@@ -974,7 +974,7 @@ export default class SerializableModel {
             ].reduce((a, b) => a + b) - 1
           ) > 1e-1
         ) {
-          throw Error(`Division by ${sum}, which is very close to zero`);
+          throw new Error(`Division by ${sum}, which is very close to zero`);
         }
       } else {
         let objectSpaceMatrix = boneSpaceMatrices.get(bonemapCollapseTarget);
@@ -1260,7 +1260,7 @@ export default class SerializableModel {
 
     const spriteHeader = at(textureContainer.spriteHeaders, -1);
     if (spriteHeader === undefined) {
-      throw Error("No sprite header?");
+      throw new Error("No sprite header?");
     }
     spriteHeader.dataSize = dataSize;
     spriteHeader.allSize = dataSizeFull;

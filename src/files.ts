@@ -24,7 +24,7 @@ export const destructureIndex = (
   index: number
 ): MapIndicesToValues<typeof fileIndices, typeof fileArray> => {
   if (index < 0 || index >= fileArray.length) {
-    throw Error(
+    throw new Error(
       `Index ${index} of out of bounds for file array with length ${fileArray.length}`
     );
   }
@@ -33,7 +33,7 @@ export const destructureIndex = (
   return fileIndices.map((indexArray) => {
     let { value: indexAtDepth } = findLastNotExceeding(indexArray, index);
     if (indexAtDepth === undefined) {
-      throw Error("Failed to destructure index!");
+      throw new Error("Failed to destructure index!");
     }
     return fileArray[indexAtDepth];
   }) as unknown as MapIndicesToValues<typeof fileIndices, typeof fileArray>;
@@ -46,7 +46,7 @@ export const constructIndex = (
   ...values: TupleSliceUnion<FilePathTuple, 0, typeof fileIndices.length>
 ) => {
   if (values.length > fileIndices.length) {
-    throw Error(
+    throw new Error(
       `Need at most ${fileIndices.length} values, got ${values.length}`
     );
   }
@@ -76,7 +76,7 @@ export const travelAlongLevel = (
   lockToParent = false
 ) => {
   if (depth < 0 || depth >= fileIndices.length) {
-    throw Error(
+    throw new Error(
       `Level ${depth} of out of bounds for tree of depth ${fileIndices.length}`
     );
   }
@@ -92,7 +92,7 @@ export const travelAlongLevel = (
     return fileIndices[depth][newIndex];
   } else {
     if (depth === 0) {
-      throw Error(
+      throw new Error(
         "Depth zero doesn't make sense for lockToParent. Root nodes have no parent."
       );
     }

@@ -28,7 +28,7 @@ export default class TextureViewer {
     this.canvas = document.createElement("canvas");
     const contentWindow = guiWindow.querySelector(".texture-viewer.content");
     if (!(contentWindow instanceof HTMLDivElement)) {
-      throw Error("Could not find content window.");
+      throw new Error("Could not find content window.");
     }
     this.contentWindow = contentWindow;
     this.renderTextures();

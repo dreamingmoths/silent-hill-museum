@@ -30,11 +30,11 @@ export default class EditMode {
   public constructor() {
     const sidebar = document.getElementById("sidebar");
     if (!(sidebar instanceof HTMLDivElement)) {
-      throw Error("Could not find sidebar div element!");
+      throw new Error("Could not find sidebar div element!");
     }
     const sidebarButtonsContainer = sidebar.querySelector(".sidebar-buttons");
     if (!(sidebarButtonsContainer instanceof HTMLDivElement)) {
-      throw Error("Could not find sidebar buttons element!");
+      throw new Error("Could not find sidebar buttons element!");
     }
     const filepicker: HTMLInputElement | null =
       document.querySelector(".filepicker");
@@ -427,7 +427,7 @@ export default class EditMode {
         "editModeLog"
       );
     } else {
-      throw Error("Did not find output log!");
+      throw new Error("Did not find output log!");
     }
 
     const textureViewerGui = new GUI({

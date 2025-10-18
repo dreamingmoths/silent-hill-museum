@@ -192,11 +192,11 @@ export const exportCanvas = (
   filename: string
 ) => {
   if (!(container instanceof HTMLElement)) {
-    throw Error("Container was not valid");
+    throw new Error("Container was not valid");
   }
   const canvas = container.querySelector("canvas");
   if (!(canvas instanceof HTMLCanvasElement)) {
-    throw Error("Could not find canvas element!");
+    throw new Error("Could not find canvas element!");
   }
   const base64 = canvas.toDataURL();
   save(base64, filename);
