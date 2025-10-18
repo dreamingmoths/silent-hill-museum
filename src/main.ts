@@ -117,16 +117,21 @@ import { NO_VALUE, Sh1AnimInfo } from "./sh1-animinfo";
 
 const appContainer = document.getElementById("app");
 if (!(appContainer instanceof HTMLDivElement)) {
-  throw Error("The app container was not found!");
+  throw new Error("The app container was not found!");
 }
 const uiContainer = document.getElementById("ui-container");
 if (!(uiContainer instanceof HTMLDivElement)) {
-  throw Error("The UI container was not found!");
+  throw new Error("The UI container was not found!");
 }
 const animationGuiContainer = document.querySelector(".quick-access");
 if (!(animationGuiContainer instanceof HTMLDivElement)) {
-  throw Error("The quick access coontainer was not found!");
+  throw new Error("The quick access container was not found!");
 }
+const versionText = document.getElementById("version-text");
+if (!(versionText instanceof HTMLParagraphElement)) {
+  throw new Error("The version text element was not found!");
+}
+versionText.innerText = `version ${process.env.APP_VERSION} (experimental)`;
 export const animationGui = new AnimationGui(animationGuiContainer);
 
 initializeModals();

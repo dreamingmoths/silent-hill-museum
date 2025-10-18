@@ -23,7 +23,6 @@
     "tsx": "^4.19.0",
     "typescript": "^5.2.2",
     "vite": "^5.3.4",
-    "vite-plugin-html": "^3.2.2",
     "vitest": "^2.0.4"
   },
   "dependencies": {
