@@ -6,7 +6,7 @@ declare namespace RuntimeExports {
      * @param {Arguments|Array=} args
      * @param {Object=} opts
      */
-    function ccall(ident: any, returnType?: (string | null) | undefined, argTypes?: any[] | undefined, args?: (Arguments | any[]) | undefined, opts?: any | undefined): any;
+    function ccall(ident: any, returnType?: (string | null) | undefined, argTypes?: any[] | undefined, args?: any[] | undefined, opts?: any | undefined): any;
     /**
      * @param {string=} returnType
      * @param {Array=} argTypes
