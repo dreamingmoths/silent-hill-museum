@@ -732,7 +732,7 @@ let renderIsFinished = true;
 let renderTicket = 0;
 let submeshListNeedsUpdate = false;
 
-const renderSh2 = (model: SilentHill2Model) => {
+const renderSh2 = async (model: SilentHill2Model) => {
   group = new Group();
 
   if (editorState.cachedOriginalModel) {
@@ -745,7 +745,7 @@ const renderSh2 = (model: SilentHill2Model) => {
 
   // temporary: separate into opaque & transparent until specularity is implemented?
   // likely need to create more materials for most accurate results
-  const opaqueMaterial = createMaterial(
+  const opaqueMaterial = await createMaterial(
     model,
     clientState.uiParams["Render Mode"] as MaterialType,
     {
@@ -771,7 +771,7 @@ const renderSh2 = (model: SilentHill2Model) => {
         ? RepeatWrapping
         : ClampToEdgeWrapping)
   );
-  const transparentMaterial = createMaterial(
+  const transparentMaterial = await createMaterial(
     model,
     clientState.uiParams["Render Mode"] as MaterialType,
     {
@@ -1232,8 +1232,8 @@ const render = () => {
     raycastTargets.length = 0;
 
     let result:
-      | ReturnType<typeof renderSh2>
-      | ReturnType<typeof renderSh1>
+      | Awaited<ReturnType<typeof renderSh2>>
+      | Awaited<ReturnType<typeof renderSh1>>
       | undefined = undefined;
     if (isSh1) {
       const maybeResult = await renderSh1();
@@ -1242,7 +1242,11 @@ const render = () => {
       }
       result = maybeResult;
     } else if (model !== undefined) {
-      result = renderSh2(model);
+      const maybeResult = await renderSh2(model);
+      if (!maybeResult) {
+        return;
+      }
+      result = maybeResult;
     } else {
       throw Error("Model is not an instance of SilentHill2Model");
     }

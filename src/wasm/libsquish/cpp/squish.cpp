@@ -217,8 +217,11 @@ void DecompressImage( u8* bgra, int width, int height, void const* blocks, int f
                         u8* targetPixel = bgra + 4*( width*sy + sx );
 
                         // copy the rgba value
-                        for( int i = 0; i < 4; ++i )
-                            *targetPixel++ = (*sourcePixel++) * 255.0;
+                        *targetPixel++ = sourcePixel[2];
+                        *targetPixel++ = sourcePixel[1];
+                        *targetPixel++ = sourcePixel[0];
+                        *targetPixel++ = sourcePixel[3] * 255.0f;
+                        sourcePixel += 4;
                     }
                     else
                     {

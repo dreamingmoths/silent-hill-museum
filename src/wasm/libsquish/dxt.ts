@@ -88,11 +88,6 @@ class SquishInstance {
     return buf;
   }
 
-  private async getDataFromPointer(pointer: number, size: number) {
-    const main = await this.module;
-    return new Uint8Array(main.HEAPU8.buffer, pointer, size).slice();
-  }
-
   public async compress(
     inputData: Uint8Array,
     width: number,
@@ -116,7 +111,7 @@ class SquishInstance {
     const targetSize = getStorageRequirements(width, height, flags);
     const pointer = main._malloc(targetSize);
     compressImage(source, width, height, pointer, flags);
-    const out = this.getDataFromPointer(pointer, targetSize);
+    const out = new Uint8Array(main.HEAPU8.buffer, pointer, targetSize).slice();
     main._free(source);
     main._free(pointer);
     return out;
@@ -136,11 +131,14 @@ class SquishInstance {
       "number",
       "number",
     ]);
-    const source = await this.pointerFromData(inputData);
-    const targetSize = width * height;
+    const source = main._malloc(inputData.length);
+    main.HEAPU8.set(inputData, source);
+
+    const targetSize = width * height * 4;
     const pointer = main._malloc(targetSize);
     decompressImage(pointer, width, height, source, flags);
-    const out = this.getDataFromPointer(pointer, targetSize);
+    const out = new Uint8Array(main.HEAPU8.buffer, pointer, targetSize).slice();
+
     main._free(source);
     main._free(pointer);
     return out;

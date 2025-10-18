@@ -18,8 +18,8 @@ import {
 } from "three";
 import SilentHillModel from "./kaitai/Mdl";
 import { at, MIN_SIGNED_INT, transformationMatrixToMat4 } from "./utils";
-import decodeDXT from "decode-dxt";
 import logger from "./objects/Logger";
+import Squish, { SquishFlags } from "./wasm/libsquish/dxt";
 
 export const MaterialView = {
   Flat: "Flat color",
@@ -216,14 +216,14 @@ const processPrimitiveHeaders = (
   return geometry;
 };
 
-export const createMaterial = (
+export const createMaterial = async (
   model: SilentHillModel,
   materialType: MaterialType = MaterialView.Textured,
   parameters?: MeshStandardMaterialParameters,
   invertAlpha: boolean = false,
   wrapMode?: Wrapping,
   baseMaterial?: Material[]
-): Material | Material[] => {
+): Promise<Material | Material[]> => {
   let material: Material | Material[];
   let textureMap = defaultDiffuseMap;
   let [width, height] = [128, 128];
@@ -252,17 +252,21 @@ export const createMaterial = (
         (a, b) =>
           textureIds.indexOf(a.textureId) - textureIds.indexOf(b.textureId)
       );
-      const dataTextures =
-        baseMaterial?.map(
+      let dataTextures: Array<unknown> = [];
+      if (baseMaterial) {
+        dataTextures = baseMaterial?.map(
           (material) => material instanceof MeshStandardMaterial && material.map
-        ) ??
-        modelTextures.map((texture) => {
+        );
+      } else {
+        dataTextures = [];
+        for (const texture of modelTextures) {
           if (texture !== undefined) {
-            const ddsBuffer = new Uint8Array(texture.data);
+            const ddsTextureArray = new Uint8Array(texture.data);
             [width, height] = [texture.width, texture.height];
-            const ddsDataView = new DataView(ddsBuffer.buffer);
-            const rgbaData = decodeDXT(
-              ddsDataView,
+            const squish = Squish.getInstance();
+
+            const rgbaData = await squish.decompress(
+              ddsTextureArray,
               width,
               height,
               DxtLookup[
@@ -274,14 +278,16 @@ export const createMaterial = (
           if (invertAlpha) {
             textureMap = textureMap.map((v, i) => (i % 4 === 3 ? 255 - v : v));
           }
+
           const dataTexture = new DataTexture(textureMap, width, height);
           dataTexture.minFilter = LinearFilter;
           dataTexture.magFilter = LinearFilter;
           dataTexture.wrapS = wrapMode ? wrapMode : ClampToEdgeWrapping;
           dataTexture.wrapT = wrapMode ? wrapMode : ClampToEdgeWrapping;
           dataTexture.needsUpdate = true;
-          return dataTexture;
-        });
+          dataTextures.push(dataTexture);
+        }
+      }
       material = dataTextures.map((dataTexture) => {
         const materialParams = Object.assign(
           {},
@@ -318,11 +324,9 @@ export const createMaterial = (
 };
 
 export const DxtLookup = {
-  0: "dxt1",
-  1: "dxt2",
-  2: "dxt3",
-  3: "dxt4",
-  4: "dxt5",
+  0: SquishFlags.DXT1,
+  2: SquishFlags.DXT3,
+  4: SquishFlags.DXT5,
 } as const;
 
 export const createSkeleton = (model: SilentHillModel) => {
