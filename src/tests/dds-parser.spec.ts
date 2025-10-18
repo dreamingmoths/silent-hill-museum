@@ -1,11 +1,11 @@
 import path from "path";
 import { describe, expect, test } from "vitest";
 import { fetchRawBytes, loadDramaDemoFromBytes } from "../load";
-import { globby } from "globby";
 import SilentHillDramaDemo from "../kaitai/Dds";
 import F2 from "../kaitai/F2";
 import logger from "../objects/Logger";
 import { at } from "../utils";
+import fs from "fs";
 
 test("should parse inu animation ", async () => {
   const inu = loadDramaDemoFromBytes(
@@ -35,14 +35,23 @@ const loadDdsWithCache = async (file: string) => {
   return cutscene;
 };
 
+const getDirectories = (source: string) =>
+  fs
+    .readdirSync(source, { withFileTypes: true })
+    .filter((dirent) => dirent.isDirectory())
+    .map((dirent) => path.join(source, dirent.name));
+
 describe("should parse all dds files without error", async () => {
   const inputDir = path.join(__dirname, "../../public/data");
-  const folders = (
-    await globby([`${inputDir}/*/*`], { onlyDirectories: true })
-  ).map((path) => at(path.split("data/"), -1)!);
+  const folders = getDirectories(path.join(inputDir, "demo")).concat(
+    getDirectories(path.join(inputDir, "demo2"))
+  );
 
   for (const folder of folders) {
-    const files = await globby([`${inputDir}/${folder}/*.dds`]);
+    const files = fs
+      .readdirSync(folder)
+      .filter((value) => value.endsWith(".dds"))
+      .map((value) => path.join(folder, value));
     if (files.length === 0) {
       continue;
     }

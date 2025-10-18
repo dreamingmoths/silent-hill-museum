@@ -1,7 +1,6 @@
 import path from "path";
 import { expect, test } from "vitest";
 import { loadModelFromUrl } from "../load";
-import { globby } from "globby";
 import SilentHillModel from "../kaitai/Mdl";
 import { at, transformationMatrixToMat4 } from "../utils";
 import { BufferGeometry, Skeleton } from "three";
@@ -12,6 +11,7 @@ import {
   createSkeleton,
 } from "../model";
 import logger from "../objects/Logger";
+import { destructureIndex, fileArray as mdlFileArray } from "../files";
 
 const QUICK = process.env.QUICK;
 const VERBOSE = true;
@@ -34,15 +34,18 @@ const loadModelWithCache = async (file: string) => {
 
 test("should parse all models without error", async () => {
   const inputDir = path.join(__dirname, "../../public/data");
-  const files = await globby([`${inputDir}/**/*.mdl`]);
+  const filenames = mdlFileArray;
 
-  for (const file of files) {
-    if (file.endsWith("_st.mdl")) {
+  for (let i = 0; i < filenames.length; i++) {
+    const filename = filenames[i];
+    if (!filename.endsWith(".mdl") || filename.endsWith("_st.mdl")) {
       // unknown, skip
       continue;
     }
+    const [root, folder] = destructureIndex(i);
+    const file = path.join(inputDir, root, folder, filename);
     if (VERBOSE) {
-      logger.info("Parsing", file);
+      console.debug("Parsing", file);
     }
     const model = loadModelWithCache(file);
     await expect(model).resolves.not.toThrow();
