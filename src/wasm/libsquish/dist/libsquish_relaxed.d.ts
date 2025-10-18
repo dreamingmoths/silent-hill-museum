@@ -6,24 +6,14 @@ declare namespace RuntimeExports {
      * @param {Arguments|Array=} args
      * @param {Object=} opts
      */
-    function ccall(ident: any, returnType?: string, argTypes?: any[], args?: any, opts?: any): any;
+    function ccall(ident: any, returnType?: (string | null) | undefined, argTypes?: any[] | undefined, args?: any[] | undefined, opts?: any | undefined): any;
     /**
      * @param {string=} returnType
      * @param {Array=} argTypes
      * @param {Object=} opts
      */
-    function cwrap(ident: any, returnType?: string, argTypes?: any[], opts?: any): (...args: any[]) => any;
-    let HEAPF32: any;
-    let HEAPF64: any;
-    let HEAP_DATA_VIEW: any;
-    let HEAP8: any;
+    function cwrap(ident: any, returnType?: string | undefined, argTypes?: any[] | undefined, opts?: any | undefined): (...args: any[]) => any;
     let HEAPU8: any;
-    let HEAP16: any;
-    let HEAPU16: any;
-    let HEAP32: any;
-    let HEAPU32: any;
-    let HEAP64: any;
-    let HEAPU64: any;
 }
 interface WasmModule {
   _GetStorageRequirements(_0: number, _1: number, _2: number): number;

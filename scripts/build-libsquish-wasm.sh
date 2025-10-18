@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ARGS="src/wasm/libsquish/cpp/*.cpp -O3 \
-    -sEXPORTED_RUNTIME_METHODS=ccall,cwrap -sASSERTIONS=1 -sALLOW_MEMORY_GROWTH \
+    -sEXPORTED_RUNTIME_METHODS=ccall,cwrap,HEAPU8 -sASSERTIONS=1 -sALLOW_MEMORY_GROWTH \
     -sEXPORTED_FUNCTIONS=_GetStorageRequirements,_CompressImage,_DecompressImage,_free,_malloc \
     -sEXPORT_ES6=1"
 RELAXED_WASM_ARGS="-msimd128 -mrelaxed-simd -msse -msse2 -sWASM=1 \

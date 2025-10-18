@@ -16,7 +16,6 @@
     "postinstall": "patch-package"
   },
   "devDependencies": {
-    "@types/decode-dxt": "^1.0.3",
     "@types/offscreencanvas": "^2019.7.3",
     "@types/three": "^0.162.0",
     "globby": "^14.0.2",
@@ -28,7 +27,6 @@
     "vitest": "^2.0.4"
   },
   "dependencies": {
-    "decode-dxt": "^1.0.1",
     "kaitai-struct": "^0.10.0",
     "lil-gui": "^0.19.2",
     "three": "^0.162.0"
