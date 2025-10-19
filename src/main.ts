@@ -1639,12 +1639,12 @@ const render = () => {
     }
 
     // where is the transparency bit stored?
-    if (isSh1 && transparentIlmFiles.has(clientState.uiParams["File (SH1)"])) {
-      clientState.uiParams.Transparency = true;
-    } else {
-      clientState.uiParams.Transparency = false;
-    }
     if (isSh1) {
+      if (transparentIlmFiles.has(clientState.uiParams["File (SH1)"])) {
+        clientState.uiParams.Transparency = true;
+      } else {
+        clientState.uiParams.Transparency = false;
+      }
       clientState.uiParams["Render Side"] = "FrontSide";
     }
 
