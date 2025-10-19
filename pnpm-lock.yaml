@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      kaitai-struct:
-        specifier: ^0.10.0
-        version: 0.10.0
       lil-gui:
         specifier: ^0.19.2
         version: 0.19.2
@@ -689,9 +686,6 @@ packages:
 
   jsonify@0.0.1:
     resolution: {integrity: sha512-2/Ki0GcmuqSrgFyelQq9M05y7PS0mEwuIzrf3f1fPqkVDVRvZrPZtVSMHxdgo8Aq0sxAOb/cr2aqqA3LeWHVPg==}
-
-  kaitai-struct@0.10.0:
-    resolution: {integrity: sha512-81oxVi/OY+LrzgrONX7ciD1wtvq24nb2M9iYixRiQG+1hrDrDRqFVWuQzF1fUexh3Sg/ol6eMAz1MOVYFouzUg==}
 
   klaw-sync@6.0.0:
     resolution: {integrity: sha512-nIeuVSzdCCs6TDPTqI8w1Yre34sSq7AkZ4B3sfOBbI2CgVSB4Du4aLQijFU2+lhAFCwt9+42Hel6lQNIv6AntQ==}
@@ -1521,8 +1515,6 @@ snapshots:
       graceful-fs: 4.2.11
 
   jsonify@0.0.1: {}
-
-  kaitai-struct@0.10.0: {}
 
   klaw-sync@6.0.0:
     dependencies:
