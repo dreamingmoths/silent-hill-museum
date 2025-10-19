@@ -15,6 +15,7 @@ uniform float opacity;
 uniform float alphaTest;
 uniform float uTime;
 uniform float lightingMode;
+uniform float transparent;
 
 layout(location = 0) out highp vec4 pc_fragColor;
 
@@ -26,15 +27,20 @@ layout(location = 0) out highp vec4 pc_fragColor;
 void main() {
     /* texture rendering */
     int clutRow = vTexInfo.y;
-    ivec2 imgXy = ivec2(vUv.xy * imgSize);
+    ivec2 imgXy = ivec2(round(vUv.xy * imgSize));
     uint paletteIndex = texelFetch(imgTexture, imgXy, 0).r;
 
     ivec2 clutXy = ivec2(paletteIndex, clutRow);
     vec4 color = texelFetch(clutTexture, clutXy, 0);
 
+    // use alpha to do alpha test, even if transparency is off
     float alpha = opacity * color.a;
     if (alpha < alphaTest) {
         discard;
+    }
+    // set alpha to 1 if transparency is off
+    if (transparent == 0.0) {
+        alpha = 1.0;
     }
 
     /* lighting */

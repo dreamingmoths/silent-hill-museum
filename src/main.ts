@@ -111,6 +111,7 @@ import {
   ilmToTextureAssoc,
   createSh1Material,
   Sh1LightingMode,
+  transparentIlmFiles,
 } from "./sh1";
 import PsxTim from "./kaitai/PsxTim";
 import { NO_VALUE, Sh1AnimInfo } from "./sh1-animinfo";
@@ -1053,8 +1054,8 @@ const renderSh1 = async () => {
     );
   }
 
-  const shaderMaterial = materialResult.material;
-  shaderMaterial.transparent = clientState.uiParams["Transparency"];
+  const sh1Material = materialResult.material;
+  sh1Material.transparent = clientState.uiParams["Transparency"];
 
   const side =
     RenderSideMap[
@@ -1063,11 +1064,11 @@ const renderSh1 = async () => {
         | "FrontSide"
         | "BackSide"
     ];
-  shaderMaterial.side = side;
+  sh1Material.side = side;
 
   const material =
     clientState.uiParams["Render Mode"] === MaterialView.Textured
-      ? shaderMaterial
+      ? sh1Material
       : new MeshStandardMaterial({
           map:
             clientState.uiParams["Render Mode"] === MaterialView.UV
@@ -1480,6 +1481,7 @@ const render = () => {
       }
       if (opaqueMesh?.material instanceof RawShaderMaterial) {
         const uniforms = opaqueMesh.material.uniforms;
+        uniforms.transparent.value = opaqueMesh.material.transparent;
         uniforms.opacity.value = clientState.uiParams["Model Opacity"];
         uniforms.ambientLightColor.value = new Color(
           clientState.uiParams["Ambient Color"]
@@ -1578,7 +1580,7 @@ const render = () => {
     lastGame = clientState.uiParams.Game;
 
     if (
-      ((isSh1 && lastSh1File !== "MTH") ||
+      ((isSh1 && lastSh1File !== "LISA") ||
         clientState.folder !== "favorites") &&
       !clientState.hasAcceptedContentWarning()
     ) {
@@ -1601,12 +1603,12 @@ const render = () => {
       return;
     }
     lastIndex = currentFileIndex;
-    if (filename in preferredParams) {
+    if (isSh2 && filename in preferredParams) {
       Object.assign(
         clientState.uiParams,
         preferredParams[filename as keyof typeof preferredParams]
       );
-    } else {
+    } else if (isSh2) {
       Object.assign(clientState.uiParams, defaultParams);
     }
     clientState.uiParams["Selected Bone"] = 0;
@@ -1634,6 +1636,16 @@ const render = () => {
 
     if (clientState.file === "inu.mdl") {
       portraitModeWarning();
+    }
+
+    // where is the transparency bit stored?
+    if (isSh1 && transparentIlmFiles.has(clientState.uiParams["File (SH1)"])) {
+      clientState.uiParams.Transparency = true;
+    } else {
+      clientState.uiParams.Transparency = false;
+    }
+    if (isSh1) {
+      clientState.uiParams["Render Side"] = "FrontSide";
     }
 
     if (clientState.uiParams["Sharable Link"] && !!history.pushState) {

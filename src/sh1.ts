@@ -122,7 +122,7 @@ export const createSh1Geometry = (init: GeometryInit) => {
 
     uvBuffer[uvIndex] = u(uv.u);
     uvBuffer[uvIndex + 1] = v(uv.v);
-    texInfoBuffer[uvIndex] = (tpage & 0x60) >> 4;
+    texInfoBuffer[uvIndex] = tpage;
     texInfoBuffer[uvIndex + 1] = clut.y;
     uvIndex += 2;
 
@@ -434,7 +434,7 @@ export const createSh1Material = (
     if (rgbIsZero && a === 0) {
       clutTexture[clutIndex + 3] = 0;
     } else if (!rgbIsZero && a === 1) {
-      clutTexture[clutIndex + 3] = 255; // should be semi-transparent
+      clutTexture[clutIndex + 3] = 128; // should be semi-transparent
     } else {
       clutTexture[clutIndex + 3] = 255;
     }
@@ -511,6 +511,7 @@ export const createSh1Material = (
     dataTexture.needsUpdate = true;
     const material = new MeshStandardMaterial({
       map: dataTexture,
+      alphaTest: 0.01,
     });
 
     // scale and translate UV into texture based on clut row
@@ -557,6 +558,7 @@ export const createSh1Material = (
       alphaTest: { value: 0.01 },
       uTime: { value: 0 },
       lightingMode: { value: Sh1LightingMode.Matte },
+      transparent: { value: 0 },
     },
     glslVersion: GLSL3,
   });
@@ -690,3 +692,8 @@ export const ilmFiles = [
   "TDRA",
   "WRM",
 ] as const;
+
+/**
+ * where is the semi-transparency bit stored?
+ */
+export const transparentIlmFiles = new Set(["MTH", "BFLU"]);
