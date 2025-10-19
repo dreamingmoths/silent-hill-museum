@@ -878,6 +878,7 @@ const renderSh2 = async (model: SilentHill2Model) => {
       }
       bindSkeletonToTransparentGeometry(model, transparentGeometry);
       (transparentMesh as SkinnedMesh).bind(modelSkeleton);
+      (transparentMesh as SkinnedMesh).normalizeSkinWeights();
     } else {
       transparentMesh = new Mesh(transparentGeometry, transparentMaterial);
     }
