@@ -26,6 +26,17 @@
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://silenthillmuseum.org" />
+
+    <!--# if expr="$arg_model" -->
+    <meta
+      property="og:image"
+      content='https://silenthillmuseum.org/images/gallery/silent-hill/<!--# echo var="arg_model" -->.png'
+    />
+    <meta
+      property="og:image:alt"
+      content="A 3D render of a Silent Hill 1 model"
+    />
+    <!--# else -->
     <meta
       property="og:image"
       content="https://silenthillmuseum.com/images/screenshot.png"
@@ -34,6 +45,7 @@
       property="og:image:alt"
       content="A 3D render of the ominous music box from Silent Hill 2"
     />
+    <!--# endif -->
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="canonical" href="https://silenthillmuseum.org/" />

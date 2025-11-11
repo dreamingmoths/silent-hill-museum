@@ -33,6 +33,7 @@ __pycache__
 kaitai_struct_compiler
 kaitai_struct_rust_runtime
 public/data
+public/images/gallery
 assets
 target
 public/sh1png

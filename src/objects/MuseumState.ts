@@ -21,6 +21,7 @@ import {
   AnimationAction,
   AnimationClip,
   AnimationMixer,
+  Camera,
   Object3D,
   Vector3,
 } from "three";
@@ -31,6 +32,7 @@ import { anmToMdlAssoc } from "../animation";
 import anmList from "../assets/anm-list.json";
 import Ilm from "../kaitai/Ilm";
 import { ilmFiles } from "../sh1";
+import { OrbitControls } from "three/examples/jsm/Addons.js";
 
 export const START_INDEX = constructIndex("chr", "favorites", "inu.mdl");
 const START_PATH_ARRAY = destructureIndex(START_INDEX);
@@ -616,6 +618,23 @@ export const cameraFix: {
       943.5324793077427
     ),
   },
+};
+export const serializeViewState = (
+  camera: Camera,
+  orbitControls: OrbitControls,
+  mixers?: AnimationMixer[]
+) => {
+  return {
+    controlsTarget: orbitControls.target,
+    cameraPosition: camera.position,
+    mixers:
+      mixers && mixers.length > 0
+        ? mixers.map((mixer) => ({
+            time: mixer.time,
+            timeScale: mixer.timeScale,
+          }))
+        : undefined,
+  };
 };
 export const defaultParams = Object.assign(
   {},

@@ -199,6 +199,12 @@ const lockToFolder = dataGuiFolder
     );
   })
   .listen();
+const getSh2SharableLink = () =>
+  [
+    clientState.rootFolder,
+    clientState.folder,
+    clientState.file.split(".")[0],
+  ].join("-");
 const updateLink = (sharable?: boolean) => {
   const baseUrl =
     window.location.protocol +
@@ -214,13 +220,7 @@ const updateLink = (sharable?: boolean) => {
   if (clientState.uiParams.Game === "Silent Hill 1") {
     newUrl += "?game=sh1&file=" + clientState.uiParams["File (SH1)"];
   } else {
-    newUrl +=
-      "?model=" +
-      [
-        clientState.rootFolder,
-        clientState.folder,
-        clientState.file.split(".")[0],
-      ].join("-");
+    newUrl += "?model=" + getSh2SharableLink();
   }
   window.history.pushState({ path: newUrl }, "", newUrl);
 };
@@ -1214,7 +1214,7 @@ const render = () => {
         mixer.stopAllAction();
         mixer.timeScale = -1;
       });
-      mixers = [];
+      mixers.length = 0;
       helper?.dispose();
       group.clear();
       scene.clear();
@@ -1513,7 +1513,10 @@ const render = () => {
       renderer.render(scene, camera);
 
       if (clientState.uiParams["Render This Frame"]) {
-        exportCanvas(appContainer, clientState.file + ".png");
+        exportCanvas(
+          appContainer,
+          clientState.getCurrentContentName() + ".png"
+        );
         clientState.uiParams["Render This Frame"] = false;
       }
     }
@@ -1791,5 +1794,11 @@ const render = () => {
     modelCallback(model);
   });
 };
+
+(window as any).render = render;
+(window as any).scene = scene;
+(window as any).state = clientState;
+(window as any).mixers = mixers;
+
 render();
 clientState.setOnUpdate(render);
