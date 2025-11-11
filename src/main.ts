@@ -1502,6 +1502,7 @@ const render = () => {
 
       if (
         !clientState.getCustomModel() &&
+        isSh2 &&
         clientState.folder === "favorites" &&
         clientState.file === "org.mdl"
       ) {
