@@ -9,6 +9,7 @@
  * @module
  */
 import { psmct32addr } from "./lib";
+import { fetchUint16Array } from "../load";
 
 /**
  * @param swizzle8 the swizzle table, see `swizzle8.bin`
@@ -149,3 +150,9 @@ export const fpsmt4 = (
 
   return result;
 };
+
+export const fetchSwizzles = async () =>
+  Promise.all([
+    fetchUint16Array("/swizzles/swizzle4.bin"),
+    fetchUint16Array("/swizzles/swizzle8.bin"),
+  ]);

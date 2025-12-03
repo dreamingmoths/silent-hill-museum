@@ -25,6 +25,9 @@ export const fetchRawBytes = async (url: string): Promise<ArrayBuffer> => {
   }
 };
 
+export const fetchUint16Array = async (url: string) =>
+  new Uint16Array(await fetchRawBytes(url));
+
 export const loadDramaDemoFromBytes = (bytes: ArrayBuffer) => {
   const stream = new KaitaiStream(bytes);
   const cutscene = new SilentHillDramaDemo(stream);
