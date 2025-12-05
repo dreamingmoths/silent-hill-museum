@@ -1,6 +1,7 @@
 /**
- * "Fast" PSMT unswizzling. Is it really fast? Doubtful, but it uses a single
- * swizzle table lookup per pixel instead of emulating GS memory.
+ * "Fast" PSMT unswizzling experiment. Is it really fast? Doubtful, but it uses
+ * a single swizzle table lookup per pixel instead of emulating GS memory. Note
+ * that it still requires that the CLUT is written as PSMCT32 first.
  *
  * The lookup tables are loaded as static assets from `public/swizzles`.
  *
@@ -14,7 +15,7 @@ import { fetchUint16Array } from "../load";
 /**
  * @param swizzle8 the swizzle table, see `swizzle8.bin`
  * @param data input texture
- * @param clut color lookup table
+ * @param clut color lookup table, must be written as psmct32
  * @param width width in pixels of output texture
  * @param height height in pixels of output texture
  * @param paletteIndex palette index, used to compute clut base pointer
@@ -77,10 +78,9 @@ export const fpsmt8 = (
   return result;
 };
 /**
- *
- * @param swizzle8 the swizzle table, see `swizzle4.bin`
+ * @param swizzle4 the swizzle table, see `swizzle4.bin`
  * @param data input texture
- * @param clut color lookup table
+ * @param clut color lookup table, must be written as psmct32
  * @param width width in pixels of output texture
  * @param height height in pixels of output texture
  * @param paletteIndex palette index, used to compute clut base pointer
@@ -151,8 +151,8 @@ export const fpsmt4 = (
   return result;
 };
 
-export const fetchSwizzles = async () =>
+export const fetchSwizzles = async (url = "/swizzles") =>
   Promise.all([
-    fetchUint16Array("/swizzles/swizzle4.bin"),
-    fetchUint16Array("/swizzles/swizzle8.bin"),
+    fetchUint16Array(`${url}/swizzle4.bin`),
+    fetchUint16Array(`${url}/swizzle8.bin`),
   ]);
