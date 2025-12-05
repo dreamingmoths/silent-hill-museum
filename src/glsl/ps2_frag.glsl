@@ -61,28 +61,37 @@ int psmct32addr(int x, int y, int base) {
     return resultIndex << 2;
 }
 
-#define FETCH_IMAGE_TEXEL(i) case i: clutIndex = int(texelFetch(imgTexture[i], xy, 0).r); break
 int readImage(ivec2 xy, int texUnit) {
     int clutIndex;
     switch(texUnit) {
         #if TEXTURE_COUNT > 0
-        FETCH_IMAGE_TEXEL(0);
+        case 0:
+            clutIndex = int(texelFetch(imgTexture[0], xy, 0).r);
+            break;
         #endif
 
         #if TEXTURE_COUNT > 1
-        FETCH_IMAGE_TEXEL(1);
+        case 1:
+            clutIndex = int(texelFetch(imgTexture[1], xy, 0).r);
+            break;
         #endif
 
         #if TEXTURE_COUNT > 2
-        FETCH_IMAGE_TEXEL(2);
+        case 2:
+            clutIndex = int(texelFetch(imgTexture[2], xy, 0).r);
+            break;
         #endif
 
         #if TEXTURE_COUNT > 3
-        FETCH_IMAGE_TEXEL(3);
+        case 3:
+            clutIndex = int(texelFetch(imgTexture[3], xy, 0).r);
+            break;
         #endif
 
         #if TEXTURE_COUNT > 4
-        FETCH_IMAGE_TEXEL(4);
+        case 4:
+            clutIndex = int(texelFetch(imgTexture[4], xy, 0).r);
+            break;
         #endif
     }
     return clutIndex;
@@ -144,7 +153,7 @@ ivec2 unswizzle4(ivec2 imgXy, vec2 size, int texUnit) {
     int swizzled = int(texelFetch(swizzleTexture4, ivec2(px, py), 0).r);
 
     int byteInPage = swizzled >> 1;
-    int isHighNibble = swizzled & 1;
+    int isHighNibble = swizzled & 1; 
     int pageRow = byteInPage >> 6;
     int pageCol = byteInPage & 63;
     int qx = pageCol + (pageX << 6);
@@ -179,7 +188,7 @@ void main() {
             clutXy = unswizzle4(imgXy, size, texUnit);
             break;
         default:
-            discard;
+            return;
     }
 
     int clutInt = psmct32addr(clutXy.x, clutXy.y, clutRow << 2) >> 2;
