@@ -18,7 +18,7 @@ seq:
   - id: character_id
     type: s4
 
-  - id: texture_count
+  - id: num_texture
     type: s4
 
   - id: ofs_texture_header
@@ -186,7 +186,7 @@ types:
         type: u4
       - id: type
         type: u4
-      - id: vif_packet_ofs
+      - id: ofs_vif_packet
         type: u4
       - id: num_vif_qwords
         type: u4
@@ -196,23 +196,23 @@ types:
         type: u4
       - id: ofs_clusters
         type: u4
-      - id: bones_count
+      - id: num_bones
         type: u4
-      - id: bones_ofs
+      - id: ofs_bones
         type: u4
       - id: num_bone_pairs
         type: u4
       - id: ofs_bone_pairs
         type: u4
-      - id: data_skeletons_offset
+      - -orig-id: data_skeletons_offset
         type: u4
-      - id: data_skeleton_pairs_offset
+      - -orig-id: data_skeleton_pairs_offset
         type: u4
       - id: num_textures
         type: u4
-      - id: texture_index_ofs
+      - id: ofs_texture_index
         type: u4
-      - id: texture_params_ofs
+      - id: ofs_texture_params
         type: u4
       - id: shading_type
         type: u1
@@ -257,7 +257,7 @@ types:
       - id: bones
         type: s2
         repeat: expr
-        repeat-expr: bones_count
+        repeat-expr: num_bones
       - id: bone_pairs
         type: s2
         repeat: expr
@@ -280,10 +280,10 @@ types:
 
       - type: s4
 
-      - id: vertex_base_ofs
+      - id: ofs_vertex_base
         type: s4
 
-      - id: bone_matrix_base_ofs
+      - id: ofs_bone_matrix_base
         type: s4
 
       - type: s4
@@ -293,7 +293,7 @@ types:
       - id: triangles_start_index
         type: s4
 
-      - id: triangles_ofs
+      - id: ofs_triangles
         type: s4
 
       - id: groups
@@ -316,7 +316,7 @@ types:
   vertex_group:
     seq:
       - size: 4
-      - id: vertex_count
+      - id: num_vertex
         type: s4
       - id: num_bone_pairs
         type: s4
@@ -442,7 +442,7 @@ types:
       - id: textures
         type: texture
         repeat: expr
-        repeat-expr: _root.texture_count
+        repeat-expr: num__root.texture
   texture:
     seq:
       - size: 8
