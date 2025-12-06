@@ -18,7 +18,7 @@ seq:
   - id: character_id
     type: s4
 
-  - id: num_texture
+  - id: num_textures
     type: s4
 
   - id: ofs_texture_header
@@ -153,7 +153,7 @@ types:
       texture_blocks:
         pos: ofs_texture_blocks
         type: texture_blocks
-        if: _root.texture_count > 0
+        if: _root.num_textures > 0
       opaque_parts:
         pos: ofs_opaque_parts
         type: part
@@ -311,12 +311,12 @@ types:
       - id: triangles
         type: s2
         repeat: expr
-        repeat-expr: (triangles_ofs - triangles_start_index) * 4
+        repeat-expr: (ofs_triangles - triangles_start_index) * 4
 
   vertex_group:
     seq:
       - size: 4
-      - id: num_vertex
+      - id: num_vertices
         type: s4
       - id: num_bone_pairs
         type: s4
@@ -339,7 +339,7 @@ types:
       - id: vertices
         type: s2
         repeat: expr
-        repeat-expr: group.vertex_count * 3
+        repeat-expr: group.num_vertices * 3
       - size: 4 - _io.pos % 4
         if: _io.pos % 4 > 0
 
@@ -347,7 +347,7 @@ types:
       - id: normals
         type: s2
         repeat: expr
-        repeat-expr: group.vertex_count * 3
+        repeat-expr: group.num_vertices * 3
       - size: 4 - _io.pos % 4
         if: _io.pos % 4 > 0
 
@@ -357,7 +357,7 @@ types:
       - id: weights
         type: s2
         repeat: expr
-        repeat-expr: group.vertex_count * (group.num_bone_pairs / 2 + 1)
+        repeat-expr: group.num_vertices * (group.num_bone_pairs / 2 + 1)
         if: group.num_bone_pairs > 0
       - size: 4 - _io.pos % 4
         if: _io.pos % 4 > 0
@@ -366,7 +366,7 @@ types:
       - id: uvs
         type: s2
         repeat: expr
-        repeat-expr: group.vertex_count * 2
+        repeat-expr: group.num_vertices * 2
       - size: 4 - _io.pos % 4
         if: _io.pos % 4 > 0
 
@@ -442,7 +442,7 @@ types:
       - id: textures
         type: texture
         repeat: expr
-        repeat-expr: num__root.texture
+        repeat-expr: _root.num_textures
   texture:
     seq:
       - size: 8
