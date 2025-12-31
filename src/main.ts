@@ -339,12 +339,7 @@ if (clientState.getGlVersion() === 2) {
     .onFinishChange(() => render());
   geometryFolder
     .add(clientState.uiParams, "Visualize Skeleton")
-    .onFinishChange((on: boolean) => {
-      if (on && clientState.uiParams["Model Opacity"] > 0.5) {
-        clientState.uiParams["Model Opacity"] = 0.5;
-      } else if (!on) {
-        clientState.uiParams["Model Opacity"] = 1.0;
-      }
+    .onFinishChange(() => {
       render();
     });
 } else {
@@ -533,7 +528,7 @@ const onClick = (event: MouseEvent) => {
     }
   }
 };
-appContainer.addEventListener("click", onClick);
+appContainer.addEventListener("pointerup", onClick);
 
 export const scene = new Scene();
 const pmremGenerator = new PMREMGenerator(renderer);
@@ -990,6 +985,7 @@ const renderSh3 = async () => {
           | "BackSide"
       ];
     material.side = side;
+    // material.transparent ||= clientState.uiParams["Model Opacity"] < 1;
   }
 
   // clientState.getTextureViewer()?.attach(images);
@@ -1010,6 +1006,7 @@ const renderSh3 = async () => {
   } else {
     mesh = new Mesh(geometry, materials);
   }
+  mesh.renderOrder = 0;
   const group = new Group();
   group.add(mesh);
   scene.add(group);
@@ -1199,7 +1196,6 @@ const renderSh1 = async () => {
           alphaTest: clientState.uiParams["Alpha Test"],
           transparent: clientState.uiParams["Visualize Skeleton"],
           side,
-          opacity: clientState.uiParams["Model Opacity"],
         });
 
   const mesh = new SkinnedMesh(geom, material);
@@ -1564,6 +1560,12 @@ const render = () => {
           });
           const mesh = new Mesh(sphere, material);
           raycastTargets.push(mesh);
+          mesh.renderOrder = 3;
+          mesh.material.depthTest = false;
+          mesh.material.depthWrite = false;
+          mesh.onBeforeRender = function (renderer) {
+            renderer.clearDepth();
+          };
           bone.add(mesh);
         });
       }
@@ -1612,7 +1614,9 @@ const render = () => {
       }
       if (opaqueMesh?.material instanceof RawShaderMaterial) {
         const uniforms = opaqueMesh.material.uniforms;
-        uniforms.transparent.value = opaqueMesh.material.transparent;
+        uniforms.transparent.value =
+          clientState.uiParams["Model Opacity"] < 1 ||
+          opaqueMesh.material.transparent;
         uniforms.opacity.value = clientState.uiParams["Model Opacity"];
         uniforms.ambientLightColor.value = new Color(
           clientState.uiParams["Ambient Color"]

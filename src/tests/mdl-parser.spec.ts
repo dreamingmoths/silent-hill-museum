@@ -45,7 +45,7 @@ test("should parse all models without error", async () => {
     const [root, folder] = destructureIndex(i);
     const file = path.join(inputDir, root, folder, filename);
     if (VERBOSE) {
-      console.debug("Parsing", file);
+      logger.debug("Parsing", file);
     }
     const model = loadModelWithCache(file);
     await expect(model).resolves.not.toThrow();

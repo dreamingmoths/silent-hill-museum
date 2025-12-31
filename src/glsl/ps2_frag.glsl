@@ -28,6 +28,7 @@ uniform vec3 ambientLightColor;
 uniform float alphaTest;
 uniform float uTime;
 uniform float lightingMode;
+uniform float opacity;
 
 #define LIGHT_SPEED 3.0
 #define NORMAL_MAP 1.5
@@ -215,7 +216,7 @@ void main() {
         discard;
     }
     float alpha = transparent && pixelAlpha >= 0.0 ? min(pixelAlpha * 2.0, 1.0) : 1.0;
-    vec3 color = pixel.rgb;
+    vec3 color = pixel.rgb * opacity;
 
     /* lighting */
     vec3 normal = vNormal;
