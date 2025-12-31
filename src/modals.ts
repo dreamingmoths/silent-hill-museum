@@ -182,7 +182,7 @@ export const showContentWarningModal = (
     toggleWithBackground("contentWarningModal", true);
     uiDescriptions.contentWarningModal.onClose = declineCallback;
     onConfirm(() => {
-      localStorage.setItem("contentWarningAccepted", "true");
+      localStorage.setItem("contentWarningAcceptedV2", "true");
       confirmCallback();
     }, uiDescriptions.contentWarningModal);
   } else {

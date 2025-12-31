@@ -392,7 +392,7 @@ export default class MuseumState {
     if (typeof localStorage === "undefined") {
       return false;
     }
-    return !!localStorage.getItem("contentWarningAccepted");
+    return !!localStorage.getItem("contentWarningAcceptedV2");
   }
 
   public getMode() {
