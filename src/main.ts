@@ -21,6 +21,7 @@ import {
   defaultParams,
   MuseumMixer,
   preferredParams,
+  START_INDEX,
 } from "./objects/MuseumState";
 import {
   ANIMATION_FRAME_DURATION,
@@ -1732,14 +1733,18 @@ const render = () => {
       showContentWarningModal(
         () => {
           clientState.uiParams["Lock To Folder"] = false;
+          render();
         },
         () => {
           if (isSh2) {
-            clientState.setFileIndex(lastIndex);
-          } else if (isSh1) {
-            clientState.uiParams["File (SH1)"] = lastSh1File as any;
+            clientState.setFileIndex(START_INDEX);
+            return;
+          }
+          if (isSh1) {
+            clientState.uiParams["File (SH1)"] = (lastSh1File ||
+              "LISA") as (typeof ilmFiles)[number];
           } else if (isSh3) {
-            clientState.uiParams["File (SH3)"] = lastSh3File;
+            clientState.uiParams["File (SH3)"] = lastSh3File || "pl/chhaa.mdl";
           }
           render();
         }

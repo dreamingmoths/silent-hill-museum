@@ -135,6 +135,7 @@ export default class MuseumState {
     this.fileIndex = index;
     this.computeFilePathArray();
     this.onUpdate();
+    console.debug(index, this.filePathArray);
   }
 
   public getFileIndex() {
