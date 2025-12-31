@@ -10,12 +10,7 @@ import SilentHillModel from "./Mdl";
  * so the model must be provided to the parser.
  */
 declare class Anm {
-  constructor(
-    io: any,
-    parent: any | undefined,
-    root: any | undefined,
-    model: SilentHillModel
-  );
+  constructor(io: any, parent?: any, root?: any, model?: SilentHillModel);
   __type: "Anm";
   _io: any;
   _read: () => void;
@@ -31,15 +26,15 @@ declare class Anm {
   /**
    * The model that the animation will be applied to.
    */
-  model: Mdl;
+  model: SilentHillModel;
 }
 
-/**
- * An axis about which a rotation will be performed. Each component is a
- * 16-bit signed integer representing a value in the range [-1, 1) (i.e.
- * divide the integer value by 32768).
- */
 declare namespace Anm {
+  /**
+   * An axis about which a rotation will be performed. Each component is a
+   * 16-bit signed integer representing a value in the range [-1, 1) (i.e.
+   * divide the integer value by 32768).
+   */
   class Axis {
     constructor(io: any, parent?: any, root?: any);
     __type: "Axis";
@@ -56,13 +51,13 @@ declare namespace Anm {
   }
 }
 
-/**
- * A block of 8 transforms. A single animation frame (consisting of one
- * transform for each bone) must consist of a whole number of blocks, so
- * the last block in a frame should be padded with "none" entries as
- * necessary.
- */
 declare namespace Anm {
+  /**
+   * A block of 8 transforms. A single animation frame (consisting of one
+   * transform for each bone) must consist of a whole number of blocks, so
+   * the last block in a frame should be padded with "none" entries as
+   * necessary.
+   */
   class Block {
     constructor(io: any, parent?: any, root?: any);
     __type: "Block";
@@ -100,7 +95,7 @@ declare namespace Anm {
     /**
      * The model that the animation applies to.
      */
-    model: Mdl;
+    model: SilentHillModel;
 
     /**
      * The index of this block within the file.
@@ -109,11 +104,11 @@ declare namespace Anm {
   }
 }
 
-/**
- * An identity transform; a transform that does nothing. This is distinct
- * from there being no transform at all.
- */
 declare namespace Anm {
+  /**
+   * An identity transform; a transform that does nothing. This is distinct
+   * from there being no transform at all.
+   */
   class Identity {
     constructor(io: any, parent?: any, root?: any);
     __type: "Identity";
@@ -121,11 +116,11 @@ declare namespace Anm {
   }
 }
 
-/**
- * Identical to interpolated_isometry32 except that the translation vector
- * components are 16-bit floating point. Note that the end vector is padded.
- */
 declare namespace Anm {
+  /**
+   * Identical to interpolated_isometry32 except that the translation vector
+   * components are 16-bit floating point. Note that the end vector is padded.
+   */
   class InterpolatedIsometry16 {
     constructor(io: any, parent?: any, root?: any);
     __type: "InterpolatedIsometry16";
@@ -139,13 +134,13 @@ declare namespace Anm {
   }
 }
 
-/**
- * A rotation followed by a translation. There are two translation vectors,
- * a start vector and end vector, which are interpolated between over the
- * duration of the frame. The axis and angle are ignored as described in
- * rotation_with_axis.
- */
 declare namespace Anm {
+  /**
+   * A rotation followed by a translation. There are two translation vectors,
+   * a start vector and end vector, which are interpolated between over the
+   * duration of the frame. The axis and angle are ignored as described in
+   * rotation_with_axis.
+   */
   class InterpolatedIsometry32 {
     constructor(io: any, parent?: any, root?: any);
     __type: "InterpolatedIsometry32";
@@ -159,10 +154,10 @@ declare namespace Anm {
   }
 }
 
-/**
- * A rotation followed by a translation using 16-bit floating point.
- */
 declare namespace Anm {
+  /**
+   * A rotation followed by a translation using 16-bit floating point.
+   */
   class Isometry16 {
     constructor(io: any, parent?: any, root?: any);
     __type: "Isometry16";
@@ -173,10 +168,10 @@ declare namespace Anm {
   }
 }
 
-/**
- * A rotation followed by a translation using 32-bit floating point.
- */
 declare namespace Anm {
+  /**
+   * A rotation followed by a translation using 32-bit floating point.
+   */
   class Isometry32 {
     constructor(io: any, parent?: any, root?: any);
     __type: "Isometry32";
@@ -187,11 +182,11 @@ declare namespace Anm {
   }
 }
 
-/**
- * Identical to isometry_with_axis except the translation vector components
- * are 16-bit floating point.
- */
 declare namespace Anm {
+  /**
+   * Identical to isometry_with_axis except the translation vector components
+   * are 16-bit floating point.
+   */
   class IsometryWithAxis16 {
     constructor(io: any, parent?: any, root?: any);
     __type: "IsometryWithAxis16";
@@ -204,11 +199,11 @@ declare namespace Anm {
   }
 }
 
-/**
- * Identical to isometry_with_axis16 except that the translation vector
- * components are padded to 32 bits.
- */
 declare namespace Anm {
+  /**
+   * Identical to isometry_with_axis16 except that the translation vector
+   * components are padded to 32 bits.
+   */
   class IsometryWithAxis16Padded {
     constructor(io: any, parent?: any, root?: any);
     __type: "IsometryWithAxis16Padded";
@@ -221,11 +216,11 @@ declare namespace Anm {
   }
 }
 
-/**
- * A rotation followed by a translation. The axis is effectively ignored
- * as described in the rotation_with_axis type.
- */
 declare namespace Anm {
+  /**
+   * A rotation followed by a translation. The axis is effectively ignored
+   * as described in the rotation_with_axis type.
+   */
   class IsometryWithAxis32 {
     constructor(io: any, parent?: any, root?: any);
     __type: "IsometryWithAxis32";
@@ -238,10 +233,10 @@ declare namespace Anm {
   }
 }
 
-/**
- * No transform; an empty slot in a block.
- */
 declare namespace Anm {
+  /**
+   * No transform; an empty slot in a block.
+   */
   class None {
     constructor(io: any, parent?: any, root?: any);
     __type: "None";
@@ -249,11 +244,11 @@ declare namespace Anm {
   }
 }
 
-/**
- * A 3D rotation described by Euler angles. Each angle is a 16-bit
- * fixed-point real number with a 12-bit fraction.
- */
 declare namespace Anm {
+  /**
+   * A 3D rotation described by Euler angles. Each angle is a 16-bit
+   * fixed-point real number with a 12-bit fraction.
+   */
   class Rotation {
     constructor(io: any, parent?: any, root?: any);
     __type: "Rotation";
@@ -268,15 +263,15 @@ declare namespace Anm {
   }
 }
 
-/**
- * A rotation vector along with an axis of rotation and an angle of
- * rotation. The intent seems to be to describe an interpolated
- * rotation that rotates about the axis until reaching the final
- * rotation vector. In practice, however, the game overwrites the
- * axis without ever using it, and identifying the last field as an
- * angle is speculative, as it's never read at all.
- */
 declare namespace Anm {
+  /**
+   * A rotation vector along with an axis of rotation and an angle of
+   * rotation. The intent seems to be to describe an interpolated
+   * rotation that rotates about the axis until reaching the final
+   * rotation vector. In practice, however, the game overwrites the
+   * axis without ever using it, and identifying the last field as an
+   * angle is speculative, as it's never read at all.
+   */
   class RotationWithAxis {
     constructor(io: any, parent?: any, root?: any);
     __type: "RotationWithAxis";
@@ -321,10 +316,10 @@ declare namespace Anm {
   }
 }
 
-/**
- * A 3D translation described with 16-bit floating point values.
- */
 declare namespace Anm {
+  /**
+   * A 3D translation described with 16-bit floating point values.
+   */
   class Translation16 {
     constructor(io: any, parent?: any, root?: any);
     __type: "Translation16";
@@ -339,11 +334,11 @@ declare namespace Anm {
   }
 }
 
-/**
- * A 3D translation described with 16-bit floating point values which are
- * padded to 32 bits.
- */
 declare namespace Anm {
+  /**
+   * A 3D translation described with 16-bit floating point values which are
+   * padded to 32 bits.
+   */
   class Translation16Padded {
     constructor(io: any, parent?: any, root?: any);
     __type: "Translation16Padded";
@@ -361,10 +356,10 @@ declare namespace Anm {
   }
 }
 
-/**
- * A 3D translation described with 32-bit floating point values.
- */
 declare namespace Anm {
+  /**
+   * A 3D translation described with 32-bit floating point values.
+   */
   class Translation32 {
     constructor(io: any, parent?: any, root?: any);
     __type: "Translation32";

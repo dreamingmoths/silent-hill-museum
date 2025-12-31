@@ -3,6 +3,8 @@
  * a single swizzle table lookup per pixel instead of emulating GS memory. Note
  * that it still requires that the CLUT is written as PSMCT32 first.
  *
+ * I later found out there is a MUCH easier way to do all of this. Oh well.
+ *
  * The lookup tables are loaded as static assets from `public/swizzles`.
  *
  * See also `lib.ts`.

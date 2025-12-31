@@ -100,7 +100,6 @@ export default class ImageLibrary {
     let smoothingBits =
       SmoothingQuality[options?.imageSmoothingQuality ?? "none"];
 
-    // Pack the values into a single number
     return (smoothingBits << 20) | (targetHeight << 10) | targetWidth;
   }
 
@@ -143,15 +142,10 @@ export default class ImageLibrary {
 
     const { imageSmoothingQuality } = options ?? {};
 
-    // Set the canvas size to the target dimensions
     this.canvas.width = targetWidth;
     this.canvas.height = targetHeight;
-
-    // Set image smoothing properties
     this.ctx.imageSmoothingEnabled = !!imageSmoothingQuality;
     this.ctx.imageSmoothingQuality = imageSmoothingQuality ?? "medium";
-
-    // Resize image
     this.ctx.drawImage(imageSource, 0, 0, targetWidth, targetHeight);
     const { data } = this.ctx.getImageData(0, 0, targetWidth, targetHeight);
 

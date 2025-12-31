@@ -39,6 +39,8 @@ target
 public/sh1png
 public/mdl
 public/sh1
+public/sh3
+public/sh3pc
 public/**/*.glb
 public/images/AR.png
 !src/wasm/**/dist

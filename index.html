@@ -94,13 +94,20 @@
           loading="lazy"
         />
       </div>
-      <p><em>outdated, will update soon:)</em></p>
       <h1>what is this project?</h1>
-      <p>this is a historical archive of a file format in silent hill.</p>
       <p>
-        right now, it just contains every model (.mdl) file in silent hill 2
-        restless dreams (pc).
+        this is a historical archive of the art from silent hill 1, 2, and 3.
       </p>
+      <p>here, you can see:</p>
+      <ul>
+        <li>every model (.mdl) file from silent hill 1.</li>
+        <li>
+          every model (.mdl) file from silent hill 2 restless dreams (pc).
+        </li>
+        <li>most model (.mdl) files from silent hill 3 (ps2).</li>
+        <li>many animation (.anm) files from silent hill 1.</li>
+        <li>some animation (.anm) files from silent hill 2.</li>
+      </ul>
       <p>
         these source files are not easy to read; they are mazes of binary, made
         specifically for konami. each model here has been reverse-engineered
@@ -117,25 +124,18 @@
         on a computer, try pressing <kbd>k</kbd> to see the keyboard controls.
       </p>
       <p>play around with the different options and explore the museum!</p>
-      <h1>is it finished?</h1>
+      <h1>can i help?</h1>
       <p>
-        it's close, but there is still a lot of mystery. i would absolutely love
-        if you can contribute on
-        <a href="https://github.com/laura-a-n-n/silent-hill-museum">github</a>.
-      </p>
-      <h1>what features are planned?</h1>
-      <p>
-        a future goal is to add more file formats, including maps and
-        animations, and formats for other games in the silent hill series.
+        yes, contribute on
+        <a href="https://github.com/laura-a-n-n/silent-hill-museum">github</a>!
       </p>
       <h1>how does it work?</h1>
       <p>
-        it parses the mdl files directly in your browser and renders them using
-        the <a href="https://threejs.org/">three.js</a> library.
+        it parses the original files directly in your browser and renders them
+        using the <a href="https://threejs.org/">three.js</a> library.
       </p>
       <p>
-        i've documented the vast majority of the mdl file format by representing
-        it in
+        we've documented the file formats by representing them in
         <a href="https://kaitai.io">kaitai struct</a>, a declarative binary
         parsing language.
       </p>
@@ -144,7 +144,7 @@
         definitions, allowing the kaitai js runtime to bring this theater to
         you.
       </p>
-      <h1>how can i explore the mdl format further?</h1>
+      <h1>how can i explore the file formats further?</h1>
       <p>
         one way is to use the <a href="https://ide.kaitai.io/">kaitai ide</a>.
         upload the
@@ -153,15 +153,6 @@
           >ksy file</a
         >
         to the ide, and also drag & drop your favorite mdl file in.
-      </p>
-      <p>
-        alternatively, if you're ok using typescript, i recommend downloading
-        the repo and checking out how
-        <a
-          href="https://github.com/laura-a-n-n/silent-hill-museum/blob/main/src/model.ts"
-          >model.ts</a
-        >
-        works.
       </p>
       <h1>can i use this for commercial purposes?</h1>
       <p>do not.</p>
@@ -196,6 +187,17 @@
       </p>
       <ul>
         <li>
+          the contributors to the
+          <a href="https://github.com/Vatuu/silent-hill-decomp"
+            >silent hill decomp</a
+          >
+          project. thank you for all your help and amazing work.
+        </li>
+        <li>
+          <a href="https://github.com/descawed">descawed</a>, who contributed
+          the animation file format spec for silent hill 2.
+        </li>
+        <li>
           <a href="https://github.com/Quaker762">quaker762</a>
           and <a href="https://github.com/GirianSeed">girianseed</a>, who
           published
@@ -203,19 +205,10 @@
           repository containing the dwarf debug symbols of silent hill 2.
         </li>
         <li>
-          quaker762 also published an initial
-          <a
-            href="https://github.com/Quaker762/SilentHillDatabase/blob/c1e5933a04f7878cc529fce6d02d1157b3516c3d/SH2/Files/mdl.md"
-          >
-            write-up</a
-          >
-          of the mdl file format.
-        </li>
-        <li>
-          <a href="https://github.com/iOrange">iorange</a>, who very recently
-          made <a href="https://github.com/iOrange/sh2tex">sh2tex</a>, which is
-          a really excellent texture extractor for silent hill 2. pretty much
-          all the work done on textures here is directly from them.
+          <a href="https://github.com/iOrange">iorange</a>, who made
+          <a href="https://github.com/iOrange/sh2tex">sh2tex</a>, which is a
+          really excellent texture extractor for silent hill 2. pretty much all
+          the work done on sh2 textures here is directly from them.
         </li>
         <li>
           <a href="https://github.com/Murugo">murugo</a>, who independently
@@ -229,12 +222,11 @@
           well as the animation and shadow formats!
         </li>
         <li>
-          perdedork, who discovered all this and more, many years ago. perdedork
-          made the
+          perdedork, who discovered much of this many years ago. perdedork made
+          the
           <a href="https://www.silenthillmemories.net/sh2/modding_en.htm">
             silent hill level viewer</a
-          >. i haven't seen the code for this viewer, but it is a really good
-          program.
+          >.
         </li>
         <li>
           anyone who contributed to
@@ -261,6 +253,8 @@
           >team silent</a
         >.
       </p>
+
+      <p>i am not affiliated with konami in any way.</p>
 
       <p>this website is inspired by</p>
       <ul>
@@ -324,14 +318,10 @@
     </div>
     <div id="content-warning-modal" class="modal">
       <p>some content may be considered violent or cruel.</p>
-      <p>are you sure you want to continue? if you accept:</p>
-      <ol>
-        <li>your confirmation will be saved, and</li>
-        <li>
-          "lock to folder" mode will be disabled, allowing you to visit all
-          files without changing the folder.
-        </li>
-      </ol>
+      <p>
+        are you sure you want to continue? if you accept, your confirmation will
+        be saved
+      </p>
       <div class="button-holder">
         <button class="confirm-button">that's fine</button>
         <button class="close-all-modals">take me back</button>

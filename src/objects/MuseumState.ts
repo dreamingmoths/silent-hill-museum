@@ -7,16 +7,17 @@ import {
   fileStructure,
   MuseumFile,
   travelAlongLevel,
-} from "../files";
+} from "../sh2/files";
 import {
   toggleWithBackground,
   onConfirm,
   showQuickModal,
   isAnyElementOpen,
+  showContentWarningModal,
 } from "../modals";
-import { MaterialView } from "../model";
+import { MaterialView } from "../sh2/model";
 import SilentHillModel from "../kaitai/Mdl";
-import { disposeResources, exportModel, saveArrayBuffer } from "../utils";
+import { disposeResources, exportModel, mod, saveArrayBuffer } from "../utils";
 import {
   AnimationAction,
   AnimationClip,
@@ -28,11 +29,13 @@ import {
 import TextureViewer, { TextureViewerStates } from "./TextureViewer";
 import { editorState } from "./EditorState";
 import { renderStructToContainer } from "../visualize-struct";
-import { anmToMdlAssoc } from "../animation";
+import { anmToMdlAssoc } from "../sh2/animation";
 import anmList from "../assets/anm-list.json";
 import Ilm from "../kaitai/Ilm";
-import { ilmFiles } from "../sh1";
+import { ilmFiles } from "../sh1/sh1";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
+import { favoriteSh3ModelFiles, sh3ModelFiles } from "../sh3/sh3";
+import SilentHill3Model from "../kaitai/Sh3mdl";
 
 export const START_INDEX = constructIndex("chr", "favorites", "inu.mdl");
 const START_PATH_ARRAY = destructureIndex(START_INDEX);
@@ -41,6 +44,11 @@ export const FilePath = {
   Folder: 1,
   File: 2,
 } as const;
+export const GAMES = [
+  "Silent Hill 1",
+  "Silent Hill 2",
+  "Silent Hill 3",
+] as const;
 
 export default class MuseumState {
   public constructor() {
@@ -52,11 +60,19 @@ export default class MuseumState {
     const game = params.get("game");
     const modelSplit = model?.split("-");
 
-    if (game === "sh1") {
-      this.uiParams["Game"] = "Silent Hill 1";
-      this.uiParams["File (SH1)"] =
-        (params.get("file") as (typeof ilmFiles)[number]) ?? "HERO";
-      return;
+    switch (game) {
+      case "sh1":
+        this.uiParams["Game"] = "Silent Hill 1";
+        this.uiParams["File (SH1)"] =
+          (params.get("file") as (typeof ilmFiles)[number]) ?? "HERO";
+        return;
+      case "sh3":
+        this.uiParams["Game"] = "Silent Hill 3";
+        const [folder, name] = modelSplit!;
+        this.uiParams["File (SH3)"] =
+          (params.get("file") as (typeof sh3ModelFiles)[number]) ??
+          `${folder}/${name}.mdl`;
+        return;
     }
 
     if (modelSplit && modelSplit.length !== 3) {
@@ -88,7 +104,7 @@ export default class MuseumState {
   private onModeUpdate?: (previousMode: "viewing" | "edit") => void;
   public onAfterRender?: () => void;
 
-  private currentViewerModel?: SilentHillModel;
+  private currentViewerModel?: SilentHill3Model | SilentHillModel;
   private currentViewerIlm?: Ilm;
   private customModel?: {
     contents: Uint8Array;
@@ -97,11 +113,22 @@ export default class MuseumState {
   private currentFile?: File;
   private currentAnimationClips: AnimationClip[] = [];
 
-  public getCurrentContentName() {
-    if (this.uiParams["Game"] === "Silent Hill 1") {
-      return this.uiParams["File (SH1)"];
+  public getCurrentContentName(): string {
+    switch (this.uiParams["Game"]) {
+      case "Silent Hill 1": {
+        return this.uiParams["File (SH1)"];
+      }
+
+      case "Silent Hill 2": {
+        return this.file;
+      }
+
+      case "Silent Hill 3": {
+        return this.uiParams["File (SH3)"];
+      }
     }
-    return this.file;
+
+    throw new Error("Unknown game selected");
   }
 
   public setFileIndex(index: number) {
@@ -151,44 +178,91 @@ export default class MuseumState {
   }
 
   public nextFile() {
-    if (this.uiParams["Game"] === "Silent Hill 1") {
-      this.uiParams["File (SH1)"] =
-        ilmFiles[
-          (ilmFiles.indexOf(this.uiParams["File (SH1)"]) + 1) % ilmFiles.length
-        ];
-      this.onUpdate();
-      return;
+    switch (this.uiParams["Game"]) {
+      case "Silent Hill 1": {
+        this.uiParams["File (SH1)"] =
+          ilmFiles[
+            (ilmFiles.indexOf(this.uiParams["File (SH1)"]) + 1) %
+              ilmFiles.length
+          ];
+        this.onUpdate();
+        return;
+      }
+      case "Silent Hill 3": {
+        const sh3Index = this.getSh3ModelFiles().indexOf(
+          `${clientState.uiParams["File (SH3)"]}`
+        );
+        if (sh3Index === favoriteSh3ModelFiles.length - 1) {
+          if (this.uiParams["Favorites Mode"]) {
+            if (!this.hasAcceptedContentWarning()) {
+              showContentWarningModal(
+                () => {
+                  this.nextFile();
+                  this.uiParams["Favorites Mode"] = false;
+                },
+                () => {
+                  this.uiParams["Favorites Mode"] = true;
+                }
+              );
+              return;
+            } else {
+              this.uiParams["Favorites Mode"] = false;
+            }
+          }
+        }
+        clientState.uiParams["File (SH3)"] =
+          this.getSh3ModelFiles()[
+            (sh3Index + 1) % this.getSh3ModelFiles().length
+          ];
+        this.onUpdate();
+        break;
+      }
+      case "Silent Hill 2": {
+        const newIndex = travelAlongLevel(
+          this.fileIndex,
+          FilePath.File,
+          1,
+          this.uiParams["Lock To Folder"]
+        );
+        this.setFileIndex(newIndex);
+      }
     }
-
-    const newIndex = travelAlongLevel(
-      this.fileIndex,
-      FilePath.File,
-      1,
-      this.uiParams["Lock To Folder"]
-    );
-    this.setFileIndex(newIndex);
   }
 
   public previousFile() {
-    if (this.uiParams["Game"] === "Silent Hill 1") {
-      this.uiParams["File (SH1)"] =
-        ilmFiles[
-          (ilmFiles.indexOf(this.uiParams["File (SH1)"]) -
-            1 +
-            ilmFiles.length) %
-            ilmFiles.length
-        ];
-      this.onUpdate();
-      return;
+    switch (this.uiParams["Game"]) {
+      case "Silent Hill 1": {
+        this.uiParams["File (SH1)"] =
+          ilmFiles[
+            mod(
+              ilmFiles.indexOf(this.uiParams["File (SH1)"]) - 1,
+              ilmFiles.length
+            )
+          ];
+        this.onUpdate();
+        return;
+      }
+      case "Silent Hill 3": {
+        const sh3Index = this.getSh3ModelFiles().indexOf(
+          `${clientState.uiParams["File (SH3)"]}`
+        );
+        clientState.uiParams["File (SH3)"] =
+          this.getSh3ModelFiles()[
+            mod(sh3Index - 1, this.getSh3ModelFiles().length)
+          ];
+        this.onUpdate();
+        break;
+      }
+      case "Silent Hill 2": {
+        const newIndex = travelAlongLevel(
+          this.fileIndex,
+          FilePath.File,
+          -1,
+          this.uiParams["Lock To Folder"]
+        );
+        this.setFileIndex(newIndex);
+      }
     }
-
-    const newIndex = travelAlongLevel(
-      this.fileIndex,
-      FilePath.File,
-      -1,
-      this.uiParams["Lock To Folder"]
-    );
-    this.setFileIndex(newIndex);
   }
 
   public nextFolder() {
@@ -216,6 +290,13 @@ export default class MuseumState {
     return folders[this.folder as keyof typeof folders];
   }
 
+  public getSh3ModelFiles() {
+    if (this.uiParams["Favorites Mode"]) {
+      return favoriteSh3ModelFiles;
+    }
+    return sh3ModelFiles;
+  }
+
   public getPossibleFolders() {
     return this.rootFolder === "chr" ? chrFolders : chr2Folders;
   }
@@ -236,7 +317,9 @@ export default class MuseumState {
     this.saveRequested = true;
   }
 
-  public setCurrentViewerModel(model: SilentHillModel | undefined) {
+  public setCurrentViewerModel(
+    model: SilentHill3Model | SilentHillModel | undefined
+  ) {
     this.currentViewerIlm = undefined;
     this.currentViewerModel = model;
   }
@@ -470,15 +553,17 @@ export default class MuseumState {
   }
 
   public uiParams = {
-    Game: Math.random() > 0.5 ? "Silent Hill 1" : "Silent Hill 2",
+    Game: "Silent Hill 3" /* randomArrayElement(GAMES) */,
     "File (SH1)": "LISA" as (typeof ilmFiles)[number],
+    "File (SH3)": "pl/chhaa.mdl" as (typeof sh3ModelFiles)[number],
+    "Favorites Mode": true,
     Scenario: this.rootFolder === "chr" ? "Main Scenario" : "Born From A Wish",
     Folder: this.folder,
     Filename: this.file,
     Animation: this.suggestAnimationPath() as string | undefined,
     "Edit Mode ✨": this.mode === "edit",
     "Texture Viewer 👀": false,
-    "Lock To Folder": !this.hasAcceptedContentWarning(),
+    "Lock To Folder": false,
     "Sharable Link": false,
     "Next File": () => this.nextFile(),
     "Previous File": () => this.previousFile(),
@@ -512,10 +597,12 @@ export default class MuseumState {
         });
       };
       if (
-        this.uiParams.Game === "Silent Hill 1" &&
+        this.uiParams.Game !== "Silent Hill 2" &&
         clientState.uiParams["CLUT Rendering"] !== "Atlas"
       ) {
-        clientState.uiParams["Texture Viewer 👀"] = true;
+        if (this.uiParams.Game !== "Silent Hill 1") {
+          clientState.uiParams["Texture Viewer 👀"] = true;
+        }
         clientState.uiParams["CLUT Rendering"] = "Atlas";
         this.onAfterRender = onReady;
         this.onUpdate();

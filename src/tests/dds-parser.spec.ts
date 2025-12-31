@@ -1,6 +1,6 @@
 import path from "path";
 import { describe, expect, test } from "vitest";
-import { fetchRawBytes, loadDramaDemoFromBytes } from "../load";
+import { fetchArrayBuffer, loadDramaDemoFromBytes } from "../load";
 import SilentHillDramaDemo from "../kaitai/Dds";
 import F2 from "../kaitai/F2";
 import logger from "../objects/Logger";
@@ -9,7 +9,7 @@ import fs from "fs";
 
 test("should parse inu animation ", async () => {
   const inu = loadDramaDemoFromBytes(
-    await fetchRawBytes(
+    await fetchArrayBuffer(
       path.join(__dirname, "../../public/data/demo/inu/end_inu.dds")
     )
   );
@@ -23,7 +23,7 @@ const ddsCache = new Map<
   }
 >();
 const loadDds = async (file: string) =>
-  loadDramaDemoFromBytes(await fetchRawBytes(file));
+  loadDramaDemoFromBytes(await fetchArrayBuffer(file));
 const loadDdsWithCache = async (file: string) => {
   const cached = ddsCache.get(file);
   if (cached) {

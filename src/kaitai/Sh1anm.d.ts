@@ -59,10 +59,10 @@ declare namespace Sh1anm {
   }
 }
 
-/**
- * 3x3 matrix, signed fixed point with 7 fraction bits
- */
 declare namespace Sh1anm {
+  /**
+   * 3x3 matrix, signed fixed point with 7 fraction bits
+   */
   class Rotation {
     constructor(io: any, parent?: any, root?: any);
     __type: "Rotation";

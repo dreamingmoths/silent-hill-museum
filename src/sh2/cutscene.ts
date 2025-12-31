@@ -8,10 +8,10 @@ import {
   ColorKeyframeTrack,
   Light,
 } from "three";
-import SilentHillDramaDemo from "./kaitai/Dds";
-import F2 from "./kaitai/F2";
-import logger from "./objects/Logger";
-import { ANIMATION_FRAME_DURATION } from "./utils";
+import SilentHillDramaDemo from "../kaitai/Dds";
+import F2 from "../kaitai/F2";
+import logger from "../objects/Logger";
+import { ANIMATION_FRAME_DURATION } from "../utils";
 
 export const createCutsceneTracks = (
   dds: SilentHillDramaDemo | undefined,

@@ -1,8 +1,8 @@
 import { AnimationAction, AnimationClip } from "three";
 import { createDiv } from "../utils";
-import { isMobile } from "../mobile";
+import { isMobile } from "../utils";
 
-export default class AnimationGui {
+export default class QuickBar {
   public container: HTMLElement;
 
   public animationProgressBar: HTMLElement;
@@ -98,7 +98,7 @@ export default class AnimationGui {
   public useAnimationVisualizer(action: AnimationAction, clip: AnimationClip) {
     const progressBar = this.animationProgressBar;
     const canUseTranslateX = CSS.supports("transform", "translateX(50cqi)");
-    const animationGui = this;
+    const quickBar = this;
     this.show();
 
     function animate() {
@@ -107,7 +107,7 @@ export default class AnimationGui {
         return requestAnimationFrame(animate);
       }
 
-      if (!animationGui.playing) {
+      if (!quickBar.playing) {
         action.getMixer().timeScale = 0;
 
         return requestAnimationFrame(animate);
@@ -115,9 +115,9 @@ export default class AnimationGui {
         action.getMixer().timeScale = 1;
       }
 
-      let time = animationGui.animationTimer;
+      let time = quickBar.animationTimer;
 
-      if (animationGui.animationTimer >= 0) {
+      if (quickBar.animationTimer >= 0) {
         action.getMixer().setTime(time * clip.duration);
       } else {
         time = action.time / duration;

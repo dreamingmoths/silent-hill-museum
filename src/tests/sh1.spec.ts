@@ -1,11 +1,11 @@
 import fs from "fs";
 import path from "path";
 import { describe, test, expect } from "vitest";
-import { fetchRawBytes } from "../load";
+import { fetchArrayBuffer } from "../load";
 import Ilm from "../kaitai/Ilm";
 import Sh1anm from "../kaitai/Sh1anm";
 import KaitaiStream from "../kaitai/runtime/KaitaiStream";
-import { ilmToAnmAssoc, anmToIlmAssoc, ilmToTextureAssoc } from "../sh1";
+import { ilmToAnmAssoc, anmToIlmAssoc, ilmToTextureAssoc } from "../sh1/sh1";
 import logger from "../objects/Logger";
 import PsxTim from "../kaitai/PsxTim";
 
@@ -27,8 +27,8 @@ describe("ilm + sh1anm", () => {
     test(`${ilmFile} + ${anmFile}`, async () => {
       expect(anmFiles).toContain(anmFile);
 
-      const ilmBytes = await fetchRawBytes(path.join(ILM_PATH, ilmFile));
-      const anmBytes = await fetchRawBytes(path.join(ANM_PATH, anmFile));
+      const ilmBytes = await fetchArrayBuffer(path.join(ILM_PATH, ilmFile));
+      const anmBytes = await fetchArrayBuffer(path.join(ANM_PATH, anmFile));
 
       const ilmStream = new KaitaiStream(ilmBytes);
       const ilm = new Ilm(ilmStream);
@@ -44,7 +44,7 @@ describe("ilm + sh1anm", () => {
     test(`${imageFile}`, async () => {
       let imageBytes;
       try {
-        imageBytes = await fetchRawBytes(path.join(ILM_PATH, imageFile));
+        imageBytes = await fetchArrayBuffer(path.join(ILM_PATH, imageFile));
       } catch (e) {
         return;
       }
@@ -72,8 +72,8 @@ describe("ilm + sh1anm", () => {
     test(`${anmFile} + ${ilmFile}`, async () => {
       expect(ilmFiles).toContain(ilmFile);
 
-      const ilmBytes = await fetchRawBytes(path.join(ILM_PATH, ilmFile));
-      const anmBytes = await fetchRawBytes(path.join(ANM_PATH, anmFile));
+      const ilmBytes = await fetchArrayBuffer(path.join(ILM_PATH, ilmFile));
+      const anmBytes = await fetchArrayBuffer(path.join(ANM_PATH, anmFile));
 
       const ilmStream = new KaitaiStream(ilmBytes);
       const ilm = new Ilm(ilmStream);

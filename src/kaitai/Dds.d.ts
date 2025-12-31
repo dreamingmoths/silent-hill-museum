@@ -52,7 +52,20 @@ declare namespace Dds {
 
     usingHalfFloats: boolean;
     controlByte: number;
-    ddsBlock: Dds.Empty | Dds.F2Vector | Dds.F4Vector | F2 | number | undefined;
+    ddsBlock:
+      | Dds.Empty
+      | Dds.Empty
+      | Dds.F2Vector
+      | Dds.F4Vector
+      | Dds.F2Vector
+      | Dds.F4Vector
+      | Dds.F2Vector
+      | Dds.F2Vector
+      | F2
+      | F2
+      | number
+      | number
+      | undefined;
   }
 }
 
@@ -133,7 +146,7 @@ declare namespace Dds {
     _io: any;
 
     demoStatus: number;
-    stateArray: Dds.StateReducer | Dds.StateReducer | undefined[];
+    stateArray: (Dds.StateReducer | Dds.StateReducer)[] | undefined;
     statusBytes: number[];
   }
 }
@@ -151,6 +164,9 @@ declare namespace Dds {
 }
 
 declare namespace Dds {
+  /**
+   * Nothing.
+   */
   class Empty {
     constructor(io: any, parent?: any, root?: any);
     __type: "Empty";
@@ -206,7 +222,7 @@ declare namespace Dds {
 
     isStopFrame: boolean;
     frameIndex: number;
-    instructions: Dds.Instruction[] | undefined;
+    instructions: (Dds.Instruction | Dds.Instruction)[];
   }
 }
 

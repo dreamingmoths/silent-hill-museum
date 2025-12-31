@@ -7,10 +7,11 @@ in vec2 vUv;
 flat in ivec2 vTexInfo;
 in vec3 vNormal;
 
-uniform vec3 ambientLightColor;
 uniform sampler2D clutTexture;
 uniform usampler2D imgTexture;
 uniform vec2 imgSize;
+
+uniform vec3 ambientLightColor;
 uniform float opacity;
 uniform float alphaTest;
 uniform float uTime;

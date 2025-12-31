@@ -205,10 +205,10 @@ declare namespace Sh3mdl {
   }
 }
 
-/**
- * Represents a 4x4 column-major transformation matrix.
- */
 declare namespace Sh3mdl {
+  /**
+   * Represents a 4x4 column-major transformation matrix.
+   */
   class TransformationMatrix {
     constructor(io: any, parent?: any, root?: any);
     __type: "TransformationMatrix";

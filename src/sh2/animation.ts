@@ -7,9 +7,9 @@ import {
   Bone,
   InterpolateLinear,
 } from "three";
-import SilentHillAnimation from "./kaitai/Anm";
-import logger from "./objects/Logger";
-import { ANIMATION_FRAME_DURATION } from "./utils";
+import SilentHillAnimation from "../kaitai/Anm";
+import logger from "../objects/Logger";
+import { ANIMATION_FRAME_DURATION } from "../utils";
 
 type BoneInfo = {
   bone: Bone;

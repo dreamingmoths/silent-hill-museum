@@ -1,6 +1,5 @@
 // This is a generated file! Please edit source .ksy file and use kaitai-struct-compiler to rebuild
 
-
 /**
  * Mdl is the proprietary 3D model format of Silent Hill 2 (PC). It describes
  * geometry, textures, skeleton data, and more. This structure does not describe
@@ -8,7 +7,7 @@
  */
 declare class Mdl {
   constructor(io: any, parent?: any, root?: any);
-  __type: 'Mdl';
+  __type: "Mdl";
   _io: any;
   _read: () => void;
   _fetchInstances: () => void;
@@ -25,7 +24,7 @@ declare class Mdl {
 declare namespace Mdl {
   class Cluster {
     constructor(io: any, parent?: any, root?: any);
-    __type: 'Cluster';
+    __type: "Cluster";
     _io: any;
 
     data: Mdl.ClusterDataList;
@@ -37,7 +36,7 @@ declare namespace Mdl {
 declare namespace Mdl {
   class ClusterData {
     constructor(io: any, parent?: any, root?: any);
-    __type: 'ClusterData';
+    __type: "ClusterData";
     _io: any;
 
     vector: Mdl.S2Vector;
@@ -48,7 +47,7 @@ declare namespace Mdl {
 declare namespace Mdl {
   class ClusterDataList {
     constructor(io: any, parent?: any, root?: any);
-    __type: 'ClusterDataList';
+    __type: "ClusterDataList";
     _io: any;
 
     vertices: Mdl.ClusterData[];
@@ -57,14 +56,13 @@ declare namespace Mdl {
   }
 }
 
-
-/**
- * Unknown original IDs for all properties.
- */
 declare namespace Mdl {
+  /**
+   * Unknown original IDs for all properties.
+   */
   class ClusterMapping {
     constructor(io: any, parent?: any, root?: any);
-    __type: 'ClusterMapping';
+    __type: "ClusterMapping";
     _io: any;
 
     sourceStartIndex: number;
@@ -76,7 +74,7 @@ declare namespace Mdl {
 declare namespace Mdl {
   class ClusterMaps {
     constructor(io: any, parent?: any, root?: any);
-    __type: 'ClusterMaps';
+    __type: "ClusterMaps";
     _io: any;
 
     opaque: Mdl.ClusterMapping[];
@@ -87,13 +85,12 @@ declare namespace Mdl {
 declare namespace Mdl {
   class FileHeader {
     constructor(io: any, parent?: any, root?: any);
-    __type: 'FileHeader';
+    __type: "FileHeader";
     _io: any;
 
-
     /**
-     * Indicates whether this model has a texture associated with it? 
-     * True for models with "notex" in the filename, e.g. 
+     * Indicates whether this model has a texture associated with it?
+     * True for models with "notex" in the filename, e.g.
      * "hll_jms_notex.mdl".
      */
     noTextureId: number;
@@ -129,7 +126,7 @@ declare namespace Mdl {
 declare namespace Mdl {
   class Geometry {
     constructor(io: any, parent?: any, root?: any);
-    __type: 'Geometry';
+    __type: "Geometry";
     _io: any;
 
     transparentPrimitiveHeaders: Mdl.TransparentPrimitiveHeaderWrapper[];
@@ -154,23 +151,21 @@ declare namespace Mdl {
 declare namespace Mdl {
   class IndexList {
     constructor(io: any, parent?: any, root?: any);
-    __type: 'IndexList';
+    __type: "IndexList";
     _io: any;
 
     array: number[];
   }
 }
 
-
-/**
- * Model container. All offsets are relative to the start of this header.
- */
 declare namespace Mdl {
+  /**
+   * Model container. All offsets are relative to the start of this header.
+   */
   class Model {
     constructor(io: any, parent?: any, root?: any);
-    __type: 'Model';
+    __type: "Model";
     _io: any;
-
 
     /**
      * Unknown original name.
@@ -203,6 +198,7 @@ declare namespace Mdl {
      * The start of the geometry data.
      */
     geometry: Mdl.Geometry;
+    junkPadding: Uint8Array;
 
     /**
      * And that's a magic number! It's 0x03 0x00 0xff 0xff.
@@ -424,19 +420,17 @@ declare namespace Mdl {
   }
 }
 
-
-/**
- * Description for a primitive, in the OpenGL sense of the word
- * "primitive". In this case, the primitives are triangle strips, but
- * the triangle list can contain degenerate triangles that are used to
- * separate strips.
- */
 declare namespace Mdl {
+  /**
+   * Description for a primitive, in the OpenGL sense of the word
+   * "primitive". In this case, the primitives are triangle strips, but
+   * the triangle list can contain degenerate triangles that are used to
+   * separate strips.
+   */
   class PrimitiveHeader {
     constructor(io: any, parent?: any, root?: any);
-    __type: 'PrimitiveHeader';
+    __type: "PrimitiveHeader";
     _io: any;
-
 
     /**
      * A list of bone pair indices. See bone_indices doc comment, a similar
@@ -482,7 +476,7 @@ declare namespace Mdl {
     textureIndexOffset: number;
 
     /**
-     * From FF24, this is an offset to ADDRESSU, ADDRESSV, MAGFILTER and 
+     * From FF24, this is an offset to ADDRESSU, ADDRESSV, MAGFILTER and
      * MINFILTER sampler states.
      */
     samplerStatesOffset: number;
@@ -580,7 +574,7 @@ declare namespace Mdl {
 declare namespace Mdl {
   class PrimitiveHeaderWrapper {
     constructor(io: any, parent?: any, root?: any);
-    __type: 'PrimitiveHeaderWrapper';
+    __type: "PrimitiveHeaderWrapper";
     _io: any;
 
     primitiveHeaderSize: number;
@@ -592,7 +586,7 @@ declare namespace Mdl {
 declare namespace Mdl {
   class S2Vector {
     constructor(io: any, parent?: any, root?: any);
-    __type: 'S2Vector';
+    __type: "S2Vector";
     _io: any;
 
     x: number;
@@ -601,14 +595,13 @@ declare namespace Mdl {
   }
 }
 
-
-/**
- * Represents a parent-child bone relationship.
- */
 declare namespace Mdl {
+  /**
+   * Represents a parent-child bone relationship.
+   */
   class SkeletonPair {
     constructor(io: any, parent?: any, root?: any);
-    __type: 'SkeletonPair';
+    __type: "SkeletonPair";
     _io: any;
 
     parent: number;
@@ -619,7 +612,7 @@ declare namespace Mdl {
 declare namespace Mdl {
   class SpriteHeader {
     constructor(io: any, parent?: any, root?: any);
-    __type: 'SpriteHeader';
+    __type: "SpriteHeader";
     _io: any;
 
     spriteId: number;
@@ -665,7 +658,7 @@ declare namespace Mdl {
 declare namespace Mdl {
   class TextureContainer {
     constructor(io: any, parent?: any, root?: any);
-    __type: 'TextureContainer';
+    __type: "TextureContainer";
     _io: any;
 
     textureId: number;
@@ -683,9 +676,8 @@ declare namespace Mdl {
 declare namespace Mdl {
   class TextureData {
     constructor(io: any, parent?: any, root?: any);
-    __type: 'TextureData';
+    __type: "TextureData";
     _io: any;
-
 
     /**
      * And that's a magic number!
@@ -699,9 +691,8 @@ declare namespace Mdl {
 declare namespace Mdl {
   class TextureMetadata {
     constructor(io: any, parent?: any, root?: any);
-    __type: 'TextureMetadata';
+    __type: "TextureMetadata";
     _io: any;
-
 
     /**
      * TODO
@@ -716,14 +707,13 @@ declare namespace Mdl {
   }
 }
 
-
-/**
- * TODO
- */
 declare namespace Mdl {
+  /**
+   * TODO
+   */
   class TexturePair {
     constructor(io: any, parent?: any, root?: any);
-    __type: 'TexturePair';
+    __type: "TexturePair";
     _io: any;
 
     textureIndex: number;
@@ -731,14 +721,13 @@ declare namespace Mdl {
   }
 }
 
-
-/**
- * Represents a 4x4 column-major transformation matrix.
- */
 declare namespace Mdl {
+  /**
+   * Represents a 4x4 column-major transformation matrix.
+   */
   class TransformationMatrix {
     constructor(io: any, parent?: any, root?: any);
-    __type: 'TransformationMatrix';
+    __type: "TransformationMatrix";
     _io: any;
 
     rotation00: number;
@@ -763,7 +752,7 @@ declare namespace Mdl {
 declare namespace Mdl {
   class TransparentPrimitiveHeader {
     constructor(io: any, parent?: any, root?: any);
-    __type: 'TransparentPrimitiveHeader';
+    __type: "TransparentPrimitiveHeader";
     _io: any;
 
     pad0: Uint8Array;
@@ -810,7 +799,7 @@ declare namespace Mdl {
 declare namespace Mdl {
   class TransparentPrimitiveHeaderWrapper {
     constructor(io: any, parent?: any, root?: any);
-    __type: 'TransparentPrimitiveHeaderWrapper';
+    __type: "TransparentPrimitiveHeaderWrapper";
     _io: any;
 
     transparentPrimitiveHeaderSize: number;
@@ -822,9 +811,8 @@ declare namespace Mdl {
 declare namespace Mdl {
   class TransparentVertexData {
     constructor(io: any, parent?: any, root?: any);
-    __type: 'TransparentVertexData';
+    __type: "TransparentVertexData";
     _io: any;
-
 
     /**
      * The x-coordinate of the vertex.
@@ -883,9 +871,8 @@ declare namespace Mdl {
 declare namespace Mdl {
   class VertexData {
     constructor(io: any, parent?: any, root?: any);
-    __type: 'VertexData';
+    __type: "VertexData";
     _io: any;
-
 
     /**
      * The x-coordinate of the vertex.

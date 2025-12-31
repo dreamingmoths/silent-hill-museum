@@ -85,6 +85,10 @@ export const initializeModals = () => {
   );
 };
 
+export const isElementOpen = (elementKey: string) => {
+  return uiDescriptions[elementKey]?.open;
+};
+
 export const isAnyElementOpen = () => {
   return uiDescriptions.blurBackground.open;
 };

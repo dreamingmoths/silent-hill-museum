@@ -9,9 +9,9 @@ import {
   bindSkeletonToTransparentGeometry,
   createMaterial,
   createSkeleton,
-} from "../model";
+} from "../sh2/model";
 import logger from "../objects/Logger";
-import { destructureIndex, fileArray as mdlFileArray } from "../files";
+import { destructureIndex, fileArray as mdlFileArray } from "../sh2/files";
 
 const QUICK = process.env.QUICK;
 const VERBOSE = true;

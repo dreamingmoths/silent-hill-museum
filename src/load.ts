@@ -12,7 +12,7 @@ export const modelCache: ModelCache = {};
 export type AnimationCache = { [url: string]: SilentHillAnimation | undefined };
 export const animationCache: AnimationCache = {};
 
-export const fetchRawBytes = async (url: string): Promise<ArrayBuffer> => {
+export const fetchArrayBuffer = async (url: string): Promise<ArrayBuffer> => {
   try {
     const response = await fetch(url);
     if (!response.ok) {
@@ -25,8 +25,8 @@ export const fetchRawBytes = async (url: string): Promise<ArrayBuffer> => {
   }
 };
 
-export const fetchUint16Array = async (url: string) =>
-  new Uint16Array(await fetchRawBytes(url));
+export const fetchUint16Array = async (url: string): Promise<Uint16Array> =>
+  new Uint16Array(await fetchArrayBuffer(url));
 
 export const loadDramaDemoFromBytes = (bytes: ArrayBuffer) => {
   const stream = new KaitaiStream(bytes);
@@ -51,7 +51,7 @@ export const loadModelFromUrl = async (url: string) => {
     logger.warn("Cannot load files other than .mdl.");
     return undefined;
   }
-  const bytes = await fetchRawBytes(url);
+  const bytes = await fetchArrayBuffer(url);
   if (bytes.byteLength === 0) {
     logger.warn("File is empty.");
     modelCache[url] = undefined;
@@ -88,7 +88,7 @@ export const loadAnimationFromUrl = async (
   if (url in animationCache) {
     return animationCache[url];
   }
-  const bytes = await fetchRawBytes(url);
+  const bytes = await fetchArrayBuffer(url);
   if (bytes.byteLength === 0) {
     logger.warn("File is empty.");
     animationCache[url] = undefined;
