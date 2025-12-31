@@ -30,6 +30,7 @@ import {
   exportCanvas,
   fitCameraToSelection,
   RenderSideMap,
+  uncurseTouchCallout,
   WrapMap,
 } from "./utils";
 import {
@@ -148,6 +149,7 @@ export const quickBar = new QuickBar(quickBarContainer);
 
 initializeModals();
 acceptModelDrop(appContainer);
+uncurseTouchCallout(appContainer);
 
 const params = new URLSearchParams(window.location.search);
 const bypassAboutModal = params.get("bypass-modal");

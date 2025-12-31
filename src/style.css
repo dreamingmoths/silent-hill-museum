@@ -30,6 +30,15 @@ canvas {
   height: 100%;
 }
 
+#app,
+canvas {
+  user-select: none;
+  -moz-user-select: none;
+  touch-action: none;
+  -ms-touch-action: none;
+  -webkit-touch-callout: none;
+}
+
 body {
   margin: 0;
   display: flex;

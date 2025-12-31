@@ -617,3 +617,15 @@ export const randomArrayElement = <T>(array: T[] | readonly T[]): T => {
 };
 
 export const isMobile = () => window.matchMedia("(pointer: coarse)").matches;
+
+export const uncurseTouchCallout = (element: HTMLElement) => {
+  element.addEventListener(
+    "touchstart",
+    (event) => {
+      event.preventDefault();
+    },
+    {
+      passive: false,
+    }
+  );
+};
