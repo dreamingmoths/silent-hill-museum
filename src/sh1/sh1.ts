@@ -25,15 +25,12 @@ import {
   Vector3Like,
   VectorKeyframeTrack,
 } from "three";
-import Ilm from "./kaitai/Ilm";
-import Sh1anm from "./kaitai/Sh1anm";
-import { Tuple } from "./types/common";
-import { BufferGeometryUtils } from "three/examples/jsm/Addons.js";
-import { ANIMATION_FRAME_DURATION } from "./utils";
-import PsxTim from "./kaitai/PsxTim";
-import psx_frag from "./glsl/psx_frag.glsl?raw";
-import psx_vert from "./glsl/psx_vert.glsl?raw";
 import { ceilPowerOfTwo } from "three/src/math/MathUtils.js";
+import { BufferGeometryUtils } from "three/examples/jsm/Addons.js";
+import { Tuple } from "../types/common";
+import { ANIMATION_FRAME_DURATION } from "../utils";
+import psx_frag from "../glsl/psx_frag.glsl?raw";
+import psx_vert from "../glsl/psx_vert.glsl?raw";
 
 // I mostly just want to quickly create a prototype for sh1 support before
 // making any big structural changes to the code
@@ -461,7 +458,7 @@ export const createSh1Material = (
     imageTexture,
     imageWidth,
     imageHeight,
-    { interpolation: "nearest", grayscale: true },
+    { interpolation: "nearest", grayscale: true, scale: 255 / 16 },
   ] as const;
   const clutInfo = [
     clutTexture,

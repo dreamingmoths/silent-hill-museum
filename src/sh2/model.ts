@@ -16,10 +16,11 @@ import {
   Vector3,
   Wrapping,
 } from "three";
-import SilentHillModel from "./kaitai/Mdl";
-import { at, MIN_SIGNED_INT, transformationMatrixToMat4 } from "./utils";
-import logger from "./objects/Logger";
-import Squish, { SquishFlags } from "./wasm/libsquish/dxt";
+import SilentHillModel from "../kaitai/Mdl";
+import { at, MIN_SIGNED_INT, transformationMatrixToMat4 } from "../utils";
+import logger from "../objects/Logger";
+import Squish, { SquishFlags } from "../wasm/libsquish/dxt";
+import SilentHill3Model from "../kaitai/Sh3mdl";
 
 export const MaterialView = {
   Flat: "Flat color",
@@ -329,11 +330,18 @@ export const DxtLookup = {
   4: SquishFlags.DXT5,
 } as const;
 
-export const createSkeleton = (model: SilentHillModel) => {
+export const createSkeleton = (model: SilentHillModel | SilentHill3Model) => {
   const bones: Bone[] = [];
   const rootBoneIndices: number[] = [];
-  const skeletonRepresentation = model.modelData.skeletonTree;
-  const initialMatrices = model.modelData.initialMatrices;
+  let skeletonRepresentation;
+  let initialMatrices;
+  if (model instanceof SilentHill3Model) {
+    skeletonRepresentation = model.modelHeader.bones;
+    initialMatrices = model.modelHeader.initialMatrices;
+  } else {
+    skeletonRepresentation = model.modelData.skeletonTree;
+    initialMatrices = model.modelData.initialMatrices;
+  }
   for (let i = 0; i < skeletonRepresentation.length; i++) {
     const parentBoneIndex = skeletonRepresentation[i];
     if (parentBoneIndex === 255) {

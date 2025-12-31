@@ -1,5 +1,5 @@
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
-import { fetchRawBytes } from "./load";
+import { fetchArrayBuffer } from "./load";
 import { clientState } from "./objects/MuseumState";
 import { acceptFileDrop, arrayBufferToBase64 } from "./utils";
 import { Matrix4, Mesh, Object3D } from "three";
@@ -315,7 +315,7 @@ export const fileCallback = (file: File) => {
       logger.debug(clientState.fullPath);
       const payload: CreationPayload = {
         bytes: buffer,
-        baseFile: await fetchRawBytes(clientState.fullPath),
+        baseFile: await fetchArrayBuffer(clientState.fullPath),
         serializationParams: editorState.getSerializationParams(),
       };
       logger.debug(new Uint8Array(payload.baseFile), "basefile");

@@ -106,8 +106,8 @@ class Logger {
 
   public disablePipeIfExists(pipeId: string) {
     const pipe = this.pipes[pipeId];
-    this.debug("Disabling pipe", pipeId);
-    if (pipe) {
+    if (pipe && pipe.enabled) {
+      this.debug("Disabling pipe", pipeId);
       pipe.enabled = false;
     }
   }

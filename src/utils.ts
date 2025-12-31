@@ -389,6 +389,9 @@ export const disposeResources = (objectToSearch?: Object3D) => {
   objectToSearch?.traverse((object) => {
     if (object instanceof Mesh) {
       object.geometry?.dispose?.();
+      if (object?.material?.name === "ps2-shader") {
+        return;
+      }
       object.material?.dispose?.();
     }
   });
@@ -608,3 +611,9 @@ export class UnhandledCaseError extends Error {
 }
 
 export const ANIMATION_FRAME_DURATION = 1 / 24;
+
+export const randomArrayElement = <T>(array: T[] | readonly T[]): T => {
+  return array[Math.floor(Math.random() * array.length)];
+};
+
+export const isMobile = () => window.matchMedia("(pointer: coarse)").matches;

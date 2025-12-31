@@ -7,8 +7,8 @@
  * @module
  */
 
-import { MapIndicesToValues, TupleSliceUnion } from "./types/common";
-import { findLastNotExceeding, mod } from "./utils";
+import { MapIndicesToValues, TupleSliceUnion } from "../types/common";
+import { findLastNotExceeding, mod } from "../utils";
 
 export type FilePathTuple = MapIndicesToValues<
   typeof fileIndices,

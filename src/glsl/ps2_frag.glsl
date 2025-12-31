@@ -12,7 +12,8 @@ precision highp usampler2D;
 precision highp isampler2D;
 
 in vec2 vUv;
-flat in ivec2 vTexInfo;
+flat in ivec3 vTexInfo;
+in vec3 vNormal;
 
 uniform sampler2D clutTexture;
 uniform usampler2D imgTexture[TEXTURE_COUNT];
@@ -22,6 +23,16 @@ uniform vec2 imgSize[TEXTURE_COUNT];
 uniform vec2 clutSize[TEXTURE_COUNT];
 uniform int clutOffsets[TEXTURE_COUNT];
 uniform int psm[TEXTURE_COUNT];
+
+uniform vec3 ambientLightColor;
+uniform float alphaTest;
+uniform float uTime;
+uniform float lightingMode;
+
+#define LIGHT_SPEED 3.0
+#define NORMAL_MAP 1.5
+#define DIFFUSE 0.5
+#define MATTE 0.0
 
 layout(location = 0) out highp vec4 pc_fragColor;
 
@@ -153,7 +164,7 @@ ivec2 unswizzle4(ivec2 imgXy, vec2 size, int texUnit) {
     int swizzled = int(texelFetch(swizzleTexture4, ivec2(px, py), 0).r);
 
     int byteInPage = swizzled >> 1;
-    int isHighNibble = swizzled & 1; 
+    int isHighNibble = swizzled & 1;
     int pageRow = byteInPage >> 6;
     int pageCol = byteInPage & 63;
     int qx = pageCol + (pageX << 6);
@@ -173,6 +184,7 @@ void main() {
     /* texture rendering */
     int texUnit = vTexInfo.x;
     int clutRow = vTexInfo.y;
+    bool transparent = vTexInfo.z > 0;
 
     vec2 size = imgSize[texUnit];
     ivec2 imgXy = ivec2(round(vUv.xy * size));
@@ -199,11 +211,26 @@ void main() {
     vec4 pixel = texelFetch(clutTexture, clutAddr, 0);
 
     float pixelAlpha = pixel.a;
-    if (pixelAlpha >= 0.0 && pixelAlpha < 0.05) {
+    if (transparent && pixelAlpha >= 0.0 && 2.0 * pixelAlpha < alphaTest) {
         discard;
     }
-    float alpha = pixelAlpha >= 0.0 ? min(pixelAlpha * 2.0, 1.0) : 1.0;
+    float alpha = transparent && pixelAlpha >= 0.0 ? min(pixelAlpha * 2.0, 1.0) : 1.0;
     vec3 color = pixel.rgb;
 
-    pc_fragColor = vec4(color, alpha);
+    /* lighting */
+    vec3 normal = vNormal;
+    if (lightingMode > NORMAL_MAP) {
+        pc_fragColor = vec4(normal, 1.0);
+        return;
+    }
+    vec3 diffuse = vec3(0.0);
+    if (lightingMode > DIFFUSE) {
+        float t = LIGHT_SPEED * uTime;
+        vec3 lightDir = vec3(sin(t), 0., cos(t));
+        diffuse += max(dot(lightDir, normal), 0.0);
+    } else {
+        diffuse = vec3(1.0);
+    }
+
+    pc_fragColor = vec4(color.rgb * ambientLightColor * diffuse, alpha);
 }

@@ -1,20 +1,20 @@
 import GUI, { Controller } from "lil-gui";
-import { clientState } from "./objects/MuseumState";
-import TextureViewer from "./objects/TextureViewer";
-import { applyUpdate, fileCallback, sharedSerializationData } from "./write";
-import logger from "./objects/Logger";
-import EditorState, { editorState } from "./objects/EditorState";
+import { clientState } from "../objects/MuseumState";
+import TextureViewer from "../objects/TextureViewer";
+import { applyUpdate, fileCallback, sharedSerializationData } from "../write";
+import logger from "../objects/Logger";
+import EditorState, { editorState } from "../objects/EditorState";
 import {
   Autoscale,
   BonemapMethod,
   BonemapType,
   ModelParams,
   SilentHillModelTypes,
-} from "./objects/SerializableModel";
-import SilentHillModel from "./kaitai/Mdl";
-import { ModelPropertyDiffJson } from "./write-worker";
-import { onConfirm, showQuickModal } from "./modals";
-import ghostParams from "./assets/ghost-params.json";
+} from "../objects/SerializableModel";
+import SilentHillModel from "../kaitai/Mdl";
+import { ModelPropertyDiffJson } from "../write-worker";
+import { onConfirm, showQuickModal } from "../modals";
+import ghostParams from "../assets/ghost-params.json";
 
 export const consoleGui = new GUI({
   title: "Output",

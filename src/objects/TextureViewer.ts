@@ -18,7 +18,6 @@ export default class TextureViewer {
   private mouseIsOver = false;
   private firstOpen = true;
   private hoverable = false;
-  private dataImages: HTMLImageElement[] = [];
 
   public constructor(
     private guiWindow: HTMLDivElement,
@@ -94,12 +93,12 @@ export default class TextureViewer {
     this.contentWindow.innerHTML = "";
   }
 
-  public attach(attachment: Object3D | HTMLImageElement[]) {
+  public attach(attachment: Object3D | TextureViewerTicket[]) {
     if (attachment instanceof Object3D) {
       this.currentObject = attachment;
-      this.dataImages = [];
+      this.renderTickets.clear();
     } else {
-      this.dataImages = attachment;
+      this.renderTickets = new Set(attachment as TextureViewerTicket[]);
     }
     if (this.state !== TextureViewerStates.Inactive) {
       this.renderTextures();
@@ -109,10 +108,21 @@ export default class TextureViewer {
   public renderTextures() {
     this.reset();
 
-    if (this.dataImages.length) {
-      for (const image of this.dataImages) {
-        this.contentWindow.appendChild(image);
-      }
+    if (this.renderTickets.size) {
+      Promise.all(
+        Array.from(this.renderTickets).map(async (ticket) => {
+          const image = await this.resolveTicket(ticket);
+          this.contentWindow.appendChild(image);
+          return image;
+        })
+      )
+        .then((value) => {
+          logger.debug(value);
+        })
+        .catch((err) => {
+          logger.error(err);
+        });
+
       return;
     }
 
@@ -128,7 +138,7 @@ export default class TextureViewer {
         object.material instanceof Material
           ? [object.material]
           : object.material;
-      materials.forEach((material) => {
+      materials.forEach(async (material) => {
         if (!("map" in material && material.map instanceof Texture)) {
           return;
         }
@@ -150,7 +160,7 @@ export default class TextureViewer {
           logger.warn("Data was not a Uint8Array.", data);
           return;
         } else {
-          image = this.renderUint8ArrayAsImage(data, width, height);
+          image = await this.renderUint8ArrayAsImage(data, width, height);
         }
 
         this.attachPointerListener(image);
@@ -159,15 +169,29 @@ export default class TextureViewer {
     });
   }
 
+  private renderTickets: Set<TextureViewerTicket> = new Set();
+
+  private async resolveTicket(ticket: TextureViewerTicket) {
+    if (ticket.image) {
+      return ticket.image;
+    }
+    const image = await this.renderUint8ArrayAsImage(...ticket.args);
+    this.attachPointerListener(image);
+    ticket.image = image;
+    return image;
+  }
+
   public createFromUint8Array(
     array: Uint8Array,
     width: number,
     height: number,
-    options?: { grayscale?: boolean; interpolation?: "nearest" | "linear" }
-  ) {
-    const image = this.renderUint8ArrayAsImage(array, width, height, options);
-    this.attachPointerListener(image);
-    return image;
+    options?: {
+      grayscale?: boolean;
+      interpolation?: "nearest" | "linear";
+      scale?: number;
+    }
+  ): TextureViewerTicket {
+    return { args: [array, width, height, options] };
   }
 
   private attachPointerListener(image: HTMLImageElement) {
@@ -176,13 +200,17 @@ export default class TextureViewer {
     });
   }
 
-  private renderUint8ArrayAsImage(
+  private async renderUint8ArrayAsImage(
     uint8Array: Uint8Array,
     width: number,
     height: number,
-    options?: { grayscale?: boolean; interpolation?: "nearest" | "linear" }
+    options?: {
+      grayscale?: boolean;
+      scale?: number;
+      interpolation?: "nearest" | "linear";
+    }
   ) {
-    const { grayscale, interpolation } = options ?? {};
+    const { grayscale, interpolation, scale = 1 } = options ?? {};
 
     const canvas = this.canvas;
     canvas.width = width;
@@ -191,20 +219,22 @@ export default class TextureViewer {
 
     if (grayscale) {
       if (width * height !== uint8Array.byteLength) {
-        throw new Error("Cannot convert grayscale image");
+        throw new Error(
+          `Cannot convert Uint8Array (${uint8Array.byteLength}) ` +
+            `to ${width}x${height} grayscale image`
+        );
       }
 
       const original = uint8Array;
       uint8Array = new Uint8Array(width * height * 4);
       for (let i = 0; i < uint8Array.length; i += 4) {
-        const v = (255 / 16) * original[i / 4];
+        const v = scale * original[i / 4];
         uint8Array[i] = v;
         uint8Array[i + 1] = v;
         uint8Array[i + 2] = v;
         uint8Array[i + 3] = v;
       }
     }
-
     const imageData = new ImageData(
       new Uint8ClampedArray(uint8Array),
       width,
@@ -226,3 +256,11 @@ export default class TextureViewer {
     return img;
   }
 }
+
+export type TextureOptions = Parameters<
+  TextureViewer["renderUint8ArrayAsImage"]
+>;
+export type TextureViewerTicket = {
+  args: TextureOptions;
+  image?: HTMLImageElement;
+};

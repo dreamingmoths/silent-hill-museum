@@ -7,13 +7,13 @@ import {
   defaultDiffuseMap,
   MaterialType,
   MaterialView,
-} from "./model";
+} from "./sh2/model";
 import {
   loadAnimationFromUrl,
   loadModelFromUrl,
   loadModelFromBytes,
   loadDramaDemoFromBytes,
-  fetchRawBytes,
+  fetchArrayBuffer,
 } from "./load";
 import {
   cameraFix,
@@ -75,29 +75,35 @@ import {
   closeAllElements,
   initializeModals,
   isAnyElementOpenOtherThan,
+  isElementOpen,
   showContentWarningModal,
   showNotSupportedModal,
   showQuickModal,
   toggleWithBackground,
 } from "./modals";
-import { chrFolders, destructureIndex, fileArray, MuseumFile } from "./files";
+import {
+  chrFolders,
+  destructureIndex,
+  fileArray,
+  MuseumFile,
+} from "./sh2/files";
 import GUI, { Controller } from "lil-gui";
 import { acceptModelDrop, applyUpdate } from "./write";
 import SilentHill2Model from "./kaitai/Mdl";
 import RaycastHelper from "./objects/RaycastHelper";
 import logger from "./objects/Logger";
-import EditMode, { consoleGui } from "./edit-mode";
+import EditMode, { consoleGui } from "./sh2/edit-mode";
 import { TextureViewerStates } from "./objects/TextureViewer";
 import { editorState } from "./objects/EditorState";
 import Gizmo from "./objects/Gizmo";
 import SilentHillAnimation from "./kaitai/Anm";
 import SilentHillDramaDemo from "./kaitai/Dds";
-import { createAnimationTracks } from "./animation";
-import AnimationGui from "./objects/AnimationGui";
+import { createAnimationTracks } from "./sh2/animation";
+import QuickBar from "./objects/QuickBar";
 import ddsList from "./assets/dds-list.json";
-import { createCutsceneTracks, INU_CUTSCENE_DURATION } from "./cutscene";
+import { createCutsceneTracks, INU_CUTSCENE_DURATION } from "./sh2/cutscene";
 import "./style.css";
-import { isMobile } from "./mobile";
+import { isMobile } from "./utils";
 import KeybindManager from "./objects/KeybindManager";
 import SilentHill1Model from "./kaitai/Ilm";
 import KaitaiStream from "./kaitai/runtime/KaitaiStream";
@@ -112,9 +118,18 @@ import {
   createSh1Material,
   Sh1LightingMode,
   transparentIlmFiles,
-} from "./sh1";
+} from "./sh1/sh1";
 import PsxTim from "./kaitai/PsxTim";
-import { NO_VALUE, Sh1AnimInfo } from "./sh1-animinfo";
+import { NO_VALUE, Sh1AnimInfo } from "./sh1/sh1-animinfo";
+import SilentHill3Model from "./kaitai/Sh3mdl";
+import {
+  createSh3Material,
+  createSh3Geometry,
+  sh3ModelFiles,
+  createSwizzleTextures,
+  Swizzles,
+  favoriteSh3ModelFiles,
+} from "./sh3/sh3";
 
 const appContainer = document.getElementById("app");
 if (!(appContainer instanceof HTMLDivElement)) {
@@ -124,11 +139,11 @@ const uiContainer = document.getElementById("ui-container");
 if (!(uiContainer instanceof HTMLDivElement)) {
   throw new Error("The UI container was not found!");
 }
-const animationGuiContainer = document.querySelector(".quick-access");
-if (!(animationGuiContainer instanceof HTMLDivElement)) {
+const quickBarContainer = document.querySelector(".quick-access");
+if (!(quickBarContainer instanceof HTMLDivElement)) {
   throw new Error("The quick access container was not found!");
 }
-export const animationGui = new AnimationGui(animationGuiContainer);
+export const quickBar = new QuickBar(quickBarContainer);
 
 initializeModals();
 acceptModelDrop(appContainer);
@@ -156,12 +171,21 @@ gui.domElement.id = "main-gui";
 
 const dataGuiFolder = gui.addFolder("Data");
 const gameInput = dataGuiFolder
-  .add(clientState.uiParams, "Game", ["Silent Hill 1", "Silent Hill 2"])
+  .add(clientState.uiParams, "Game", [
+    "Silent Hill 1",
+    "Silent Hill 2",
+    "Silent Hill 3",
+  ])
   .onFinishChange(() => {
     render();
   });
 const sh1FileInput = dataGuiFolder
   .add(clientState.uiParams, "File (SH1)", ilmFiles)
+  .hide()
+  .onFinishChange(() => render())
+  .listen();
+const sh3FileInput = dataGuiFolder
+  .add(clientState.uiParams, "File (SH3)", sh3ModelFiles)
   .hide()
   .onFinishChange(() => render())
   .listen();
@@ -205,6 +229,8 @@ const getSh2SharableLink = () =>
     clientState.folder,
     clientState.file.split(".")[0],
   ].join("-");
+const getSh3SharableLink = () =>
+  clientState.uiParams["File (SH3)"].replace("/", "-").replace(".mdl", "");
 const updateLink = (sharable?: boolean) => {
   const baseUrl =
     window.location.protocol +
@@ -217,10 +243,16 @@ const updateLink = (sharable?: boolean) => {
   }
 
   let newUrl = baseUrl;
-  if (clientState.uiParams.Game === "Silent Hill 1") {
-    newUrl += "?game=sh1&file=" + clientState.uiParams["File (SH1)"];
-  } else {
-    newUrl += "?model=" + getSh2SharableLink();
+  switch (clientState.uiParams["Game"]) {
+    case "Silent Hill 3":
+      newUrl += "?game=sh3&model=" + getSh3SharableLink();
+      break;
+    case "Silent Hill 1":
+      newUrl += "?game=sh1&file=" + clientState.uiParams["File (SH1)"];
+      break;
+    case "Silent Hill 2":
+      newUrl += "?game=sh2&model=" + getSh2SharableLink();
+      break;
   }
   window.history.pushState({ path: newUrl }, "", newUrl);
 };
@@ -327,10 +359,6 @@ const submeshFolder = geometryFolder.addFolder("Submeshes").hide().close();
 
 const materialFolder = gui.addFolder("Material");
 materialFolder
-  .add(clientState.uiParams, "CLUT Rendering", ["PSX Shader", "Atlas"])
-  .listen()
-  .onFinishChange(() => render());
-materialFolder
   .add(clientState.uiParams, "Render Mode", [
     MaterialView.Flat,
     MaterialView.UV,
@@ -355,10 +383,6 @@ const wrappingInput = materialFolder
   .onFinishChange(() => render())
   .listen()
   .setValue(clientState.uiParams.Wrapping.replace("Wrapping", ""));
-materialFolder
-  .add(clientState.uiParams, "Model Opacity", 0, 1, 0.01)
-  .onFinishChange(() => render())
-  .listen();
 const transparencyInput = materialFolder
   .add(clientState.uiParams, "Transparency")
   .onFinishChange(() => render());
@@ -366,7 +390,7 @@ const invertAlphaInput = materialFolder
   .add(clientState.uiParams, "Invert Alpha")
   .onFinishChange(() => render())
   .listen();
-materialFolder
+const alphaTestInput = materialFolder
   .add(clientState.uiParams, "Alpha Test", 0, 1, 0.01)
   .onFinishChange(() => render())
   .listen();
@@ -465,11 +489,11 @@ const portraitModeWarning = (width?: number, height?: number) => {
     clientState.uiParams["Game"] === "Silent Hill 2" &&
     width < height &&
     clientState.file === "inu.mdl" &&
-    !animationGui.forceClosed
+    !quickBar.forceClosed
   ) {
-    animationGui.show();
+    quickBar.show();
   } else {
-    animationGui.hide();
+    quickBar.hide();
   }
 };
 onWindowResize();
@@ -572,8 +596,9 @@ let helper: SkeletonHelper | undefined;
 const clock = new Clock();
 let group = new Group();
 let lastIndex = -1;
-let lastSh1File = "AR";
-let lastGame = clientState.uiParams.Game;
+let lastSh1File = "";
+let lastSh3File = "";
+let lastGame = "";
 let mixers: AnimationMixer[] = [];
 
 const editor = new EditMode();
@@ -598,11 +623,7 @@ clientState.setOnModeUpdate((oldMode) => {
   onWindowResize();
 });
 
-const registerAllKeybinds = ({
-  animationGui,
-}: {
-  animationGui: AnimationGui;
-}) => {
+const registerAllKeybinds = ({ quickBar }: { quickBar: QuickBar }) => {
   const keybindManager = new KeybindManager();
   keybindManager.addKeybind(
     "arrowright",
@@ -617,12 +638,17 @@ const registerAllKeybinds = ({
   keybindManager.addKeybind(
     "arrowup",
     () => {
-      if (clientState.uiParams["Game"] === "Silent Hill 1") {
-        gameInput.setValue("Silent Hill 2");
-        render();
-        return;
+      switch (clientState.uiParams["Game"]) {
+        case "Silent Hill 3":
+          gameInput.setValue("Silent Hill 2");
+          break;
+        case "Silent Hill 2":
+          gameInput.setValue("Silent Hill 1");
+          break;
+        case "Silent Hill 1":
+          gameInput.setValue("Silent Hill 3");
+          break;
       }
-      gameInput.setValue("Silent Hill 1");
       render();
     },
     "Next game"
@@ -630,12 +656,17 @@ const registerAllKeybinds = ({
   keybindManager.addKeybind(
     "arrowdown",
     () => {
-      if (clientState.uiParams["Game"] === "Silent Hill 1") {
-        gameInput.setValue("Silent Hill 2");
-        render();
-        return;
+      switch (clientState.uiParams["Game"]) {
+        case "Silent Hill 1":
+          gameInput.setValue("Silent Hill 2");
+          break;
+        case "Silent Hill 2":
+          gameInput.setValue("Silent Hill 3");
+          break;
+        case "Silent Hill 3":
+          gameInput.setValue("Silent Hill 1");
+          break;
       }
-      gameInput.setValue("Silent Hill 1");
       render();
     },
     "Previous game"
@@ -705,7 +736,7 @@ const registerAllKeybinds = ({
     clientState.uiParams["View Structure 🔎"]()
   );
   keybindManager.addKeybind("space", () => {
-    animationGui.togglePause();
+    quickBar.togglePause();
   });
 
   const keybindsModal = document.getElementById("keybinds-modal");
@@ -726,7 +757,7 @@ const registerAllKeybinds = ({
   }
 };
 
-registerAllKeybinds({ animationGui });
+registerAllKeybinds({ quickBar });
 
 let lightGroup: Group | undefined;
 let renderIsFinished = true;
@@ -916,6 +947,78 @@ const renderSh2 = async (model: SilentHill2Model) => {
   };
 };
 
+let swizzleTextures: Swizzles | null = null;
+
+const renderSh3 = async () => {
+  const filename = clientState.uiParams["File (SH3)"];
+  const ticket = ++renderTicket;
+  const bytes = await fetchArrayBuffer(`sh3/${filename}`);
+  if (!swizzleTextures) {
+    swizzleTextures = await createSwizzleTextures();
+  }
+
+  if (renderTicket !== ticket) {
+    return null;
+  }
+
+  const model = new SilentHill3Model(new KaitaiStream(bytes));
+  const { geometry } = createSh3Geometry(model, {
+    maxEquipmentId: filename === "en/en_bhr.mdl" ? 2 : undefined,
+  });
+  const { materials } = createSh3Material(model, swizzleTextures, {
+    device:
+      clientState.uiParams["CLUT Rendering"] === "PSX Shader" ? "gpu" : "cpu",
+  });
+  for (const material of Array.isArray(materials) ? materials : [materials]) {
+    const side =
+      RenderSideMap[
+        clientState.uiParams["Render Side"] as
+          | "DoubleSide"
+          | "FrontSide"
+          | "BackSide"
+      ];
+    material.side = side;
+  }
+
+  // clientState.getTextureViewer()?.attach(images);
+  let mesh: Mesh | SkinnedMesh = new SkinnedMesh();
+  let modelSkeleton: Skeleton | undefined = undefined;
+  if (mesh instanceof SkinnedMesh) {
+    mesh = new SkinnedMesh(geometry, materials);
+
+    const { skeleton, rootBoneIndices } = createSkeleton(model);
+    rootBoneIndices.forEach((boneIndex) => mesh.add(skeleton.bones[boneIndex]));
+    (mesh as SkinnedMesh).bind(skeleton);
+    modelSkeleton = skeleton;
+
+    if (clientState.uiParams["Visualize Skeleton"]) {
+      helper = new SkeletonHelper(mesh);
+      scene.add(helper);
+    }
+  } else {
+    mesh = new Mesh(geometry, materials);
+  }
+  const group = new Group();
+  group.add(mesh);
+  scene.add(group);
+  clientState.setCurrentObject(group);
+  clientState.setCurrentViewerModel(model);
+
+  if (clientState.uiParams["Visualize Normals"]) {
+    const normalsHelper = new VertexNormalsHelper(mesh, 8, 0xff0000);
+    scene.add(normalsHelper);
+  }
+
+  return {
+    group,
+    opaqueGeometry: geometry,
+    transparentGeometry: undefined,
+    opaqueMesh: mesh,
+    transparentMesh: undefined,
+    modelSkeleton,
+  };
+};
+
 const renderSh1 = async () => {
   const ticket = ++renderTicket;
 
@@ -924,11 +1027,11 @@ const renderSh1 = async () => {
   const anmName = ilmToAnmAssoc(modelName);
 
   const ilm = new SilentHill1Model(
-    new KaitaiStream(await fetchRawBytes(`sh1/CHARA/${modelName}.ILM`))
+    new KaitaiStream(await fetchArrayBuffer(`sh1/CHARA/${modelName}.ILM`))
   );
   clientState.setCurrentViewerIlm(ilm);
   const anm = new Sh1anm(
-    new KaitaiStream(await fetchRawBytes(`sh1/ANIM/${anmName}`))
+    new KaitaiStream(await fetchArrayBuffer(`sh1/ANIM/${anmName}`))
   );
   logger.info("Parsed SH1 model and animation", { ilm, anm });
 
@@ -936,12 +1039,12 @@ const renderSh1 = async () => {
   try {
     psxTim = new PsxTim(
       new KaitaiStream(
-        await fetchRawBytes(`sh1/${ilmToTextureAssoc(modelName)}.TIM`)
+        await fetchArrayBuffer(`sh1/${ilmToTextureAssoc(modelName)}.TIM`)
       )
     );
   } catch (e) {
     psxTim = new PsxTim(
-      new KaitaiStream(await fetchRawBytes(`sh1/CHARA/HERO.TIM`))
+      new KaitaiStream(await fetchArrayBuffer(`sh1/CHARA/HERO.TIM`))
     );
     logger.error(e);
   }
@@ -1175,7 +1278,7 @@ const renderSh1 = async () => {
 
   mixers.push(mixer);
 
-  animationGui.show();
+  quickBar.show();
   loadingMessage.remove();
 
   return {
@@ -1189,10 +1292,15 @@ const renderSh1 = async () => {
 };
 
 const render = () => {
+  if (isElementOpen("contentWarningModal")) {
+    return;
+  }
+
   renderIsFinished = false;
 
-  const isSh2 = clientState.uiParams.Game === "Silent Hill 2";
   const isSh1 = clientState.uiParams.Game === "Silent Hill 1";
+  const isSh2 = clientState.uiParams.Game === "Silent Hill 2";
+  const isSh3 = clientState.uiParams.Game === "Silent Hill 3";
 
   const modelCallback = async (
     model?: SilentHill2Model | undefined,
@@ -1236,8 +1344,15 @@ const render = () => {
     let result:
       | Awaited<ReturnType<typeof renderSh2>>
       | Awaited<ReturnType<typeof renderSh1>>
+      | Awaited<ReturnType<typeof renderSh3>>
       | undefined = undefined;
-    if (isSh1) {
+    if (isSh3) {
+      const maybeResult = await renderSh3();
+      if (!maybeResult) {
+        return;
+      }
+      result = maybeResult;
+    } else if (isSh1) {
       const maybeResult = await renderSh1();
       if (!maybeResult) {
         return;
@@ -1262,7 +1377,8 @@ const render = () => {
     } = result;
     group = result.group;
 
-    const currentObject = clientState.file === "inu.mdl" ? scene : group;
+    const currentObject =
+      isSh2 && clientState.file === "inu.mdl" ? scene : group;
     clientState.setCurrentObject(currentObject);
     if (isSh2) {
       clientState.getTextureViewer()?.attach(currentObject);
@@ -1282,7 +1398,9 @@ const render = () => {
       (opaqueGeometry !== undefined || transparentGeometry !== undefined)
     ) {
       const fix = cameraFix[filename as MuseumFile];
+      // if (k == 0) {
       fitCameraToSelection(camera, orbitControls, [group]);
+      // }
       if (fix !== undefined) {
         orbitControls.target.copy(fix.controlsTarget);
         camera.position.copy(fix.cameraPosition);
@@ -1409,7 +1527,7 @@ const render = () => {
         transparentAction.play();
       }
     } else {
-      animationGui.hide();
+      quickBar.hide();
       loadingMessage.remove();
     }
 
@@ -1531,12 +1649,13 @@ const render = () => {
     return group;
   };
 
-  if (isSh1) {
+  if (isSh1 || isSh3) {
     scenarioInput.hide();
     folderInput.hide();
     fileInput.hide();
     lockToFolder.hide();
     sh1FileInput.show();
+    sh3FileInput.hide();
     wrappingInput.hide();
     renderOpaqueInput.hide();
     renderTransparentInput.hide();
@@ -1547,6 +1666,7 @@ const render = () => {
     textureViewerButton.show();
     invertAlphaInput.hide();
     transparencyInput.hide();
+    textureViewerButton.show();
 
     if (clientState.getGlVersion() === 1) {
       showQuickModal(
@@ -1570,22 +1690,32 @@ const render = () => {
     transparencyInput.show();
     animationsFolder.hide();
     submeshFolder.hide();
+    sh3FileInput.hide();
+    textureViewerButton.show();
+  }
+  if (isSh3) {
+    sh1FileInput.hide();
+    sh3FileInput.show();
+
+    clientState.uiParams["Texture Viewer 👀"] = false;
+    clientState.getTextureViewer()?.setState(TextureViewerStates.Inactive);
+    textureViewerButton.hide();
   }
 
-  const filename = isSh2
+  const filename: string = isSh2
     ? clientState.file
+    : isSh3
+    ? clientState.uiParams["File (SH3)"]
     : clientState.uiParams["File (SH1)"];
   const currentFileIndex = clientState.getFileIndex();
-  if (
-    lastGame !== clientState.uiParams["Game"] ||
-    lastIndex !== currentFileIndex ||
-    (!isSh2 && lastSh1File !== filename)
-  ) {
-    lastSh1File = clientState.uiParams["File (SH1)"];
-    lastGame = clientState.uiParams.Game;
-
+  const gameChanged = lastGame !== clientState.uiParams["Game"];
+  const sh1FileChanged = isSh1 && lastSh1File !== filename;
+  const sh2FileChanged = lastIndex !== currentFileIndex;
+  const sh3FileChanged = isSh3 && lastSh3File !== filename;
+  if (gameChanged || sh2FileChanged || sh1FileChanged || sh3FileChanged) {
     if (
-      ((isSh1 && lastSh1File !== "LISA") ||
+      ((isSh1 && filename !== "LISA") ||
+        (isSh3 && !favoriteSh3ModelFiles.includes(filename)) ||
         clientState.folder !== "favorites") &&
       !clientState.hasAcceptedContentWarning()
     ) {
@@ -1593,20 +1723,25 @@ const render = () => {
       showContentWarningModal(
         () => {
           clientState.uiParams["Lock To Folder"] = false;
-          render();
         },
         () => {
-          clientState.setFileIndex(clientState.defaultStartIndex);
-          const controllers = gui.controllersRecursive();
-          controllers.forEach((c) => {
-            if (c !== gameInput) {
-              c.setValue(c.initialValue);
-            }
-          });
+          if (isSh2) {
+            clientState.setFileIndex(lastIndex);
+          } else if (isSh1) {
+            clientState.uiParams["File (SH1)"] = lastSh1File as any;
+          } else if (isSh3) {
+            clientState.uiParams["File (SH3)"] = lastSh3File;
+          }
+          render();
         }
       );
       return;
     }
+
+    lastSh1File = clientState.uiParams["File (SH1)"];
+    lastSh3File = clientState.uiParams["File (SH3)"];
+    lastGame = clientState.uiParams.Game;
+
     lastIndex = currentFileIndex;
     if (isSh2 && filename in preferredParams) {
       Object.assign(
@@ -1615,6 +1750,11 @@ const render = () => {
       );
     } else if (isSh2) {
       Object.assign(clientState.uiParams, defaultParams);
+    }
+    if (gameChanged && isSh3) {
+      alphaTestInput.setValue(0.2);
+    } else if (gameChanged && !isSh3) {
+      alphaTestInput.setValue(0.01);
     }
     clientState.uiParams["Selected Bone"] = 0;
     clientState.uiParams["Current Animation"] = "[none]";
@@ -1729,7 +1869,7 @@ const render = () => {
           ddsList[index + 1] ?? ""
         }`;
       }
-      bytes = await fetchRawBytes(path);
+      bytes = await fetchArrayBuffer(path);
       const dds = loadDramaDemoFromBytes(bytes);
 
       const argArray: Array<Parameters<typeof modelCallback>> = [];
@@ -1784,7 +1924,7 @@ const render = () => {
     return;
   }
 
-  if (isSh1) {
+  if (isSh1 || isSh3) {
     modelCallback();
     return;
   }
