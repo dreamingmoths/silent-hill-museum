@@ -1818,6 +1818,8 @@ const render = () => {
       } else {
         clientState.uiParams.Transparency = false;
       }
+    }
+    if (isSh1 || isSh3) {
       clientState.uiParams["Render Side"] = "FrontSide";
     }
 
