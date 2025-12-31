@@ -359,6 +359,10 @@ const submeshFolder = geometryFolder.addFolder("Submeshes").hide().close();
 
 const materialFolder = gui.addFolder("Material");
 materialFolder
+  .add(clientState.uiParams, "CLUT Rendering", ["PSX Shader", "Atlas"])
+  .listen()
+  .onFinishChange(() => render());
+materialFolder
   .add(clientState.uiParams, "Render Mode", [
     MaterialView.Flat,
     MaterialView.UV,
@@ -965,10 +969,15 @@ const renderSh3 = async () => {
   const { geometry } = createSh3Geometry(model, {
     maxEquipmentId: filename === "en/en_bhr.mdl" ? 2 : undefined,
   });
+  const device =
+    clientState.uiParams["CLUT Rendering"] === "PSX Shader" ? "gpu" : "cpu";
   const { materials } = createSh3Material(model, swizzleTextures, {
-    device:
-      clientState.uiParams["CLUT Rendering"] === "PSX Shader" ? "gpu" : "cpu",
+    device,
   });
+  if (device === "cpu") {
+    // delete unnecessary texInfo attribute in case we try to export
+    geometry.deleteAttribute("texInfo");
+  }
   for (const material of Array.isArray(materials) ? materials : [materials]) {
     const side =
       RenderSideMap[

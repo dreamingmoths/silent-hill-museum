@@ -581,13 +581,13 @@ export default class MuseumState {
       );
     },
     "Export to GLTF": () => {
-      const object = this.currentObject;
-      if (object === undefined) {
-        return;
-      }
       const onReady = () => {
         toggleWithBackground("disclaimerModal", true);
         onConfirm(() => {
+          const object = this.getCurrentObject();
+          if (object === undefined) {
+            return;
+          }
           exportModel(
             object,
             this.getCurrentContentName(),
