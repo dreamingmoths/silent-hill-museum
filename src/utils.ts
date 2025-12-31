@@ -7,6 +7,7 @@ import {
   DoubleSide,
   FrontSide,
   Group,
+  Line,
   Matrix4,
   Mesh,
   MeshBasicMaterial,
@@ -628,4 +629,17 @@ export const uncurseTouchCallout = (element: HTMLElement) => {
       passive: false,
     }
   );
+};
+
+export const ensureArray = <T>(element: T | Array<T>): Array<T> =>
+  Array.isArray(element) ? element : [element];
+
+export const depthlessMaterial = (object: Mesh | Line) => {
+  ensureArray(object.material).forEach((material) => {
+    material.depthTest = false;
+    material.depthWrite = false;
+  });
+  object.onBeforeRender = function (renderer) {
+    renderer.clearDepth();
+  };
 };

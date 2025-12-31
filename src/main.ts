@@ -26,7 +26,9 @@ import {
 import {
   ANIMATION_FRAME_DURATION,
   createRainbowLights,
+  depthlessMaterial,
   disposeResources,
+  ensureArray,
   exportCanvas,
   fitCameraToSelection,
   RenderSideMap,
@@ -593,6 +595,10 @@ originalTransformGizmo.setRenderLoop(modelRenderLoop);
 originalTransformGizmo.setOnDrag(disableOrbitControls);
 originalTransformGizmo.setOnStopDrag(enableOrbitControls);
 
+const OPAQUE_RENDER_LAYER = 0 as const;
+const TRANSPARENT_RENDER_LAYER = 1 as const;
+const UI_RENDER_LAYER = 2 as const;
+
 let helper: SkeletonHelper | undefined;
 
 const clock = new Clock();
@@ -877,12 +883,14 @@ const renderSh2 = async (model: SilentHill2Model) => {
 
       if (clientState.uiParams["Visualize Skeleton"]) {
         helper = new SkeletonHelper(opaqueMesh);
+        depthlessMaterial(helper);
+        helper.renderOrder = UI_RENDER_LAYER;
         scene.add(helper);
       }
     } else {
       opaqueMesh = new Mesh(opaqueGeometry, opaqueMaterial);
     }
-    opaqueMesh.renderOrder = 1;
+    opaqueMesh.renderOrder = OPAQUE_RENDER_LAYER;
 
     logger.debug("Added opaque geometry to mesh!", opaqueGeometry);
     group.add(opaqueMesh);
@@ -915,7 +923,7 @@ const renderSh2 = async (model: SilentHill2Model) => {
     } else {
       transparentMesh = new Mesh(transparentGeometry, transparentMaterial);
     }
-    transparentMesh.renderOrder = 2;
+    transparentMesh.renderOrder = TRANSPARENT_RENDER_LAYER;
 
     if (clientState.uiParams["Visualize Normals"]) {
       const normalsHelper = new VertexNormalsHelper(
@@ -976,7 +984,7 @@ const renderSh3 = async () => {
     // delete unnecessary texInfo attribute in case we try to export
     geometry.deleteAttribute("texInfo");
   }
-  for (const material of Array.isArray(materials) ? materials : [materials]) {
+  for (const material of ensureArray(materials)) {
     const side =
       RenderSideMap[
         clientState.uiParams["Render Side"] as
@@ -1001,12 +1009,14 @@ const renderSh3 = async () => {
 
     if (clientState.uiParams["Visualize Skeleton"]) {
       helper = new SkeletonHelper(mesh);
+      depthlessMaterial(helper);
+      helper.renderOrder = UI_RENDER_LAYER;
       scene.add(helper);
     }
   } else {
     mesh = new Mesh(geometry, materials);
   }
-  mesh.renderOrder = 0;
+  mesh.renderOrder = OPAQUE_RENDER_LAYER;
   const group = new Group();
   group.add(mesh);
   scene.add(group);
@@ -1206,6 +1216,8 @@ const renderSh1 = async () => {
 
   if (clientState.uiParams["Visualize Skeleton"]) {
     helper = new SkeletonHelper(mesh);
+    helper.renderOrder = UI_RENDER_LAYER;
+    depthlessMaterial(helper);
     scene.add(helper);
   }
 
@@ -1560,12 +1572,8 @@ const render = () => {
           });
           const mesh = new Mesh(sphere, material);
           raycastTargets.push(mesh);
-          mesh.renderOrder = 3;
-          mesh.material.depthTest = false;
-          mesh.material.depthWrite = false;
-          mesh.onBeforeRender = function (renderer) {
-            renderer.clearDepth();
-          };
+          mesh.renderOrder = UI_RENDER_LAYER;
+          depthlessMaterial(mesh);
           bone.add(mesh);
         });
       }
