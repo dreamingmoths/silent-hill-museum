@@ -722,8 +722,9 @@ div.struct-visualizer {
     position: fixed;
     right: auto;
     top: auto;
-    max-height: 50%;
-    max-width: 80%;
+    max-height: 40%;
+    max-width: 100%;
+    width: 100%;
     bottom: 0;
     left: 0;
     float: none;

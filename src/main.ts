@@ -263,11 +263,11 @@ const updateLink = (sharable?: boolean) => {
 dataGuiFolder
   .add(clientState.uiParams, "Sharable Link")
   .onFinishChange(updateLink);
-dataGuiFolder.add(clientState.uiParams, "View Structure 🔎");
 dataGuiFolder.add(clientState.uiParams, "Next File");
 dataGuiFolder.add(clientState.uiParams, "Previous File");
 dataGuiFolder.add(clientState.uiParams, "Save Image");
 dataGuiFolder.add(clientState.uiParams, "Export to GLTF");
+dataGuiFolder.add(clientState.uiParams, "View Structure 🔎");
 fileInput.onFinishChange((file: (typeof possibleFilenames)[number]) => {
   clientState.file = file;
 });
