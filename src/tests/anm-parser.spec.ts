@@ -4,8 +4,8 @@ import SilentHillModel from "../kaitai/Mdl";
 import SilentHillAnimation from "../kaitai/Anm";
 
 import anmFileStructure from "../assets/anm-structure.json";
-import { anmToMdlAssoc } from "../animation";
-import { destructureIndex, fileArray } from "../files";
+import { anmToMdlAssoc } from "../sh2/animation";
+import { destructureIndex, fileArray } from "../sh2/files";
 import { loadAnimationFromUrl, loadModelFromUrl } from "../load";
 import path from "path";
 import logger from "../objects/Logger";

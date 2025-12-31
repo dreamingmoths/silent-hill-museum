@@ -4,7 +4,7 @@ import {
   destructureIndex,
   fileIndices,
   travelAlongLevel,
-} from "../files";
+} from "../sh2/files";
 
 test("should correctly round-trip file index", () => {
   const index = constructIndex("chr", "favorites", "org.mdl");
