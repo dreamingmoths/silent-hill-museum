@@ -192,6 +192,12 @@ export default class MuseumState {
         const sh3Index = this.getSh3ModelFiles().indexOf(
           `${clientState.uiParams["File (SH3)"]}`
         );
+        if (sh3Index < 0) {
+          // already outside of favorites
+          clientState.uiParams["Favorites Mode"] = false;
+          this.nextFile();
+          return;
+        }
         if (sh3Index === favoriteSh3ModelFiles.length - 1) {
           if (this.uiParams["Favorites Mode"]) {
             if (!this.hasAcceptedContentWarning()) {
@@ -553,7 +559,7 @@ export default class MuseumState {
   }
 
   public uiParams = {
-    Game: "Silent Hill 3" /* randomArrayElement(GAMES) */,
+    Game: "Silent Hill 1" /* randomArrayElement(GAMES) */,
     "File (SH1)": "LISA" as (typeof ilmFiles)[number],
     "File (SH3)": "pl/chhaa.mdl" as (typeof sh3ModelFiles)[number],
     "Favorites Mode": true,
