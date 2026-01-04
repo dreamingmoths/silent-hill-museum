@@ -559,7 +559,7 @@ export default class MuseumState {
   }
 
   public uiParams = {
-    Game: "Silent Hill 1" /* randomArrayElement(GAMES) */,
+    Game: "Silent Hill 3" /* randomArrayElement(GAMES) */,
     "File (SH1)": "LISA" as (typeof ilmFiles)[number],
     "File (SH3)": "pl/chhaa.mdl" as (typeof sh3ModelFiles)[number],
     "Favorites Mode": true,

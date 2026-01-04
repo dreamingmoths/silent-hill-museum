@@ -61,6 +61,12 @@ h1 {
   text-align: center;
 }
 
+.overlay-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -210,7 +216,8 @@ kbd {
   text-decoration: none;
 }
 
-#mode-indicator img {
+#mode-indicator img,
+.icon {
   width: 1em;
 }
 
