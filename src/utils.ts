@@ -600,6 +600,13 @@ export const at = <T>(array: Array<T>, index: number): T | undefined => {
   return array[index];
 };
 
+export const concatBuffers = (a: ArrayBuffer, b: ArrayBuffer) => {
+  const result = new Uint8Array(a.byteLength + b.byteLength);
+  result.set(new Uint8Array(a), 0);
+  result.set(new Uint8Array(b), a.byteLength);
+  return result;
+}
+
 export class UnhandledCaseError extends Error {
   constructor(message: string) {
     super(`Unhandled case: ${message}`);

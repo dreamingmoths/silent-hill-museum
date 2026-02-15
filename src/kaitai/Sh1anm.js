@@ -31,7 +31,7 @@ var Sh1anm = (function () {
         this.numRotations * 9 + this.numTranslations * 3,
         this.frameSize,
         this._io,
-        "/seq/3"
+        "/seq/3",
       );
     }
     this.numBones = this._io.readS2le();
@@ -125,15 +125,24 @@ var Sh1anm = (function () {
 
     return Rotation;
   })());
+
+  /**
+   * `num_frames` seems to be ignored in practice as the game relies on
+   * generated `AnimInfo` tables to determine the keyframe limits of each
+   * animation.
+   */
   Object.defineProperty(Sh1anm.prototype, "frames", {
     get: function () {
       if (this._m_frames !== undefined) return this._m_frames;
       var _pos = this._io.pos;
       this._io.seek(this.magic);
       this._m_frames = [];
-      for (var i = 0; i < this.numFrames; i++) {
-        this._m_frames.push(new Frame(this._io, this, this._root, i));
-      }
+      var i = 0;
+      do {
+        var _ = new Frame(this._io, this, this._root, i);
+        this._m_frames.push(_);
+        i++;
+      } while (!(this._io.size - this._io.pos < this.frameSize));
       this._io.seek(_pos);
       return this._m_frames;
     },

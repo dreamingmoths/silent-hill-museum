@@ -18,6 +18,8 @@ export const Anim_Update2 = undefined;
 export const NO_VALUE = -1;
 export const NULL = -1;
 
+export const HB_BASE_FRAMES_OFFSET = 0x15bb4;
+
 export const HARRY_M0S00_ANIM_INFOS: AnimInfo = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],

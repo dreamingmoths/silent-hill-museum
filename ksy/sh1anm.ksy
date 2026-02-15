@@ -55,8 +55,12 @@ instances:
   frames:
     type: frame(_index)
     pos: magic
-    repeat: expr
-    repeat-expr: num_frames
+    repeat: until
+    repeat-until: _io.size - _io.pos < frame_size
+    doc: |
+      `num_frames` seems to be ignored in practice as the game relies on
+      generated `AnimInfo` tables to determine the keyframe limits of each
+      animation.
 
   transforms_per_frame:
     value: num_rotations + num_translations

@@ -106,7 +106,7 @@ export const createSh1Geometry = (init: GeometryInit) => {
     tpage: number,
     uv: Ilm.Uv,
     vIndex: number,
-    nIndex: number
+    nIndex: number,
   ) => {
     vertexBuffer[vertexIndex] = scratchpadBuffer[vIndex];
     vertexBuffer[vertexIndex + 1] = scratchpadBuffer[vIndex + 1];
@@ -234,7 +234,7 @@ export const createSh1Geometry = (init: GeometryInit) => {
   geom.setAttribute("skinIndex", new Uint16BufferAttribute(skinIndexBuffer, 4));
   geom.setAttribute(
     "skinWeight",
-    new Float32BufferAttribute(skinWeightBuffer, 4)
+    new Float32BufferAttribute(skinWeightBuffer, 4),
   );
   geom.setAttribute("uv", new Float32BufferAttribute(uvBuffer, 2));
   geom.setAttribute("texInfo", new Int32BufferAttribute(texInfoBuffer, 2));
@@ -299,10 +299,11 @@ const smatrix = (matrix: Matrix4, qMatrix: number[]) => {
 
 export const createSh1Animation = (anm: Sh1anm) => {
   const boneCount = anm.numBones;
+  const frameCount = anm.frames.length;
 
   const scale = (x: number) => x * (1 << anm.scaleLog2);
 
-  const timeBuffer = new Float32Array(anm.numFrames);
+  const timeBuffer = new Float32Array(frameCount);
   const transformBuffers: Array<{
     translations?: Float32Array;
     rotations?: Float32Array;
@@ -313,12 +314,12 @@ export const createSh1Animation = (anm: Sh1anm) => {
     transformBuffers[boneIndex] = {};
     if (bone.translationIndex >= 0) {
       transformBuffers[boneIndex].translations = new Float32Array(
-        3 * anm.numFrames
+        3 * frameCount,
       );
     }
     if (bone.rotationIndex >= 0) {
       transformBuffers[boneIndex].rotations = new Float32Array(
-        4 * anm.numFrames
+        4 * frameCount,
       );
     }
   }
@@ -345,7 +346,7 @@ export const createSh1Animation = (anm: Sh1anm) => {
         const transform = frame.rotations[bone.rotationIndex];
 
         const quat = new Quaternion().setFromRotationMatrix(
-          smatrix(new Matrix4(), transform.value)
+          smatrix(new Matrix4(), transform.value),
         );
 
         const buffer = rotations;
@@ -357,7 +358,7 @@ export const createSh1Animation = (anm: Sh1anm) => {
       }
     }
   }
-  for (let i = 0; i < anm.numFrames; i++) {
+  for (let i = 0; i < frameCount; i++) {
     timeBuffer[i] = i * ANIMATION_FRAME_DURATION;
   }
 
@@ -371,8 +372,8 @@ export const createSh1Animation = (anm: Sh1anm) => {
           `sh1model.bones[${boneIndex}].position`,
           timeBuffer,
           translations,
-          InterpolateLinear
-        )
+          InterpolateLinear,
+        ),
       );
     }
     if (rotations) {
@@ -381,8 +382,8 @@ export const createSh1Animation = (anm: Sh1anm) => {
           `sh1model.bones[${boneIndex}].quaternion`,
           timeBuffer,
           rotations,
-          InterpolateLinear
-        )
+          InterpolateLinear,
+        ),
       );
     }
   }
@@ -405,7 +406,7 @@ const clut = (x: number) => (x / 31) * 255;
 
 export const createSh1Material = (
   psxTim: PsxTim,
-  options: Sh1MaterialOptions = { type: "shader" }
+  options: Sh1MaterialOptions = { type: "shader" },
 ) => {
   if (psxTim.bpp !== 0 /* 4bpp */) {
     throw new Error("BPP must be 4");
@@ -539,7 +540,7 @@ export const createSh1Material = (
     imageWidth,
     imageHeight,
     RedIntegerFormat,
-    UnsignedIntType
+    UnsignedIntType,
   );
   imageDataTexture.needsUpdate = true;
 
@@ -577,8 +578,8 @@ export const ilmToAnmArray = [
   ["BOS2", "BOS"],
   ["TDRA", "TDA"],
   ["BLISA", "BLS"],
-  ["DARIA", "DA2"],
-  ["DARIA", "TDA"],
+  // ["DARIA", "DA2"],
+  // ["DARIA", "TDA"],
   ["DARIA", "DA"],
   ["SIBYL", "SBL"],
   ["PRSD", "PRS"],
@@ -588,11 +589,12 @@ export const ilmToAnmArray = [
   ["CLD4", "CLD2"],
   ["BD2", "BIRD"],
   ["BAR", "BAR_LAST"],
-  ["KAU", "KAU2"],
+  // ["KAU", "KAU2"],
   ["KAU", "KAU"],
   ["SIBYL", "SBL2"],
-  ["HERO", "HR_E01"],
-  ["HERO", "HR"],
+  // ["HERO", "HR_E01"],
+  // ["HERO", "HR"],
+  ["HERO", "HB_BASE"],
   ["SIBYL", "SBL_LAST"],
   // ["SNK", "SPD"],
 ] as const;
@@ -602,7 +604,7 @@ const ilmToAnmMap = new Map(ilmToAnmArray);
 const anmToIlmMap = new Map(
   ilmToAnmArray.map((pair) => pair.slice().reverse()) as Array<
     [SpecialAnmName, SpecialIlmName]
-  >
+  >,
 );
 
 export const ilmToAnmAssoc = (ilmName: string) => {

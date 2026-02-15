@@ -25,6 +25,7 @@ import {
 } from "./objects/MuseumState";
 import {
   ANIMATION_FRAME_DURATION,
+  concatBuffers,
   createRainbowLights,
   depthlessMaterial,
   disposeResources,
@@ -124,7 +125,7 @@ import {
   transparentIlmFiles,
 } from "./sh1/sh1";
 import PsxTim from "./kaitai/PsxTim";
-import { NO_VALUE, Sh1AnimInfo } from "./sh1/sh1-animinfo";
+import { HB_BASE_FRAMES_OFFSET, NO_VALUE, Sh1AnimInfo } from "./sh1/sh1-animinfo";
 import SilentHill3Model from "./kaitai/Sh3mdl";
 import {
   createSh3Material,
@@ -859,8 +860,8 @@ const renderSh2 = async (model: SilentHill2Model) => {
           ? clientState.folder === "jms"
             ? [0, 3, 14]
             : clientState.folder === "mar"
-            ? [0, 3, 6]
-            : undefined
+              ? [0, 3, 6]
+              : undefined
           : undefined
       )
     : undefined;
@@ -1046,12 +1047,17 @@ const renderSh1 = async () => {
   const anmName = ilmToAnmAssoc(modelName);
 
   const ilm = new SilentHill1Model(
-    new KaitaiStream(await fetchArrayBuffer(`sh1/CHARA/${modelName}.ILM`))
+    new KaitaiStream(await fetchArrayBuffer(`sh1/CHARA/${modelName}.ILM`)),
   );
   clientState.setCurrentViewerIlm(ilm);
-  const anm = new Sh1anm(
-    new KaitaiStream(await fetchArrayBuffer(`sh1/ANIM/${anmName}`))
-  );
+
+  let anmBuffer = await fetchArrayBuffer(`sh1/ANIM/${anmName}`);
+  if (modelName === "HERO") {
+    const afterBuffer = await fetchArrayBuffer(`sh1/ANIM/HB_M0S00.ANM`);
+    anmBuffer = concatBuffers(anmBuffer.slice(0, HB_BASE_FRAMES_OFFSET), afterBuffer);
+  }
+
+  const anm = new Sh1anm(new KaitaiStream(anmBuffer));
   logger.info("Parsed SH1 model and animation", { ilm, anm });
 
   let psxTim: PsxTim | undefined = undefined;
@@ -1236,10 +1242,11 @@ const renderSh1 = async () => {
   if (animInfos) {
     const animMap: Record<string, () => void> = {};
 
+    let frameOne = animInfos[0][2];
     for (let i = 0; i < animInfos.length; i++) {
       const animInfo = animInfos[i];
       let animStart = animInfo[1];
-      const animEnd = animInfo[2];
+      let animEnd = animInfo[2];
 
       let type = "animation";
       if (animStart === NO_VALUE) {
@@ -1248,6 +1255,8 @@ const renderSh1 = async () => {
         // just skipping these for now
         continue;
       }
+      animStart -= frameOne;
+      animEnd -= frameOne;
 
       // TODO: use the duration?
       // const animDuration =
@@ -1729,8 +1738,8 @@ const render = () => {
   const filename: string = isSh2
     ? clientState.file
     : isSh3
-    ? clientState.uiParams["File (SH3)"]
-    : clientState.uiParams["File (SH1)"];
+      ? clientState.uiParams["File (SH3)"]
+      : clientState.uiParams["File (SH1)"];
   const currentFileIndex = clientState.getFileIndex();
   const gameChanged = lastGame !== clientState.uiParams["Game"];
   const sh1FileChanged = isSh1 && lastSh1File !== filename;
