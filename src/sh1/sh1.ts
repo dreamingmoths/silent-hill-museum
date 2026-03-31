@@ -318,9 +318,7 @@ export const createSh1Animation = (anm: Sh1anm) => {
       );
     }
     if (bone.rotationIndex >= 0) {
-      transformBuffers[boneIndex].rotations = new Float32Array(
-        4 * frameCount,
-      );
+      transformBuffers[boneIndex].rotations = new Float32Array(4 * frameCount);
     }
   }
 
@@ -578,8 +576,8 @@ export const ilmToAnmArray = [
   ["BOS2", "BOS"],
   ["TDRA", "TDA"],
   ["BLISA", "BLS"],
-  // ["DARIA", "DA2"],
-  // ["DARIA", "TDA"],
+  ["DARIA", "DA2"],
+  ["DARIA", "TDA"],
   ["DARIA", "DA"],
   ["SIBYL", "SBL"],
   ["PRSD", "PRS"],
@@ -589,14 +587,14 @@ export const ilmToAnmArray = [
   ["CLD4", "CLD2"],
   ["BD2", "BIRD"],
   ["BAR", "BAR_LAST"],
-  // ["KAU", "KAU2"],
+  ["KAU", "KAU2"],
   ["KAU", "KAU"],
   ["SIBYL", "SBL2"],
-  // ["HERO", "HR_E01"],
-  // ["HERO", "HR"],
+  ["HERO", "HR_E01"],
+  ["HERO", "HR"],
   ["HERO", "HB_BASE"],
   ["SIBYL", "SBL_LAST"],
-  // ["SNK", "SPD"],
+  ["SNK", "SPD"],
 ] as const;
 type SpecialIlmName = (typeof ilmToAnmArray)[number][0];
 type SpecialAnmName = (typeof ilmToAnmArray)[number][1];
