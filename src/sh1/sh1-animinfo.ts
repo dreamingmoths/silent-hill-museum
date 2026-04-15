@@ -2020,7 +2020,7 @@ export const Sh1AnimInfo = {
   CLD4: null,
   COC: CREEPER_ANIM_INFOS,
   DARIA: DAHLIA_ANIM_INFOS,
-  DEAD: LOCKERR_DEAD_BODY_ANIM_INFOS,
+  DEAD: null /* LOCKERR_DEAD_BODY_ANIM_INFOS */,
   DG2: null,
   DOB: null,
   DOC: null,

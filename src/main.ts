@@ -68,6 +68,8 @@ import {
   RawShaderMaterial,
   AnimationAction,
   KeyframeTrack,
+  LoopRepeat,
+  LoopOnce,
 } from "three";
 import {
   GLTFLoader,
@@ -125,7 +127,11 @@ import {
   transparentIlmFiles,
 } from "./sh1/sh1";
 import PsxTim from "./kaitai/PsxTim";
-import { HB_BASE_FRAMES_OFFSET, NO_VALUE, Sh1AnimInfo } from "./sh1/sh1-animinfo";
+import {
+  HB_BASE_FRAMES_OFFSET,
+  NO_VALUE,
+  Sh1AnimInfo,
+} from "./sh1/sh1-animinfo";
 import SilentHill3Model from "./kaitai/Sh3mdl";
 import {
   createSh3Material,
@@ -209,7 +215,7 @@ const possibleFilenames = clientState.getPossibleFilenames();
 const fileInput = dataGuiFolder.add(
   clientState.uiParams,
   "Filename",
-  possibleFilenames
+  possibleFilenames,
 );
 const lockToFolder = dataGuiFolder
   .add(clientState.uiParams, "Lock To Folder")
@@ -225,7 +231,7 @@ const lockToFolder = dataGuiFolder
         controllers.forEach((c) => {
           c.setValue(c.initialValue);
         });
-      }
+      },
     );
   })
   .listen();
@@ -419,6 +425,20 @@ const animationsFolder = gui.addFolder("Animation").hide();
 let animationController: Controller | undefined = undefined;
 
 let animationsPaused = false;
+let animationLooped = true;
+const configureAction = (action: AnimationAction) => {
+  if (animationLooped) {
+    action.setLoop(LoopRepeat, Infinity);
+    action.clampWhenFinished = false;
+    if (action.paused) {
+      action.paused = false;
+    }
+  } else {
+    action.setLoop(LoopOnce, 1);
+    action.clampWhenFinished = true;
+  }
+  return action;
+};
 const animationControls = {
   "Play/Pause": () => {
     for (const mixer of mixers) {
@@ -439,9 +459,22 @@ const animationControls = {
       mixer.setTime(0);
     }
   },
+  Loop: true,
+};
+const onAnimationLoopToggle = () => {
+  for (const mixer of mixers) {
+    animationLooped = !animationLooped;
+    for (const action of mixer._actions) {
+      configureAction(action);
+    }
+  }
 };
 animationsFolder.add(animationControls, "Play/Pause");
 animationsFolder.add(animationControls, "Reset");
+const animationLoopButton = animationsFolder
+  .add(animationControls, "Loop")
+  .onFinishChange(onAnimationLoopToggle)
+  .hide();
 
 const loadingMessage = document.createElement("div");
 loadingMessage.className = "loading-message";
@@ -514,7 +547,7 @@ const onClick = (event: MouseEvent) => {
   }
   const currentObject = clientState.getCurrentObject();
   for (const skinnedMesh of currentObject?.children.filter(
-    (object) => object instanceof SkinnedMesh
+    (object) => object instanceof SkinnedMesh,
   ) ?? []) {
     const bones = skinnedMesh.skeleton.bones;
     if (!bones || !bones.length || !currentObject) {
@@ -561,7 +594,7 @@ orbitControls.addEventListener("start", () => {
     const actions = mixerWithActions._actions.filter(
       (action) =>
         action.getClip().name === "camera" ||
-        action.getClip().name === "controls"
+        action.getClip().name === "controls",
     );
     if (actions.length) {
       actions.forEach((action) => {
@@ -580,7 +613,7 @@ const modelRenderLoop = (controls: TransformControls) => {
     | "rotate"
     | "scale";
   controls.setRotationSnap(
-    (editorState.editorParams["Rotation Step"] / 180) * Math.PI
+    (editorState.editorParams["Rotation Step"] / 180) * Math.PI,
   );
 };
 modelTransformGizmo.setRenderLoop(modelRenderLoop);
@@ -608,7 +641,7 @@ let lastIndex = -1;
 let lastSh1File = "";
 let lastSh3File = "";
 let lastGame = "";
-let mixers: AnimationMixer[] = [];
+let mixers: MuseumMixer[] = [];
 
 const editor = new EditMode();
 
@@ -620,7 +653,7 @@ clientState.setOnModeUpdate((oldMode) => {
     ?.setState(
       newMode === "edit" || clientState.uiParams["Texture Viewer 👀"]
         ? TextureViewerStates.Locked
-        : TextureViewerStates.Inactive
+        : TextureViewerStates.Inactive,
     );
   document.body.classList.add(newMode);
   if (newMode === "edit") {
@@ -637,12 +670,12 @@ const registerAllKeybinds = ({ quickBar }: { quickBar: QuickBar }) => {
   keybindManager.addKeybind(
     "arrowright",
     () => clientState.nextFile(),
-    "Next file"
+    "Next file",
   );
   keybindManager.addKeybind(
     "arrowleft",
     () => clientState.previousFile(),
-    "Previous file"
+    "Previous file",
   );
   keybindManager.addKeybind(
     "arrowup",
@@ -660,7 +693,7 @@ const registerAllKeybinds = ({ quickBar }: { quickBar: QuickBar }) => {
       }
       render();
     },
-    "Next game"
+    "Next game",
   );
   keybindManager.addKeybind(
     "arrowdown",
@@ -678,12 +711,12 @@ const registerAllKeybinds = ({ quickBar }: { quickBar: QuickBar }) => {
       }
       render();
     },
-    "Previous game"
+    "Previous game",
   );
   keybindManager.addKeybind(
     "f",
     () => clientState.nextRootFolder(),
-    "Toggle scenarios"
+    "Toggle scenarios",
   );
   keybindManager.addKeybind(
     "r",
@@ -693,7 +726,7 @@ const registerAllKeybinds = ({ quickBar }: { quickBar: QuickBar }) => {
         editorState.editorParams["Model Controls"] = true;
       }
     },
-    "Rotate mode"
+    "Rotate mode",
   );
   keybindManager.addKeybind(
     "t",
@@ -703,7 +736,7 @@ const registerAllKeybinds = ({ quickBar }: { quickBar: QuickBar }) => {
         editorState.editorParams["Model Controls"] = true;
       }
     },
-    "Move mode"
+    "Move mode",
   );
   keybindManager.addKeybind(
     "s",
@@ -713,7 +746,7 @@ const registerAllKeybinds = ({ quickBar }: { quickBar: QuickBar }) => {
         editorState.editorParams["Model Controls"] = true;
       }
     },
-    "Scale mode"
+    "Scale mode",
   );
   keybindManager.addKeybind(
     "e",
@@ -722,27 +755,27 @@ const registerAllKeybinds = ({ quickBar }: { quickBar: QuickBar }) => {
       toggleEditMode(value);
       editModeButton.setValue(value);
     },
-    "Edit mode"
+    "Edit mode",
   );
   keybindManager.addKeybind(
     "0",
     () => (clientState.uiParams["Render This Frame"] = true),
-    "Render the current frame as PNG"
+    "Render the current frame as PNG",
   );
   keybindManager.addKeybind(
     "k",
     () =>
       !isAnyElementOpenOtherThan("keybindsModal") &&
       toggleWithBackground("keybindsModal"),
-    "Toggle keybinds modal"
+    "Toggle keybinds modal",
   );
   keybindManager.addKeybind(
     "escape",
     () => closeAllElements(),
-    "Close all modals"
+    "Close all modals",
   );
   keybindManager.addKeybind("i", () =>
-    clientState.uiParams["View Structure 🔎"]()
+    clientState.uiParams["View Structure 🔎"](),
   );
   keybindManager.addKeybind("space", () => {
     quickBar.togglePause();
@@ -810,7 +843,7 @@ const renderSh2 = async (model: SilentHill2Model) => {
       (model.modelData.geometry.primitiveHeaders?.[0]?.body.samplerStates[0] ===
       0x01
         ? RepeatWrapping
-        : ClampToEdgeWrapping)
+        : ClampToEdgeWrapping),
   );
   const transparentMaterial = await createMaterial(
     model,
@@ -839,7 +872,7 @@ const renderSh2 = async (model: SilentHill2Model) => {
       0x01
         ? RepeatWrapping
         : ClampToEdgeWrapping),
-    opaqueMaterial instanceof Material ? [opaqueMaterial] : opaqueMaterial
+    opaqueMaterial instanceof Material ? [opaqueMaterial] : opaqueMaterial,
   );
 
   if (
@@ -862,7 +895,7 @@ const renderSh2 = async (model: SilentHill2Model) => {
             : clientState.folder === "mar"
               ? [0, 3, 6]
               : undefined
-          : undefined
+          : undefined,
       )
     : undefined;
 
@@ -877,7 +910,7 @@ const renderSh2 = async (model: SilentHill2Model) => {
 
       opaqueMesh = new SkinnedMesh(opaqueGeometry, opaqueMaterial);
       rootBoneIndices.forEach((boneIndex) =>
-        opaqueMesh?.add(skeleton.bones[boneIndex])
+        opaqueMesh?.add(skeleton.bones[boneIndex]),
       );
       (opaqueMesh as SkinnedMesh).bind(skeleton);
       modelSkeleton = skeleton;
@@ -907,7 +940,7 @@ const renderSh2 = async (model: SilentHill2Model) => {
     if (clientState.uiParams["Skeleton Mode"]) {
       transparentMesh = new SkinnedMesh(
         transparentGeometry,
-        transparentMaterial
+        transparentMaterial,
       );
       transparentMesh.frustumCulled = false;
 
@@ -915,7 +948,7 @@ const renderSh2 = async (model: SilentHill2Model) => {
         const { skeleton, rootBoneIndices } = createSkeleton(model);
         modelSkeleton = skeleton;
         rootBoneIndices.forEach((boneIndex) =>
-          transparentMesh?.add(skeleton.bones[boneIndex])
+          transparentMesh?.add(skeleton.bones[boneIndex]),
         );
       }
       bindSkeletonToTransparentGeometry(model, transparentGeometry);
@@ -930,7 +963,7 @@ const renderSh2 = async (model: SilentHill2Model) => {
       const normalsHelper = new VertexNormalsHelper(
         transparentMesh,
         8,
-        0xff0000
+        0xff0000,
       );
       scene.add(normalsHelper);
     }
@@ -1054,7 +1087,10 @@ const renderSh1 = async () => {
   let anmBuffer = await fetchArrayBuffer(`sh1/ANIM/${anmName}`);
   if (modelName === "HERO") {
     const afterBuffer = await fetchArrayBuffer(`sh1/ANIM/HB_M0S00.ANM`);
-    anmBuffer = concatBuffers(anmBuffer.slice(0, HB_BASE_FRAMES_OFFSET), afterBuffer);
+    anmBuffer = concatBuffers(
+      anmBuffer.slice(0, HB_BASE_FRAMES_OFFSET),
+      afterBuffer,
+    );
   }
 
   const anm = new Sh1anm(new KaitaiStream(anmBuffer));
@@ -1064,12 +1100,12 @@ const renderSh1 = async () => {
   try {
     psxTim = new PsxTim(
       new KaitaiStream(
-        await fetchArrayBuffer(`sh1/${ilmToTextureAssoc(modelName)}.TIM`)
-      )
+        await fetchArrayBuffer(`sh1/${ilmToTextureAssoc(modelName)}.TIM`),
+      ),
     );
   } catch (e) {
     psxTim = new PsxTim(
-      new KaitaiStream(await fetchArrayBuffer(`sh1/CHARA/HERO.TIM`))
+      new KaitaiStream(await fetchArrayBuffer(`sh1/CHARA/HERO.TIM`)),
     );
     logger.error(e);
   }
@@ -1178,8 +1214,8 @@ const renderSh1 = async () => {
   if (viewer) {
     viewer.attach(
       materialResult.textures.map((info) =>
-        viewer.createFromUint8Array(...info)
-      )
+        viewer.createFromUint8Array(...info),
+      ),
     );
   }
 
@@ -1240,10 +1276,12 @@ const renderSh1 = async () => {
 
   const animInfos = Sh1AnimInfo[ilm.name as keyof typeof Sh1AnimInfo];
   if (animInfos) {
-    const animMap: Record<string, () => void> = {};
+    const animMap: Record<string, () => void> = {
+      "[none]": () => render(),
+    };
 
     let frameOne = animInfos[0][2];
-    for (let i = 0; i < animInfos.length; i++) {
+    for (let i = 1; i < animInfos.length; i += 2) {
       const animInfo = animInfos[i];
       let animStart = animInfo[1];
       let animEnd = animInfo[2];
@@ -1271,14 +1309,15 @@ const renderSh1 = async () => {
       };
 
       const clip = new AnimationClip(anmName, -1, tracks.map(trim));
-      const clipAction = mixer.clipAction(clip);
+      const clipAction = configureAction(mixer.clipAction(clip));
       clips.push(clip);
       actions.push(clipAction);
 
-      const key = `${type} ${i}`;
+      const n = i >> 1;
+      const key = `${type} ${n}`;
       animMap[key] = () => {
         mixer.stopAllAction();
-        clipAction.play();
+        configureAction(clipAction).play();
       };
     }
 
@@ -1286,11 +1325,13 @@ const renderSh1 = async () => {
     animationController = animationsFolder
       .add(clientState.uiParams, "Current Animation", Object.keys(animMap))
       .show();
+    animationLoopButton.show();
     animationController.onFinishChange((animation: keyof typeof animMap) => {
       animMap[animation]();
     });
   } else {
     animationController?.hide();
+    animationLoopButton.hide();
   }
   animationsFolder.show();
 
@@ -1305,7 +1346,7 @@ const renderSh1 = async () => {
   }
   // #endregion <anim info section>
 
-  mixers.push(mixer);
+  mixers.push(mixer as MuseumMixer);
 
   quickBar.show();
   loadingMessage.remove();
@@ -1336,7 +1377,7 @@ const render = () => {
     cleanupResources = true,
     animation?: SilentHillAnimation,
     dds?: SilentHillDramaDemo,
-    name?: string
+    name?: string,
   ) => {
     if (model !== undefined) {
       logger.debug("Parsed model structure", model);
@@ -1361,7 +1402,7 @@ const render = () => {
     if (!light) {
       light = new AmbientLight(
         clientState.uiParams["Ambient Color"],
-        clientState.uiParams["Ambient Intensity"]
+        clientState.uiParams["Ambient Intensity"],
       );
       light.name = "ambient-light";
       scene.add(light);
@@ -1470,14 +1511,14 @@ const render = () => {
     ) {
       mixer = new AnimationMixer(mesh);
       (mixer as MuseumMixer).isInuAnm = true;
-      mixers.push(mixer);
+      mixers.push(mixer as MuseumMixer);
 
       const tracks = createAnimationTracks(animation, modelSkeleton);
       tracks.forEach((track) => track.trim(0, INU_CUTSCENE_DURATION));
       const clip = new AnimationClip(
         clientState.file.replace(".mdl", ".anm"),
         -1,
-        tracks
+        tracks,
       );
 
       const opaqueAction = mixer.clipAction(clip);
@@ -1485,13 +1526,13 @@ const render = () => {
 
       const { tracks: ddsTracks, ddsLights } = createCutsceneTracks(
         dds,
-        name ?? ""
+        name ?? "",
       );
       if (ddsTracks) {
         const ddsClip = new AnimationClip(
           name ?? clientState.file.replace(".mdl", ".anm"),
           -1,
-          ddsTracks.character
+          ddsTracks.character,
         );
 
         const ddsAction = mixer.clipAction(ddsClip);
@@ -1504,19 +1545,19 @@ const render = () => {
           const ddsCameraClip = new AnimationClip(
             "camera",
             -1,
-            ddsTracks.camera
+            ddsTracks.camera,
           );
           const ddsCameraAction = mixer.clipAction(ddsCameraClip, camera);
           ddsCameraAction.play();
           const ddsControlsClip = new AnimationClip(
             "controls",
             -1,
-            ddsTracks.controls
+            ddsTracks.controls,
           );
           const ddsControlsAction = mixer.clipAction(
             ddsControlsClip,
             //@ts-ignore
-            orbitControls
+            orbitControls,
           );
           ddsControlsAction.play();
 
@@ -1525,7 +1566,7 @@ const render = () => {
             const ddsLightClip = new AnimationClip(
               `ddsLight${index}`,
               -1,
-              ddsTracks.lights[index]
+              ddsTracks.lights[index],
             );
             const ddsLightAction = mixer!.clipAction(ddsLightClip, ddsLight);
             ddsLightAction.play();
@@ -1613,16 +1654,16 @@ const render = () => {
       modelTransformGizmo.render(
         clientState.getMode() === "edit" &&
           editorState.editorParams["Model Controls"],
-        group
+        group,
       );
       boneTransformGizmo.render(
         !!modelSkeleton && clientState.uiParams["Bone Controls"],
-        modelSkeleton?.bones[clientState.uiParams["Selected Bone"]]
+        modelSkeleton?.bones[clientState.uiParams["Selected Bone"]],
       );
       originalTransformGizmo.render(
         clientState.getMode() === "edit" &&
           editorState.editorParams["Base Model Controls"],
-        editorState.cachedOriginalModel
+        editorState.cachedOriginalModel,
       );
 
       if (light instanceof AmbientLight) {
@@ -1636,7 +1677,7 @@ const render = () => {
           opaqueMesh.material.transparent;
         uniforms.opacity.value = clientState.uiParams["Model Opacity"];
         uniforms.ambientLightColor.value = new Color(
-          clientState.uiParams["Ambient Color"]
+          clientState.uiParams["Ambient Color"],
         ).multiplyScalar(clientState.uiParams["Ambient Intensity"]);
         uniforms.alphaTest.value = clientState.uiParams["Alpha Test"];
         uniforms.uTime.value += delta;
@@ -1666,7 +1707,7 @@ const render = () => {
       if (clientState.uiParams["Render This Frame"]) {
         exportCanvas(
           appContainer,
-          clientState.getCurrentContentName() + ".png"
+          clientState.getCurrentContentName() + ".png",
         );
         clientState.uiParams["Render This Frame"] = false;
       }
@@ -1704,7 +1745,7 @@ const render = () => {
     if (clientState.getGlVersion() === 1) {
       showQuickModal(
         "<p>WebGL 2 is required for Silent Hill 1 models for now.</p>" +
-          "<p>This is because the models require animations to be properly displayed.</p>"
+          "<p>This is because the models require animations to be properly displayed.</p>",
       );
       throw new Error("WebGL 1 not supported for Silent Hill 1 models");
     }
@@ -1770,7 +1811,7 @@ const render = () => {
             clientState.uiParams["File (SH3)"] = lastSh3File || "pl/chhaa.mdl";
           }
           render();
-        }
+        },
       );
       return;
     }
@@ -1783,7 +1824,7 @@ const render = () => {
     if (isSh2 && filename in preferredParams) {
       Object.assign(
         clientState.uiParams,
-        preferredParams[filename as keyof typeof preferredParams]
+        preferredParams[filename as keyof typeof preferredParams],
       );
     } else if (isSh2) {
       Object.assign(clientState.uiParams, defaultParams);
@@ -1798,7 +1839,7 @@ const render = () => {
 
     fileInput.setValue(clientState.file);
     scenarioInput.setValue(
-      clientState.rootFolder === "chr" ? "Main Scenario" : "Born From A Wish"
+      clientState.rootFolder === "chr" ? "Main Scenario" : "Born From A Wish",
     );
     folderInput.setValue(clientState.folder);
     folderInput.options(clientState.getPossibleFolders());
@@ -1935,7 +1976,7 @@ const render = () => {
             `/data/${index >= 219 ? "demo2" : "demo"}/${
               ddsList[index] ?? "inu"
             }/${mdlName}`.replace(".mdl", ".anm"),
-            model
+            model,
           );
         }
 
@@ -1952,7 +1993,7 @@ const render = () => {
       Promise.all(
         dds.characterNames.map((_, i) => {
           return spawnCharacter(i);
-        })
+        }),
       ).then(() => {
         argArray.forEach((args, index) => {
           args[1] = index === 0;
