@@ -448,15 +448,23 @@ const animationControls = {
         if (clientState.uiParams["Visualize Normals"]) {
           render();
         }
+        playPauseButton.innerText = "Play";
       } else {
         animationsPaused = false;
         mixer.timeScale = 1;
+        playPauseButton.innerText = "Pause";
+      }
+      for (const action of mixer._actions) {
+        action.paused = animationsPaused;
       }
     }
   },
   Reset: () => {
     for (const mixer of mixers) {
       mixer.setTime(0);
+      for (const action of mixer._actions) {
+        action.reset();
+      }
     }
   },
   Loop: true,
@@ -469,7 +477,13 @@ const onAnimationLoopToggle = () => {
     }
   }
 };
-animationsFolder.add(animationControls, "Play/Pause");
+const playPause = animationsFolder.add(animationControls, "Play/Pause");
+const maybePlayPauseButton = playPause.domElement.querySelector("div.name");
+if (!(maybePlayPauseButton instanceof HTMLDivElement))
+  throw new Error("Play/pause button not found!");
+const playPauseButton = maybePlayPauseButton;
+playPauseButton.innerText = "Pause";
+
 animationsFolder.add(animationControls, "Reset");
 const animationLoopButton = animationsFolder
   .add(animationControls, "Loop")
