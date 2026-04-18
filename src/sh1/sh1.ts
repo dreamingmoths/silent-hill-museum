@@ -594,7 +594,6 @@ export const ilmToAnmArray = [
   ["HERO", "HR"],
   ["HERO", "HB_BASE"],
   ["SIBYL", "SBL_LAST"],
-  ["SNK", "SPD"],
 ] as const;
 type SpecialIlmName = (typeof ilmToAnmArray)[number][0];
 type SpecialAnmName = (typeof ilmToAnmArray)[number][1];
