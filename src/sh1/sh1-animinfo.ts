@@ -2042,6 +2042,16 @@ export const LARVAL_STALKER_ANIM_INFOS: AnimInfo = [
   [ /* Anim_PlaybackOnce, ANIM_STATUS(18, true),  false, ANIM_STATUS(2, false),  */ Q12(8.0),  22,       32  ]
 ];
 
+export const CHERYL_ANIM_INFOS: AnimInfo = [
+  [ /* Anim_BlendLinear,  ANIM_STATUS(0,  false), false, ANIM_STATUS(0, false),  */ Q12(0.0),  NO_VALUE, 0  ], 
+  [ /* Anim_PlaybackLoop, ANIM_STATUS(0,  true),  false, NO_VALUE,               */ Q12(30.0), NO_VALUE, 1  ], 
+  [ /* Anim_BlendLinear,  ANIM_STATUS(1,  false), false, ANIM_STATUS(1, true),   */ Q12(5.0),  NO_VALUE, 0  ], 
+  [ /* Anim_PlaybackLoop, ANIM_STATUS(1,  true),  false, NO_VALUE,               */ Q12(5.0),  0,        5  ], 
+  [ /* Anim_BlendLinear,  ANIM_STATUS(2,  false), false, ANIM_STATUS(2, true),   */ Q12(5.0),  NO_VALUE, 6  ], 
+  [ /* Anim_PlaybackLoop, ANIM_STATUS(2,  true),  false, NO_VALUE,               */ Q12(30.0), 6,        32 ], 
+  [ /* Anim_BlendLinear,  ANIM_STATUS(3,  false), false, ANIM_STATUS(3, true),   */ Q12(5.0),  NO_VALUE, 34 ], 
+  [ /* Anim_PlaybackLoop, ANIM_STATUS(3,  true),  false, NO_VALUE,               */ Q12(30.0), 34,       55 ]
+];
 
 export const Sh1AnimInfo = {
   AR: ALESSA_ANIM_INFOS,
@@ -2089,7 +2099,7 @@ export const Sh1AnimInfo = {
   SIBYL: null,
   SLT: null,
   SNK: null,
-  SRL: null,
+  SRL: CHERYL_ANIM_INFOS,
   TAR: null,
   TDRA: null,
   WORM: null,
