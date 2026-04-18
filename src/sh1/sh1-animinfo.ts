@@ -2083,7 +2083,7 @@ export const Sh1AnimInfo = {
   FRG: null,
   HERO: null,
   ICU: null,
-  JACK: null,
+  JACK: ROMPER_ANIM_INFOS,
   KAU: null,
   LISA: LISA_ANIM_INFOS,
   LITL: null,
