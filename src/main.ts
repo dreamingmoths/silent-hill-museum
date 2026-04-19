@@ -1294,26 +1294,18 @@ const renderSh1 = async () => {
       "[none]": () => render(),
     };
 
-    let frameOne = animInfos[0][2];
     for (let i = 1; i < animInfos.length; i += 2) {
       const animInfo = animInfos[i];
       let animStart = animInfo[1];
       let animEnd = animInfo[2];
 
       let type = "animation";
-      if (animStart === NO_VALUE) {
+      if (animStart === NO_VALUE || animEnd === NO_VALUE) {
         animStart = animEnd;
         type = "start frame";
         // just skipping these for now
         continue;
       }
-      animStart -= frameOne;
-      animEnd -= frameOne;
-
-      // TODO: use the duration?
-      // const animDuration =
-      //   typeof animInfo[0] === "number" ? animInfo[0] : animInfo[0]();
-      // const frameDelta = 30 / FROM_Q12(animDuration);
 
       const trim = (t: KeyframeTrack) => {
         const start = animStart * ANIMATION_FRAME_DURATION;
