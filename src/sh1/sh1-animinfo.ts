@@ -1355,19 +1355,18 @@ export const BLOODY_INCUBATOR_ANIM_INFOS: AnimInfo = [
 //    [  Q12(10) ,0,        100 ]
 // ];
 
-// export const CAT_ANIM_INFOS: AnimInfo =
-// [
-//    [  Q12(0)     ,NO_VALUE, 0  ],
-//    [  Q12(0)     ,0,        0  ],
-//    [  Q12(64)    ,NO_VALUE, 7  ],
-//    [  Q12(15.8) ,7,        22 ],
-//    [  Q12(64)    ,NO_VALUE, 23 ],
-//    [  Q12(35)    ,23,       43 ],
-//    [  Q12(0)     ,NO_VALUE, 7  ],
-//    [  Q12(0)     ,7,        8  ],
-//    [  Q12(0)     ,NO_VALUE, 22 ],
-//    [  Q12(0)     ,22,       23 ]
-// ];
+export const CAT_ANIM_INFOS: AnimInfo = [
+    [ /* Anim_BlendLinear, NO_VALUE,                                          false, ANIM_STATUS(CatAnim_Still,                 false),  */ Q12(0), NO_VALUE, 0  ],
+    [ /* NULL,         ANIM_STATUS(CatAnim_Still,                 false), false, ANIM_STATUS(CatAnim_Still,                 false),  */ Q12(0), 0,        0  ],
+    [ /* Anim_BlendLinear, ANIM_STATUS(CatAnim_Jump,                  false), false, ANIM_STATUS(CatAnim_Jump,                  true),  */  Q12(64), NO_VALUE, 7  ],
+    [ /* Anim_PlaybackOnce, ANIM_STATUS(CatAnim_Jump,                  true),  false, ANIM_STATUS(CatAnim_TransitionJumpToRun,   false), */  Q12(15.8), 7,        22 ],
+    [ /* Anim_BlendLinear, ANIM_STATUS(CatAnim_Run,                   false), false, ANIM_STATUS(CatAnim_Run,                   true),  */ Q12(64), NO_VALUE, 23 ],
+    [ /* Anim_PlaybackLoop, ANIM_STATUS(CatAnim_Run,                   true),  false, NO_VALUE,                                          */  Q12(35), 23,       43 ],
+    [ /* Anim_BlendLinear, ANIM_STATUS(CatAnim_TransitionStillToJump, false), false, ANIM_STATUS(CatAnim_TransitionStillToJump, true),  */  Q12(0), NO_VALUE, 7  ],
+    [ /* Anim_PlaybackLoop, ANIM_STATUS(CatAnim_TransitionStillToJump, true),  false, NO_VALUE,                                          */  Q12(0), 7,        8  ],
+    [ /* Anim_BlendLinear, ANIM_STATUS(CatAnim_TransitionJumpToRun,   false), false, ANIM_STATUS(CatAnim_TransitionJumpToRun,   true),   */ Q12(0), NO_VALUE, 22 ],
+    [ /* Anim_PlaybackLoop, ANIM_STATUS(CatAnim_TransitionJumpToRun,   true),  false, NO_VALUE,                                           */ Q12(0), 22,       23 ]
+];
 
 export const CYBIL_ANIM_INFOS: AnimInfo = [
   [Q12(0), NO_VALUE, 0],
@@ -1673,14 +1672,6 @@ export const INCUBATOR_ANIM_INFOS: AnimInfo = [
   [Q12(10), 75, 115],
   [Q12(10), NO_VALUE, 116],
   [Q12(10), 116, 132],
-];
-
-export const KAUFMANN_ANIM_INFOS: AnimInfo = [
-  [Q12(0), NO_VALUE, 0],
-  [Q12(30), NO_VALUE, 1],
-  [Q12(5), NO_VALUE, 0],
-  [Q12(5), 0, 5],
-  [Q12(5), NO_VALUE, 6],
 ];
 
 export const LISA_ANIM_INFOS: AnimInfo = [
@@ -2053,6 +2044,105 @@ export const CHERYL_ANIM_INFOS: AnimInfo = [
   [ /* Anim_PlaybackLoop, ANIM_STATUS(3,  true),  false, NO_VALUE,               */ Q12(30.0), 34,       55 ]
 ];
 
+export const KAUFMANN_ANIM_INFOS: AnimInfo = [ 
+  [ /* Anim_BlendLinear,  ANIM_STATUS(0,  false), false, ANIM_STATUS(0,  false),  */ Q12(0.0),   NO_VALUE, 0,   ],
+  [ /* Anim_PlaybackLoop, ANIM_STATUS(0,  true),  false, NO_VALUE,                */ Q12(30.0),  NO_VALUE, 1,   ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(1,  false), false, ANIM_STATUS(1,  true),   */ Q12(5.0),   NO_VALUE, 0,   ],
+  [ /* Anim_PlaybackLoop, ANIM_STATUS(1,  true),  false, NO_VALUE,                */ Q12(5.0),   0,        15,  ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(2,  false), false, ANIM_STATUS(2,  true),   */ Q12(10.0),  NO_VALUE, 16,  ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(2,  true),  false, ANIM_STATUS(2,  true),   */ Q12(10.0),  16,       36,  ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(3,  false), false, ANIM_STATUS(3,  true),   */ Q12(5.0),   NO_VALUE, 37,  ],
+  [ /* Anim_PlaybackLoop, ANIM_STATUS(3,  true),  false, NO_VALUE,                */ Q12(12.0),  37,       59   ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(4,  false), false, ANIM_STATUS(4,  true),   */ Q12(10.0),  NO_VALUE, 60,  ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(4,  true),  false, ANIM_STATUS(4,  true),   */ Q12(20.0),  60,       89,  ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(5,  false), false, ANIM_STATUS(5,  true),   */ Q12(5.0),   NO_VALUE, 90,  ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(5,  true),  false, ANIM_STATUS(5,  true),   */ Q12(4.0),   90,       104, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(6,  false), false, ANIM_STATUS(6,  true),   */ Q12(10.0),  NO_VALUE, 105, ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(6,  true),  false, ANIM_STATUS(6,  true),   */ Q12(5.0),   105,      115, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(7,  false), false, ANIM_STATUS(7,  true),   */ Q12(10.0),  NO_VALUE, 116, ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(7,  true),  false, ANIM_STATUS(7,  true),   */ Q12(15.0),  116,      181, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(8,  false), false, ANIM_STATUS(8,  true),   */ Q12(10.0),  NO_VALUE, 182, ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(8,  true),  false, ANIM_STATUS(8,  true),   */ Q12(15.0),  182,      202, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(9,  false), false, ANIM_STATUS(9,  true),   */ Q12(10.0),  NO_VALUE, 203, ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(9,  true),  false, ANIM_STATUS(9,  true),   */ Q12(10.0),  203,      290, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(10, false), false, ANIM_STATUS(10, true),   */ Q12(10.0),  NO_VALUE, 291, ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(10, true),  false, ANIM_STATUS(10, true),   */ Q12(10.0),  291,      321, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(11, false), false, ANIM_STATUS(11, true),   */ Q12(10.0),  NO_VALUE, 322, ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(11, true),  false, ANIM_STATUS(11, true),   */ Q12(10.0),  322,      346, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(12, false), false, ANIM_STATUS(12, true),   */ Q12(10.0),  NO_VALUE, 347, ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(12, true),  false, ANIM_STATUS(12, true),   */ Q12(10.0),  347,      383, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(13, false), false, ANIM_STATUS(13, true),   */ Q12(10.0),  NO_VALUE, 384, ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(13, true),  false, ANIM_STATUS(13, true),   */ Q12(15.0),  384,      404, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(14, false), false, ANIM_STATUS(14, true),   */ Q12(5.0),   NO_VALUE, 405, ],
+  [ /* Anim_PlaybackLoop, ANIM_STATUS(14, true),  false, NO_VALUE,                */ Q12(5.0),   405,      420, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(15, false), false, ANIM_STATUS(15, true),   */ Q12(10.0),  NO_VALUE, 0,   ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(15, true),  false, ANIM_STATUS(15, true),   */ Q12(10.0),  0,        62,  ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(16, false), false, ANIM_STATUS(16, true),   */ Q12(10.0),  NO_VALUE, 63,  ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(16, true),  false, ANIM_STATUS(16, true),   */ Q12(10.0),  63,       85,  ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(17, false), false, ANIM_STATUS(17, true),   */ Q12(10.0),  NO_VALUE, 86,  ],
+  [ /* Anim_PlaybackLoop, ANIM_STATUS(17, true),  false, NO_VALUE,                */ Q12(10.0),  86,       101, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(18, false), false, ANIM_STATUS(18, true),   */ Q12(10.0),  NO_VALUE, 102, ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(18, true),  false, ANIM_STATUS(18, true),   */ Q12(10.0),  102,      201, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(19, false), false, ANIM_STATUS(19, true),   */ Q12(10.0),  NO_VALUE, 202, ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(19, true),  false, ANIM_STATUS(19, true),   */ Q12(10.0),  202,      225, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(20, false), false, ANIM_STATUS(20, true),   */ Q12(5.0),   NO_VALUE, 226, ],
+  [ /* Anim_PlaybackLoop, ANIM_STATUS(20, true),  false, NO_VALUE,                */ Q12(5.0),   226,      241, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(21, false), false, ANIM_STATUS(21, true),   */ Q12(10.0),  NO_VALUE, 242, ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(21, true),  false, ANIM_STATUS(21, true),   */ Q12(10.0),  242,      262, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(22, false), false, ANIM_STATUS(22, true),   */ Q12(10.0),  NO_VALUE, 208, ],
+];
+
+export const TWINFEELER_ANIM_INFOS: AnimInfo = [ 
+  [ /* Anim_BlendLinear,  NO_VALUE,               false, ANIM_STATUS(0, false),   */ Q12(0.0),  NO_VALUE, 0,   ],
+  [ /* NULL,              ANIM_STATUS(0,  false), false, ANIM_STATUS(0,  false),  */ Q12(0.0),  0,        0,   ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(1,  false), false, ANIM_STATUS(1,  true),   */ Q12(20.0), NO_VALUE, 0,   ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(1,  true),  false, ANIM_STATUS(18, false),  */ Q12(16.0), 0,        31,  ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(2,  false), false, ANIM_STATUS(2,  true),   */ Q12(8.0),  NO_VALUE, 32,  ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(2,  true),  false, ANIM_STATUS(18, false),  */ Q12(14.0), 32,       72,  ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(3,  false), false, ANIM_STATUS(3,  true),   */ Q12(20.0), NO_VALUE, 73,  ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(3,  true),  false, ANIM_STATUS(19, false),  */ Q12(14.0), 73,       104, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(4,  false), false, ANIM_STATUS(4,  true),   */ Q12(20.0), NO_VALUE, 105, ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(4,  true),  false, ANIM_STATUS(19, false),  */ Q12(14.0), 105,      130, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(5,  false), false, ANIM_STATUS(5,  true),   */ Q12(20.0), NO_VALUE, 131, ],
+  [ /* Anim_PlaybackLoop, ANIM_STATUS(5,  true),  false, NO_VALUE,                */ Q12(14.0), 131,      162, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(6,  false), false, ANIM_STATUS(6,  true),   */ Q12(20.0), NO_VALUE, 163, ],
+  [ /* Anim_PlaybackLoop, ANIM_STATUS(6,  true),  false, NO_VALUE,                */ Q12(14.0), 163,      194, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(7,  false), false, ANIM_STATUS(7,  true),   */ Q12(20.0), NO_VALUE, 195, ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(7,  true),  false, ANIM_STATUS(20, false),  */ Q12(14.0), 195,      226, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(8,  false), false, ANIM_STATUS(8,  true),   */ Q12(10.0), NO_VALUE, 227, ],
+  [ /* Anim_PlaybackLoop, ANIM_STATUS(8,  true),  false, NO_VALUE,                */ Q12(14.0), 227,      258, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(9,  false), false, ANIM_STATUS(9,  true),   */ Q12(20.0), NO_VALUE, 259, ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(9,  true),  false, ANIM_STATUS(18, false),  */ Q12(14.0), 259,      290, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(10, false), false, ANIM_STATUS(10, true),   */ Q12(20.0), NO_VALUE, 291, ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(10, true),  false, ANIM_STATUS(18, false),  */ Q12(14.0), 291,      322, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(11, false), false, ANIM_STATUS(11, true),   */ Q12(20.0), NO_VALUE, 323, ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(11, true),  false, ANIM_STATUS(18, false),  */ Q12(14.0), 323,      354, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(12, false), false, ANIM_STATUS(12, true),   */ Q12(20.0), NO_VALUE, 355, ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(12, true),  false, ANIM_STATUS(18, false),  */ Q12(14.0), 355,      386, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(13, false), false, ANIM_STATUS(13, true),   */ Q12(20.0), NO_VALUE, 387, ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(13, true),  false, ANIM_STATUS(18, false),  */ Q12(14.0), 387,      407, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(14, false), false, ANIM_STATUS(14, true),   */ Q12(20.0), NO_VALUE, 408, ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(14, true),  false, ANIM_STATUS(18, false),  */ Q12(14.0), 408,      428, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(15, false), false, ANIM_STATUS(15, true),   */ Q12(20.0), NO_VALUE, 429, ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(15, true),  false, ANIM_STATUS(21, false),  */ Q12(14.0), 429,      459, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(16, false), false, ANIM_STATUS(16, true),   */ Q12(20.0), NO_VALUE, 460, ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(16, true),  false, ANIM_STATUS(22, false),  */ Q12(14.0), 460,      490, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(17, false), false, ANIM_STATUS(17, true),   */ Q12(20.0), NO_VALUE, 491, ],
+  [ /* Anim_PlaybackOnce, ANIM_STATUS(17, true),  false, ANIM_STATUS(18, false),  */ Q12(30.0), 491,      521, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(18, false), false, ANIM_STATUS(18, true),   */ Q12(60.0), NO_VALUE, 258, ],
+  [ /* Anim_PlaybackLoop, ANIM_STATUS(18, true),  false, NO_VALUE,                */ Q12(0.0),  258,      258, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(19, false), false, ANIM_STATUS(19, true),   */ Q12(60.0), NO_VALUE, 104, ],
+  [ /* Anim_PlaybackLoop, ANIM_STATUS(19, true),  false, NO_VALUE,                */ Q12(0.0),  104,      104, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(20, false), false, ANIM_STATUS(20, true),   */ Q12(60.0), NO_VALUE, 226, ],
+  [ /* Anim_PlaybackLoop, ANIM_STATUS(20, true),  false, NO_VALUE,                */ Q12(0.0),  226,      226, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(21, false), false, ANIM_STATUS(21, true),   */ Q12(60.0), NO_VALUE, 459, ],
+  [ /* Anim_PlaybackLoop, ANIM_STATUS(21, true),  false, NO_VALUE,                */ Q12(0.0),  459,      459, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(22, false), false, ANIM_STATUS(22, true),   */ Q12(60.0), NO_VALUE, 490, ],
+  [ /* Anim_PlaybackLoop, ANIM_STATUS(22, true),  false, NO_VALUE,                */ Q12(0.0),  490,      490, ],
+  [ /* Anim_BlendLinear,  ANIM_STATUS(23, false), false, ANIM_STATUS(23, true),   */ Q12(20.0), NO_VALUE, 0,   ],
+];
+
+
 export const Sh1AnimInfo = {
   AR: ALESSA_ANIM_INFOS,
   BAR: null,
@@ -2064,7 +2154,7 @@ export const Sh1AnimInfo = {
   BOS: INCUBATOR_ANIM_INFOS,
   BOS2: null,
   BTFY: null,
-  CAT: null,
+  CAT: CAT_ANIM_INFOS,
   CKN: null,
   CLD1: LARVAL_STALKER_ANIM_INFOS,
   CLD2: null,
@@ -2084,7 +2174,7 @@ export const Sh1AnimInfo = {
   HERO: null,
   ICU: null,
   JACK: ROMPER_ANIM_INFOS,
-  KAU: null,
+  KAU: KAUFMANN_ANIM_INFOS,
   LISA: LISA_ANIM_INFOS,
   LITL: null,
   DEV: null,
@@ -2102,7 +2192,7 @@ export const Sh1AnimInfo = {
   SRL: CHERYL_ANIM_INFOS,
   TAR: null,
   TDRA: null,
-  WORM: null,
+  WORM: TWINFEELER_ANIM_INFOS,
 } satisfies Record<string, null | AnimInfo>;
 
 type AnimInfo = ReadonlyArray<
