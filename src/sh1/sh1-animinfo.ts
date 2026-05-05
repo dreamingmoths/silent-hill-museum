@@ -1,17 +1,23 @@
 // from https://github.com/Vatuu/silent-hill-decomp/blob/f334e8307d43891d6a147ff4c6be9373d2ab3a98/include/maps/shared.h
 
-function Q12(x: number) {
+const Q12 = (x: number) => {
   return x * 0x1000;
 }
-function func_800E21C8() {
+const func_800E21C8 = () => {
   return 0;
 }
-function func_800D8898() {
+const func_800D8898 = () => {
   return 0;
 }
-function sharedFunc_800D77D0_0_s01() {
+const sharedFunc_800D77D0_0_s01 = () => {
   return 0;
 }
+
+export const Anim_BlendLinear = () => { return 0; }
+export const Anim_PlaybackOnce = () => { return 0; }
+export const Anim_PlaybackLoop = () => { return 0; }
+export const ANIM_STATUS = (animIndex: number, isActive: boolean) => 
+  (((animIndex) << 1) | ((isActive) ? (1 << 0) : 0));
 export const Anim_Update0 = undefined;
 export const Anim_Update1 = undefined;
 export const Anim_Update2 = undefined;
@@ -20,7 +26,7 @@ export const NULL = -1;
 
 export const HB_BASE_FRAMES_OFFSET = 0x15bb4;
 
-export const HARRY_M0S00_ANIM_INFOS: AnimInfo = [
+export const HARRY_M0S00_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -57,7 +63,7 @@ export const HARRY_M0S00_ANIM_INFOS: AnimInfo = [
   [Q12(25), 994, 1026],
 ];
 
-export const HARRY_M0S01_ANIM_INFOS: AnimInfo = [
+export const HARRY_M0S01_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -100,7 +106,7 @@ export const HARRY_M0S01_ANIM_INFOS: AnimInfo = [
   [Q12(15), 815, 815],
 ];
 
-export const HARRY_M0S02_ANIM_INFOS: AnimInfo = [
+export const HARRY_M0S02_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -117,7 +123,7 @@ export const HARRY_M0S02_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M1S00_ANIM_INFOS: AnimInfo = [
+export const HARRY_M1S00_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -148,7 +154,7 @@ export const HARRY_M1S00_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M1S01_ANIM_INFOS: AnimInfo = [
+export const HARRY_M1S01_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -185,7 +191,7 @@ export const HARRY_M1S01_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M1S02_ANIM_INFOS: AnimInfo = [
+export const HARRY_M1S02_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -236,7 +242,7 @@ export const HARRY_M1S02_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M1S03_ANIM_INFOS: AnimInfo = [
+export const HARRY_M1S03_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -289,7 +295,7 @@ export const HARRY_M1S03_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M1S05_ANIM_INFOS: AnimInfo = [
+export const HARRY_M1S05_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -314,7 +320,7 @@ export const HARRY_M1S05_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M1S06_ANIM_INFOS: AnimInfo = [
+export const HARRY_M1S06_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -325,7 +331,7 @@ export const HARRY_M1S06_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M2S00_ANIM_INFOS: AnimInfo = [
+export const HARRY_M2S00_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -366,7 +372,7 @@ export const HARRY_M2S00_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M2S01_ANIM_INFOS: AnimInfo = [
+export const HARRY_M2S01_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -379,7 +385,7 @@ export const HARRY_M2S01_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M2S02_ANIM_INFOS: AnimInfo = [
+export const HARRY_M2S02_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -414,7 +420,7 @@ export const HARRY_M2S02_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M2S04_ANIM_INFOS: AnimInfo = [
+export const HARRY_M2S04_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -433,7 +439,7 @@ export const HARRY_M2S04_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M3S00_ANIM_INFOS: AnimInfo = [
+export const HARRY_M3S00_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -446,7 +452,7 @@ export const HARRY_M3S00_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M3S01_ANIM_INFOS: AnimInfo = [
+export const HARRY_M3S01_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -479,7 +485,7 @@ export const HARRY_M3S01_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M3S02_ANIM_INFOS: AnimInfo = [
+export const HARRY_M3S02_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -508,7 +514,7 @@ export const HARRY_M3S02_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M3S04_ANIM_INFOS: AnimInfo = [
+export const HARRY_M3S04_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -545,7 +551,7 @@ export const HARRY_M3S04_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M3S05_ANIM_INFOS: AnimInfo = [
+export const HARRY_M3S05_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -586,7 +592,7 @@ export const HARRY_M3S05_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M3S06_ANIM_INFOS: AnimInfo = [
+export const HARRY_M3S06_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -599,7 +605,7 @@ export const HARRY_M3S06_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M4S01_ANIM_INFOS: AnimInfo = [
+export const HARRY_M4S01_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -632,7 +638,7 @@ export const HARRY_M4S01_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M4S02_ANIM_INFOS: AnimInfo = [
+export const HARRY_M4S02_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -669,7 +675,7 @@ export const HARRY_M4S02_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M4S03_ANIM_INFOS: AnimInfo = [
+export const HARRY_M4S03_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -702,7 +708,7 @@ export const HARRY_M4S03_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M4S04_ANIM_INFOS: AnimInfo = [
+export const HARRY_M4S04_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -717,7 +723,7 @@ export const HARRY_M4S04_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M4S05_ANIM_INFOS: AnimInfo = [
+export const HARRY_M4S05_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -744,7 +750,7 @@ export const HARRY_M4S05_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M5S00_ANIM_INFOS: AnimInfo = [
+export const HARRY_M5S00_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -777,7 +783,7 @@ export const HARRY_M5S00_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M5S02_ANIM_INFOS: AnimInfo = [
+export const HARRY_M5S02_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -818,7 +824,7 @@ export const HARRY_M5S02_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M5S03_ANIM_INFOS: AnimInfo = [
+export const HARRY_M5S03_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -851,7 +857,7 @@ export const HARRY_M5S03_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M6S00_ANIM_INFOS: AnimInfo = [
+export const HARRY_M6S00_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -896,7 +902,7 @@ export const HARRY_M6S00_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M6S01_ANIM_INFOS: AnimInfo = [
+export const HARRY_M6S01_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 680],
@@ -911,7 +917,7 @@ export const HARRY_M6S01_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M6S02_ANIM_INFOS: AnimInfo = [
+export const HARRY_M6S02_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -956,7 +962,7 @@ export const HARRY_M6S02_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M6S03_ANIM_INFOS: AnimInfo = [
+export const HARRY_M6S03_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -987,7 +993,7 @@ export const HARRY_M6S03_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M6S04_ANIM_INFOS: AnimInfo = [
+export const HARRY_M6S04_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(3), NO_VALUE, 678],
@@ -1066,7 +1072,7 @@ export const HARRY_M6S04_ANIM_INFOS: AnimInfo = [
   [Q12(10), 889, 918],
 ];
 
-export const HARRY_M7S00_ANIM_INFOS: AnimInfo = [
+export const HARRY_M7S00_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -1085,7 +1091,7 @@ export const HARRY_M7S00_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M7S01_ANIM_INFOS: AnimInfo = [
+export const HARRY_M7S01_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -1132,7 +1138,7 @@ export const HARRY_M7S01_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M7S02_ANIM_INFOS: AnimInfo = [
+export const HARRY_M7S02_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -1183,7 +1189,7 @@ export const HARRY_M7S02_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const HARRY_M7S03_ANIM_INFOS: AnimInfo = [
+export const HARRY_M7S03_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, 676],
   [Q12(10), 676, 677],
   [Q12(10), NO_VALUE, 678],
@@ -1236,7 +1242,7 @@ export const HARRY_M7S03_ANIM_INFOS: AnimInfo = [
   [Q12(20), 485, 502],
 ];
 
-export const AIR_SCREAMER_ANIM_INFOS: AnimInfo = [
+export const AIR_SCREAMER_ANIM_INFOS: AnimInfo[] = [
   [Q12(10), NO_VALUE, NO_VALUE],
   [Q12(10), NO_VALUE, NO_VALUE],
   [Q12(10), NO_VALUE, 0],
@@ -1295,7 +1301,7 @@ export const AIR_SCREAMER_ANIM_INFOS: AnimInfo = [
   [sharedFunc_800D77D0_0_s01, 365, 376],
 ];
 
-export const ALESSA_ANIM_INFOS = [
+export const ALESSA_ANIM_INFOS: AnimInfo[] = [
   [Q12(0), NO_VALUE, 0],
   [Q12(30), NO_VALUE, 1],
   [Q12(5), NO_VALUE, 0],
@@ -1320,7 +1326,7 @@ export const ALESSA_ANIM_INFOS = [
   [Q12(3), 326, 341],
 ] as const;
 
-export const BLOODY_INCUBATOR_ANIM_INFOS: AnimInfo = [
+export const BLOODY_INCUBATOR_ANIM_INFOS: AnimInfo[] = [
   [Q12(0), NO_VALUE, 0],
   [Q12(30), NO_VALUE, 1],
   [Q12(10), NO_VALUE, 0],
@@ -1355,7 +1361,7 @@ export const BLOODY_INCUBATOR_ANIM_INFOS: AnimInfo = [
 //    [  Q12(10) ,0,        100 ]
 // ];
 
-export const CAT_ANIM_INFOS: AnimInfo = [
+export const CAT_ANIM_INFOS: AnimInfo[] = [
     [ /* Anim_BlendLinear, NO_VALUE,                                          false, ANIM_STATUS(CatAnim_Still,                 false),  */ Q12(0), NO_VALUE, 0  ],
     [ /* NULL,         ANIM_STATUS(CatAnim_Still,                 false), false, ANIM_STATUS(CatAnim_Still,                 false),  */ Q12(0), 0,        0  ],
     [ /* Anim_BlendLinear, ANIM_STATUS(CatAnim_Jump,                  false), false, ANIM_STATUS(CatAnim_Jump,                  true),  */  Q12(64), NO_VALUE, 7  ],
@@ -1368,7 +1374,7 @@ export const CAT_ANIM_INFOS: AnimInfo = [
     [ /* Anim_PlaybackLoop, ANIM_STATUS(CatAnim_TransitionJumpToRun,   true),  false, NO_VALUE,                                           */ Q12(0), 22,       23 ]
 ];
 
-export const CYBIL_ANIM_INFOS: AnimInfo = [
+export const CYBIL_ANIM_INFOS: AnimInfo[] = [
   [Q12(0), NO_VALUE, 0],
   [Q12(30), NO_VALUE, 1],
   [Q12(5), NO_VALUE, 0],
@@ -1441,7 +1447,7 @@ export const CYBIL_ANIM_INFOS: AnimInfo = [
   [Q12(2), 356, 371],
 ];
 
-export const DAHLIA_ANIM_INFOS: AnimInfo = [
+export const DAHLIA_ANIM_INFOS: AnimInfo[] = [
   [Q12(0), NO_VALUE, 0],
   [Q12(30), NO_VALUE, 1],
   [Q12(10), NO_VALUE, 0],
@@ -1527,7 +1533,7 @@ export const DAHLIA_ANIM_INFOS: AnimInfo = [
 //    [  Q12(32) ,1, 31 ]
 // ];
 
-export const GHOST_CHILD_ALESSA_ANIM_INFOS: AnimInfo = [
+export const GHOST_CHILD_ALESSA_ANIM_INFOS: AnimInfo[] = [
   [Q12(0), NO_VALUE, 0],
   [Q12(30), NO_VALUE, 1],
   [Q12(5), NO_VALUE, 0],
@@ -1548,65 +1554,65 @@ export const GHOST_CHILD_ALESSA_ANIM_INFOS: AnimInfo = [
   [Q12(5), 128, 137],
 ];
 
-export const GHOST_DOCTOR_ANIM_INFOS: AnimInfo = [
+export const GHOST_DOCTOR_ANIM_INFOS: AnimInfo[] = [
   [Q12(0), NO_VALUE, 0],
   [Q12(30), NO_VALUE, 1],
   [Q12(5), NO_VALUE, 0],
   [Q12(15), 0, 15],
 ];
 
-export const GROANER_ANIM_INFOS: AnimInfo = [
-  [Q12(0), NO_VALUE, 0],
-  [Q12(0), 0, 0],
-  [Q12(2), NO_VALUE, 0],
-  [Q12(3), 0, 15],
-  [Q12(16), NO_VALUE, 19],
-  [Q12(24.8), 19, 36],
-  [Q12(16), NO_VALUE, 39],
-  [Q12(0), 39, 77],
-  [Q12(1), NO_VALUE, 78],
-  [Q12(4), 78, 93],
-  [Q12(2), NO_VALUE, 94],
-  [Q12(3.5), 94, 110],
-  [Q12(16), NO_VALUE, 114],
-  [Q12(24.2), 114, 130],
-  [Q12(16), NO_VALUE, 134],
-  [Q12(0), 134, 164],
-  [Q12(1), NO_VALUE, 165],
-  [Q12(6), 165, 190],
-  [Q12(2), NO_VALUE, 191],
-  [Q12(7), 191, 206],
-  [Q12(20), NO_VALUE, 214],
-  [Q12(0), 214, 243],
-  [Q12(2), NO_VALUE, 244],
-  [Q12(3.5), 244, 264],
-  [Q12(16), NO_VALUE, 268],
-  [Q12(24.2), 268, 284],
-  [Q12(32), NO_VALUE, 288],
-  [Q12(0), 288, 318],
-  [Q12(1), NO_VALUE, 319],
-  [Q12(6), 319, 345],
-  [Q12(32), NO_VALUE, 346],
-  [Q12(54), 346, 362],
-  [Q12(16), NO_VALUE, 363],
-  [Q12(0), 363, 370],
-  [Q12(2), NO_VALUE, 371],
-  [Q12(11.5), 371, 396],
-  [Q12(16), NO_VALUE, 15],
-  [Q12(0), 15, 16],
-  [Q12(16), NO_VALUE, 110],
-  [Q12(0), 110, 111],
-  [Q12(16), NO_VALUE, 264],
-  [Q12(0), 264, 265],
-  [Q12(16), NO_VALUE, 0],
-  [Q12(12), 0, 15],
-  [Q12(16), NO_VALUE, 94],
-  [Q12(12), 94, 110],
-  [Q12(16), NO_VALUE, 244],
-  [Q12(12), 244, 264],
+export const GROANER_ANIM_INFOS: FullAnimInfo[] = [
+    [ Anim_BlendLinear, NO_VALUE, false, ANIM_STATUS(0, false), Q12(0), NO_VALUE, 0 ],
+    [ NULL, ANIM_STATUS(0, false), false, ANIM_STATUS(0, false), Q12(0), 0, 0 ],
+    [ Anim_BlendLinear, ANIM_STATUS(1, false), false, ANIM_STATUS(1, true), Q12(2), NO_VALUE, 0 ],
+    [ Anim_PlaybackOnce, ANIM_STATUS(1, true), false, ANIM_STATUS(18, false), Q12(3), 0, 15 ],
+    [ Anim_BlendLinear, ANIM_STATUS(2, false), false, ANIM_STATUS(2, true), Q12(16), NO_VALUE, 19 ],
+    [ Anim_PlaybackOnce, ANIM_STATUS(2, true), false, ANIM_STATUS(9, false), Q12(24.8), 19, 36 ],
+    [ Anim_BlendLinear, ANIM_STATUS(3, false), false, ANIM_STATUS(3, true), Q12(16), NO_VALUE, 39 ],
+    [ Anim_PlaybackOnce, ANIM_STATUS(3, true), false, ANIM_STATUS(4, false), Q12(0), 39, 77 ],
+    [ Anim_BlendLinear, ANIM_STATUS(4, false), false, ANIM_STATUS(4, true), Q12(1), NO_VALUE, 78 ],
+    [ Anim_PlaybackLoop, ANIM_STATUS(4, true), false, NO_VALUE, Q12(4), 78, 93 ],
+    [ Anim_BlendLinear, ANIM_STATUS(5, false), false, ANIM_STATUS(5, true), Q12(2), NO_VALUE, 94 ],
+    [ Anim_PlaybackOnce, ANIM_STATUS(5, true), false, ANIM_STATUS(19, false), Q12(3.5), 94, 110 ],
+    [ Anim_BlendLinear, ANIM_STATUS(6, false), false, ANIM_STATUS(6, true), Q12(16), NO_VALUE, 114 ],
+    [ Anim_PlaybackOnce, ANIM_STATUS(6, true), false, ANIM_STATUS(9, false), Q12(24.2), 114, 130 ],
+    [ Anim_BlendLinear, ANIM_STATUS(7, false), false, ANIM_STATUS(7, true), Q12(16), NO_VALUE, 134 ],
+    [ Anim_PlaybackOnce, ANIM_STATUS(7, true), false, ANIM_STATUS(8, false), Q12(0), 134, 164 ],
+    [ Anim_BlendLinear, ANIM_STATUS(8, false), false, ANIM_STATUS(8, true), Q12(1), NO_VALUE, 165 ],
+    [ Anim_PlaybackLoop, ANIM_STATUS(8, true), false, NO_VALUE, Q12(6), 165, 190 ],
+    [ Anim_BlendLinear, ANIM_STATUS(9, false), false, ANIM_STATUS(9, true), Q12(2), NO_VALUE, 191 ],
+    [ Anim_PlaybackLoop, ANIM_STATUS(9, true), false, NO_VALUE, Q12(7), 191, 206 ],
+    [ Anim_BlendLinear, ANIM_STATUS(10, false), false, ANIM_STATUS(10, true), Q12(20), NO_VALUE, 214 ],
+    [ Anim_PlaybackOnce, ANIM_STATUS(10, true), false, ANIM_STATUS(16, false), Q12(0), 214, 243 ],
+    [ Anim_BlendLinear, ANIM_STATUS(11, false), false, ANIM_STATUS(11, true), Q12(2), NO_VALUE, 244 ],
+    [ Anim_PlaybackOnce, ANIM_STATUS(11, true), false, ANIM_STATUS(20, false), Q12(3.5), 244, 264 ],
+    [ Anim_BlendLinear, ANIM_STATUS(12, false), false, ANIM_STATUS(12, true), Q12(16), NO_VALUE, 268 ],
+    [ Anim_PlaybackOnce, ANIM_STATUS(12, true), false, ANIM_STATUS(9, false), Q12(24.2), 268, 284 ],
+    [ Anim_BlendLinear, ANIM_STATUS(13, false), false, ANIM_STATUS(13, true), Q12(32), NO_VALUE, 288 ],
+    [ Anim_PlaybackOnce, ANIM_STATUS(13, true), false, ANIM_STATUS(14, false), Q12(0), 288, 318 ],
+    [ Anim_BlendLinear, ANIM_STATUS(14, false), false, ANIM_STATUS(14, true), Q12(1), NO_VALUE, 319 ],
+    [ Anim_PlaybackLoop, ANIM_STATUS(14, true), false, NO_VALUE, Q12(6), 319, 345 ],
+    [ Anim_BlendLinear, ANIM_STATUS(15, false), false, ANIM_STATUS(15, true), Q12(32), NO_VALUE, 346 ],
+    [ Anim_PlaybackOnce, ANIM_STATUS(15, true), false, ANIM_STATUS(10, false), Q12(54), 346, 362 ],
+    [ Anim_BlendLinear, ANIM_STATUS(16, false), false, ANIM_STATUS(16, true), Q12(16), NO_VALUE, 363 ],
+    [ Anim_PlaybackLoop, ANIM_STATUS(16, true), false, NO_VALUE, Q12(0), 363, 370 ],
+    [ Anim_BlendLinear, ANIM_STATUS(17, false), false, ANIM_STATUS(17, true), Q12(2), NO_VALUE, 371 ],
+    [ Anim_PlaybackLoop, ANIM_STATUS(17, true), false, NO_VALUE, Q12(11.5), 371, 396 ],
+    [ Anim_BlendLinear, ANIM_STATUS(18, false), false, ANIM_STATUS(18, true), Q12(16), NO_VALUE, 15 ],
+    [ Anim_PlaybackLoop, ANIM_STATUS(18, true), false, NO_VALUE, Q12(0), 15, 16 ],
+    [ Anim_BlendLinear, ANIM_STATUS(19, false), false, ANIM_STATUS(19, true), Q12(16), NO_VALUE, 110 ],
+    [ Anim_PlaybackLoop, ANIM_STATUS(19, true), false, NO_VALUE, Q12(0), 110, 111 ],
+    [ Anim_BlendLinear, ANIM_STATUS(20, false), false, ANIM_STATUS(20, true), Q12(16), NO_VALUE, 264 ],
+    [ Anim_PlaybackLoop, ANIM_STATUS(20, true), false, NO_VALUE, Q12(0), 264, 265 ],
+    [ Anim_BlendLinear, ANIM_STATUS(21, false), false, ANIM_STATUS(21, true), Q12(16), NO_VALUE, 0 ],
+    [ Anim_PlaybackOnce, ANIM_STATUS(21, true), false, ANIM_STATUS(4, false), Q12(12), 0, 15 ],
+    [ Anim_BlendLinear, ANIM_STATUS(22, false), false, ANIM_STATUS(22, true), Q12(16), NO_VALUE, 94 ],
+    [ Anim_PlaybackOnce, ANIM_STATUS(22, true), false, ANIM_STATUS(8, false), Q12(12), 94, 110 ],
+    [ Anim_BlendLinear, ANIM_STATUS(23, false), false, ANIM_STATUS(23, true), Q12(16), NO_VALUE, 244 ],
+    [ Anim_PlaybackOnce, ANIM_STATUS(23, true), false, ANIM_STATUS(14, false), Q12(12), 244, 264 ]
 ];
 
-export const HANGED_SCRATCHER_ANIM_INFOS: AnimInfo = [
+export const HANGED_SCRATCHER_ANIM_INFOS: AnimInfo[] = [
   [Q12(0), NO_VALUE, 0],
   [Q12(0), 0, 0],
   [Q12(0), NO_VALUE, 0],
@@ -1663,7 +1669,7 @@ export const HANGED_SCRATCHER_ANIM_INFOS: AnimInfo = [
   [Q12(0), 97, 98],
 ];
 
-export const INCUBATOR_ANIM_INFOS: AnimInfo = [
+export const INCUBATOR_ANIM_INFOS: AnimInfo[] = [
   [Q12(0), NO_VALUE, 0],
   [Q12(30), NO_VALUE, 1],
   [Q12(10), NO_VALUE, 0],
@@ -1674,7 +1680,7 @@ export const INCUBATOR_ANIM_INFOS: AnimInfo = [
   [Q12(10), 116, 132],
 ];
 
-export const LISA_ANIM_INFOS: AnimInfo = [
+export const LISA_ANIM_INFOS: AnimInfo[] = [
   [Q12(0), NO_VALUE, 0],
   [Q12(30), NO_VALUE, 1],
   [Q12(2), NO_VALUE, 0],
@@ -1713,9 +1719,9 @@ export const LISA_ANIM_INFOS: AnimInfo = [
   [Q12(5), 603, 618],
 ];
 
-export const LOCKERR_DEAD_BODY_ANIM_INFOS: AnimInfo = [];
+export const LOCKERR_DEAD_BODY_ANIM_INFOS: AnimInfo[] = [];
 
-export const MONSTER_CYBIL_ANIM_INFOS: AnimInfo = [
+export const MONSTER_CYBIL_ANIM_INFOS: AnimInfo[] = [
   [Q12(0), NO_VALUE, 0],
   [Q12(30), NO_VALUE, 1],
   [Q12(1), NO_VALUE, 0],
@@ -1723,7 +1729,7 @@ export const MONSTER_CYBIL_ANIM_INFOS: AnimInfo = [
   [Q12(5), NO_VALUE, 24],
 ];
 
-export const ROMPER_ANIM_INFOS: AnimInfo = [
+export const ROMPER_ANIM_INFOS: AnimInfo[] = [
   [Q12(0), NO_VALUE, 0],
   [Q12(0), 0, 0],
   [Q12(20), NO_VALUE, 0],
@@ -1766,7 +1772,7 @@ export const ROMPER_ANIM_INFOS: AnimInfo = [
   [Q12(0), 109, 130],
 ];
 
-export const SPLITHEAD_ANIM_INFOS: AnimInfo = [
+export const SPLITHEAD_ANIM_INFOS: AnimInfo[] = [
   [Q12(0), NO_VALUE, 0],
   [Q12(0), 0, 0],
   [Q12(2), NO_VALUE, 0],
@@ -1799,7 +1805,7 @@ export const SPLITHEAD_ANIM_INFOS: AnimInfo = [
   [Q12(2), 34, 36],
 ];
 
-export const STALKER_ANIM_INFOS: AnimInfo = [
+export const STALKER_ANIM_INFOS: AnimInfo[] = [
   [Q12(0), NO_VALUE, 0],
   [Q12(0), 0, 0],
   [Q12(5), NO_VALUE, 0],
@@ -1898,7 +1904,7 @@ export const STALKER_ANIM_INFOS: AnimInfo = [
   [Q12(0), 294, 295],
 ];
 
-export const D_800D39A0: AnimInfo = [
+export const D_800D39A0: AnimInfo[] = [
   [Q12(0), NO_VALUE, 0],
   [Q12(30), NO_VALUE, 1],
   [Q12(10), NO_VALUE, 0],
@@ -1953,193 +1959,193 @@ export const D_800D39A0: AnimInfo = [
   [Q12(0), 260, 296],
 ];
 
-export const CREEPER_ANIM_INFOS: AnimInfo = [
-  [ /* Anim_BlendLinear,  NO_VALUE,               false, ANIM_STATUS(0, false),  */ Q12(0.0),  NO_VALUE, 0  ],
-  [ /* NULL,              ANIM_STATUS(0, false),  false, ANIM_STATUS(0, false),  */ Q12(0.0),  0,        0  ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(1, false),  false, ANIM_STATUS(1, true),   */ Q12(64.0), NO_VALUE, 0  ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(1, true),   false, ANIM_STATUS(13, false), */ Q12(16.0), 0,        3  ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(2, false),  false, ANIM_STATUS(2, true),   */ Q12(64.0), NO_VALUE, 4  ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(2, true),   false, ANIM_STATUS(1, false),  */ Q12(27.0), 4,        14 ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(3, false),  false, ANIM_STATUS(3, true),   */ Q12(16.0), NO_VALUE, 15 ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(3, true),   false, ANIM_STATUS(14, false), */ Q12(4.0),  15,       20 ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(4, false),  false, ANIM_STATUS(4, true),   */ Q12(8.0),  NO_VALUE, 22 ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(4, true),   false, ANIM_STATUS(15, false), */ Q12(4.0),  22,       27 ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(5, false),  false, ANIM_STATUS(5, true),   */ Q12(16.0), NO_VALUE, 29 ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(5, true),   false, ANIM_STATUS(11, false), */ Q12(16.0), 29,       40 ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(6, false),  false, ANIM_STATUS(6, true),   */ Q12(16.0), NO_VALUE, 41 ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(6, true),   false, ANIM_STATUS(11, false), */ Q12(16.0), 41,       49 ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(7, false),  false, ANIM_STATUS(7, true),   */ Q12(16.0), NO_VALUE, 50 ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(7, true),   false, ANIM_STATUS(9, false),  */ Q12(33.0), 50,       63 ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(8, false),  false, ANIM_STATUS(8, true),   */ Q12(16.0), NO_VALUE, 64 ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(8, true),   false, ANIM_STATUS(10, false), */ Q12(15.0), 64,       70 ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(9, false),  false, ANIM_STATUS(9, true),   */ Q12(32.0), NO_VALUE, 71 ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(9, true),   false, NO_VALUE,               */ Q12(15.0), 71,       83 ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(10, false), false, ANIM_STATUS(10, true),  */ Q12(32.0), NO_VALUE, 84 ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(10, true),  false, NO_VALUE,               */ Q12(20.0), 84,       93 ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(11, false), false, ANIM_STATUS(11, true),  */ Q12(16.0), NO_VALUE, 94 ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(11, true),  false, NO_VALUE,               */ Q12(4.0),  94,       105],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(12, false), false, ANIM_STATUS(12, true),  */ Q12(64.0), NO_VALUE, 106],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(12, true),  false, ANIM_STATUS(2, false),  */ Q12(16.0), 106,      111],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(13, false), false, ANIM_STATUS(13, true),  */ Q12(16.0), NO_VALUE, 112],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(13, true),  false, NO_VALUE,               */ Q12(34.5), 112,      131],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(14, false), false, ANIM_STATUS(14, true),  */ Q12(32.0), NO_VALUE, 20 ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(14, true),  false, NO_VALUE,               */ Q12(0.2),  20,       21 ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(15, false), false, ANIM_STATUS(15, true),  */ Q12(32.0), NO_VALUE, 27 ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(15, true),  false, NO_VALUE,               */ Q12(0.2),  27,       28 ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(16, false), false, ANIM_STATUS(16, true),  */ Q12(16.0), NO_VALUE, 50 ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(16, true),  false, ANIM_STATUS(3, false),  */ Q12(22.0), 50,       63 ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(17, false), false, ANIM_STATUS(17, true),  */ Q12(16.0), NO_VALUE, 64 ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(17, true),  false, ANIM_STATUS(4, false),  */ Q12(10.0), 64,       70  ]
+export const CREEPER_ANIM_INFOS: FullAnimInfo[] = [
+  [  Anim_BlendLinear,  NO_VALUE,               false, ANIM_STATUS(0, false),  Q12(0.0),  NO_VALUE, 0  ],
+  [  NULL,              ANIM_STATUS(0, false),  false, ANIM_STATUS(0, false),  Q12(0.0),  0,        0  ],
+  [  Anim_BlendLinear,  ANIM_STATUS(1, false),  false, ANIM_STATUS(1, true),   Q12(64.0), NO_VALUE, 0  ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(1, true),   false, ANIM_STATUS(13, false), Q12(16.0), 0,        3  ],
+  [  Anim_BlendLinear,  ANIM_STATUS(2, false),  false, ANIM_STATUS(2, true),   Q12(64.0), NO_VALUE, 4  ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(2, true),   false, ANIM_STATUS(1, false),  Q12(27.0), 4,        14 ],
+  [  Anim_BlendLinear,  ANIM_STATUS(3, false),  false, ANIM_STATUS(3, true),   Q12(16.0), NO_VALUE, 15 ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(3, true),   false, ANIM_STATUS(14, false), Q12(4.0),  15,       20 ],
+  [  Anim_BlendLinear,  ANIM_STATUS(4, false),  false, ANIM_STATUS(4, true),   Q12(8.0),  NO_VALUE, 22 ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(4, true),   false, ANIM_STATUS(15, false), Q12(4.0),  22,       27 ],
+  [  Anim_BlendLinear,  ANIM_STATUS(5, false),  false, ANIM_STATUS(5, true),   Q12(16.0), NO_VALUE, 29 ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(5, true),   false, ANIM_STATUS(11, false), Q12(16.0), 29,       40 ],
+  [  Anim_BlendLinear,  ANIM_STATUS(6, false),  false, ANIM_STATUS(6, true),   Q12(16.0), NO_VALUE, 41 ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(6, true),   false, ANIM_STATUS(11, false), Q12(16.0), 41,       49 ],
+  [  Anim_BlendLinear,  ANIM_STATUS(7, false),  false, ANIM_STATUS(7, true),   Q12(16.0), NO_VALUE, 50 ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(7, true),   false, ANIM_STATUS(9, false),  Q12(33.0), 50,       63 ],
+  [  Anim_BlendLinear,  ANIM_STATUS(8, false),  false, ANIM_STATUS(8, true),   Q12(16.0), NO_VALUE, 64 ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(8, true),   false, ANIM_STATUS(10, false), Q12(15.0), 64,       70 ],
+  [  Anim_BlendLinear,  ANIM_STATUS(9, false),  false, ANIM_STATUS(9, true),   Q12(32.0), NO_VALUE, 71 ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(9, true),   false, NO_VALUE,               Q12(15.0), 71,       83 ],
+  [  Anim_BlendLinear,  ANIM_STATUS(10, false), false, ANIM_STATUS(10, true),  Q12(32.0), NO_VALUE, 84 ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(10, true),  false, NO_VALUE,               Q12(20.0), 84,       93 ],
+  [  Anim_BlendLinear,  ANIM_STATUS(11, false), false, ANIM_STATUS(11, true),  Q12(16.0), NO_VALUE, 94 ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(11, true),  false, NO_VALUE,               Q12(4.0),  94,       105],
+  [  Anim_BlendLinear,  ANIM_STATUS(12, false), false, ANIM_STATUS(12, true),  Q12(64.0), NO_VALUE, 106],
+  [  Anim_PlaybackOnce, ANIM_STATUS(12, true),  false, ANIM_STATUS(2, false),  Q12(16.0), 106,      111],
+  [  Anim_BlendLinear,  ANIM_STATUS(13, false), false, ANIM_STATUS(13, true),  Q12(16.0), NO_VALUE, 112],
+  [  Anim_PlaybackLoop, ANIM_STATUS(13, true),  false, NO_VALUE,               Q12(34.5), 112,      131],
+  [  Anim_BlendLinear,  ANIM_STATUS(14, false), false, ANIM_STATUS(14, true),  Q12(32.0), NO_VALUE, 20 ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(14, true),  false, NO_VALUE,               Q12(0.2),  20,       21 ],
+  [  Anim_BlendLinear,  ANIM_STATUS(15, false), false, ANIM_STATUS(15, true),  Q12(32.0), NO_VALUE, 27 ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(15, true),  false, NO_VALUE,               Q12(0.2),  27,       28 ],
+  [  Anim_BlendLinear,  ANIM_STATUS(16, false), false, ANIM_STATUS(16, true),  Q12(16.0), NO_VALUE, 50 ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(16, true),  false, ANIM_STATUS(3, false),  Q12(22.0), 50,       63 ],
+  [  Anim_BlendLinear,  ANIM_STATUS(17, false), false, ANIM_STATUS(17, true),  Q12(16.0), NO_VALUE, 64 ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(17, true),  false, ANIM_STATUS(4, false),  Q12(10.0), 64,       70  ]
 ];
 
-export const LARVAL_STALKER_ANIM_INFOS: AnimInfo = [
-  [ /* Anim_BlendLinear,  NO_VALUE,               false, ANIM_STATUS(0, false),  */ Q12(0.0),  NO_VALUE, 0   ],
-  [ /* NULL,              ANIM_STATUS(0, false),  false, ANIM_STATUS(0, false),  */ Q12(0.0),  0,        0   ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(1, false),  false, ANIM_STATUS(1, true),   */ Q12(8.0),  NO_VALUE, 0   ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(1, true),   false, NO_VALUE,               */ Q12(16.0), 0,        11  ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(2, false),  false, ANIM_STATUS(2, true),   */ Q12(16.0), NO_VALUE, 12  ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(2, true),   false, NO_VALUE,               */ Q12(1.0),  12,       21  ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(3, false),  false, ANIM_STATUS(3, true),   */ Q12(8.0),  NO_VALUE, 22  ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(3, true),   false, ANIM_STATUS(14, false), */ Q12(2.0),  22,       32  ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(4, false),  false, ANIM_STATUS(4, true),   */ Q12(8.0),  NO_VALUE, 33  ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(4, true),   false, ANIM_STATUS(13, false), */ Q12(2.0),  33,       40  ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(5, false),  false, ANIM_STATUS(5, true),   */ Q12(16.0), NO_VALUE, 41  ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(5, true),   false, ANIM_STATUS(10, false), */ Q12(16.0), 41,       85  ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(6, false),  false, ANIM_STATUS(6, true),   */ Q12(16.0), NO_VALUE, 86  ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(6, true),   false, ANIM_STATUS(10, false), */ Q12(10.0), 86,       120 ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(7, false),  false, ANIM_STATUS(7, true),   */ Q12(16.0), NO_VALUE, 121 ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(7, true),   false, ANIM_STATUS(2, false),  */ Q12(10.0), 121,      142 ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(8, false),  false, ANIM_STATUS(8, true),   */ Q12(16.0), NO_VALUE, 143 ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(8, true),   false, ANIM_STATUS(9, false),  */ Q12(10.0), 143,      153 ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(9, false),  false, ANIM_STATUS(9, true),   */ Q12(16.0), NO_VALUE, 154 ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(9, true),   false, NO_VALUE,               */ Q12(4.0),  154,      161 ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(10, false), false, ANIM_STATUS(10, true),  */ Q12(1.0),  NO_VALUE, 162 ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(10, true),  false, NO_VALUE,               */ Q12(4.0),  162,      184 ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(11, false), false, ANIM_STATUS(11, true),  */ Q12(8.0),  NO_VALUE, 185 ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(11, true),  false, NO_VALUE,               */ Q12(16.8), 185,      200 ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(12, false), false, ANIM_STATUS(12, true),  */ Q12(16.0), NO_VALUE, 185 ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(12, true),  false, NO_VALUE,               */ Q12(0.0),  185,      200 ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(13, false), false, ANIM_STATUS(13, true),  */ Q12(16.0), NO_VALUE, 40  ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(13, true),  false, NO_VALUE,               */ Q12(0.0),  40,       41  ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(14, false), false, ANIM_STATUS(14, true),  */ Q12(16.0), NO_VALUE, 32  ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(14, true),  false, NO_VALUE,               */ Q12(0.0),  32,       33  ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(15, false), false, ANIM_STATUS(15, true),  */ Q12(0.0),  NO_VALUE, 41  ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(15, true),  false, ANIM_STATUS(10, false), */ Q12(0.0),  41,       85  ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(16, false), false, ANIM_STATUS(16, true),  */ Q12(0.0),  NO_VALUE, 86  ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(16, true),  false, ANIM_STATUS(10, false), */ Q12(0.0),  86,       120 ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(17, false), false, ANIM_STATUS(17, true),  */ Q12(16.0), NO_VALUE, 154 ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(17, true),  false, ANIM_STATUS(9, false),  */ Q12(12.0), 154,      161 ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(18, false), false, ANIM_STATUS(18, true),  */ Q12(16.0), NO_VALUE, 22  ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(18, true),  false, ANIM_STATUS(2, false),  */ Q12(8.0),  22,       32  ]
+export const LARVAL_STALKER_ANIM_INFOS: FullAnimInfo[] = [
+  [  Anim_BlendLinear,  NO_VALUE,               false, ANIM_STATUS(0, false),  Q12(0.0),  NO_VALUE, 0   ],
+  [  NULL,              ANIM_STATUS(0, false),  false, ANIM_STATUS(0, false),  Q12(0.0),  0,        0   ],
+  [  Anim_BlendLinear,  ANIM_STATUS(1, false),  false, ANIM_STATUS(1, true),   Q12(8.0),  NO_VALUE, 0   ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(1, true),   false, NO_VALUE,               Q12(16.0), 0,        11  ],
+  [  Anim_BlendLinear,  ANIM_STATUS(2, false),  false, ANIM_STATUS(2, true),   Q12(16.0), NO_VALUE, 12  ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(2, true),   false, NO_VALUE,               Q12(1.0),  12,       21  ],
+  [  Anim_BlendLinear,  ANIM_STATUS(3, false),  false, ANIM_STATUS(3, true),   Q12(8.0),  NO_VALUE, 22  ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(3, true),   false, ANIM_STATUS(14, false), Q12(2.0),  22,       32  ],
+  [  Anim_BlendLinear,  ANIM_STATUS(4, false),  false, ANIM_STATUS(4, true),   Q12(8.0),  NO_VALUE, 33  ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(4, true),   false, ANIM_STATUS(13, false), Q12(2.0),  33,       40  ],
+  [  Anim_BlendLinear,  ANIM_STATUS(5, false),  false, ANIM_STATUS(5, true),   Q12(16.0), NO_VALUE, 41  ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(5, true),   false, ANIM_STATUS(10, false), Q12(16.0), 41,       85  ],
+  [  Anim_BlendLinear,  ANIM_STATUS(6, false),  false, ANIM_STATUS(6, true),   Q12(16.0), NO_VALUE, 86  ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(6, true),   false, ANIM_STATUS(10, false), Q12(10.0), 86,       120 ],
+  [  Anim_BlendLinear,  ANIM_STATUS(7, false),  false, ANIM_STATUS(7, true),   Q12(16.0), NO_VALUE, 121 ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(7, true),   false, ANIM_STATUS(2, false),  Q12(10.0), 121,      142 ],
+  [  Anim_BlendLinear,  ANIM_STATUS(8, false),  false, ANIM_STATUS(8, true),   Q12(16.0), NO_VALUE, 143 ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(8, true),   false, ANIM_STATUS(9, false),  Q12(10.0), 143,      153 ],
+  [  Anim_BlendLinear,  ANIM_STATUS(9, false),  false, ANIM_STATUS(9, true),   Q12(16.0), NO_VALUE, 154 ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(9, true),   false, NO_VALUE,               Q12(4.0),  154,      161 ],
+  [  Anim_BlendLinear,  ANIM_STATUS(10, false), false, ANIM_STATUS(10, true),  Q12(1.0),  NO_VALUE, 162 ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(10, true),  false, NO_VALUE,               Q12(4.0),  162,      184 ],
+  [  Anim_BlendLinear,  ANIM_STATUS(11, false), false, ANIM_STATUS(11, true),  Q12(8.0),  NO_VALUE, 185 ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(11, true),  false, NO_VALUE,               Q12(16.8), 185,      200 ],
+  [  Anim_BlendLinear,  ANIM_STATUS(12, false), false, ANIM_STATUS(12, true),  Q12(16.0), NO_VALUE, 185 ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(12, true),  false, NO_VALUE,               Q12(0.0),  185,      200 ],
+  [  Anim_BlendLinear,  ANIM_STATUS(13, false), false, ANIM_STATUS(13, true),  Q12(16.0), NO_VALUE, 40  ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(13, true),  false, NO_VALUE,               Q12(0.0),  40,       41  ],
+  [  Anim_BlendLinear,  ANIM_STATUS(14, false), false, ANIM_STATUS(14, true),  Q12(16.0), NO_VALUE, 32  ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(14, true),  false, NO_VALUE,               Q12(0.0),  32,       33  ],
+  [  Anim_BlendLinear,  ANIM_STATUS(15, false), false, ANIM_STATUS(15, true),  Q12(0.0),  NO_VALUE, 41  ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(15, true),  false, ANIM_STATUS(10, false), Q12(0.0),  41,       85  ],
+  [  Anim_BlendLinear,  ANIM_STATUS(16, false), false, ANIM_STATUS(16, true),  Q12(0.0),  NO_VALUE, 86  ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(16, true),  false, ANIM_STATUS(10, false), Q12(0.0),  86,       120 ],
+  [  Anim_BlendLinear,  ANIM_STATUS(17, false), false, ANIM_STATUS(17, true),  Q12(16.0), NO_VALUE, 154 ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(17, true),  false, ANIM_STATUS(9, false),  Q12(12.0), 154,      161 ],
+  [  Anim_BlendLinear,  ANIM_STATUS(18, false), false, ANIM_STATUS(18, true),  Q12(16.0), NO_VALUE, 22  ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(18, true),  false, ANIM_STATUS(2, false),  Q12(8.0),  22,       32  ]
 ];
 
-export const CHERYL_ANIM_INFOS: AnimInfo = [
-  [ /* Anim_BlendLinear,  ANIM_STATUS(0,  false), false, ANIM_STATUS(0, false),  */ Q12(0.0),  NO_VALUE, 0  ], 
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(0,  true),  false, NO_VALUE,               */ Q12(30.0), NO_VALUE, 1  ], 
-  [ /* Anim_BlendLinear,  ANIM_STATUS(1,  false), false, ANIM_STATUS(1, true),   */ Q12(5.0),  NO_VALUE, 0  ], 
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(1,  true),  false, NO_VALUE,               */ Q12(5.0),  0,        5  ], 
-  [ /* Anim_BlendLinear,  ANIM_STATUS(2,  false), false, ANIM_STATUS(2, true),   */ Q12(5.0),  NO_VALUE, 6  ], 
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(2,  true),  false, NO_VALUE,               */ Q12(30.0), 6,        32 ], 
-  [ /* Anim_BlendLinear,  ANIM_STATUS(3,  false), false, ANIM_STATUS(3, true),   */ Q12(5.0),  NO_VALUE, 34 ], 
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(3,  true),  false, NO_VALUE,               */ Q12(30.0), 34,       55 ]
+export const CHERYL_ANIM_INFOS: FullAnimInfo[] = [
+  [  Anim_BlendLinear,  ANIM_STATUS(0,  false), false, ANIM_STATUS(0, false),  Q12(0.0),  NO_VALUE, 0  ], 
+  [  Anim_PlaybackLoop, ANIM_STATUS(0,  true),  false, NO_VALUE,               Q12(30.0), NO_VALUE, 1  ], 
+  [  Anim_BlendLinear,  ANIM_STATUS(1,  false), false, ANIM_STATUS(1, true),   Q12(5.0),  NO_VALUE, 0  ], 
+  [  Anim_PlaybackLoop, ANIM_STATUS(1,  true),  false, NO_VALUE,               Q12(5.0),  0,        5  ], 
+  [  Anim_BlendLinear,  ANIM_STATUS(2,  false), false, ANIM_STATUS(2, true),   Q12(5.0),  NO_VALUE, 6  ], 
+  [  Anim_PlaybackLoop, ANIM_STATUS(2,  true),  false, NO_VALUE,               Q12(30.0), 6,        32 ], 
+  [  Anim_BlendLinear,  ANIM_STATUS(3,  false), false, ANIM_STATUS(3, true),   Q12(5.0),  NO_VALUE, 34 ], 
+  [  Anim_PlaybackLoop, ANIM_STATUS(3,  true),  false, NO_VALUE,               Q12(30.0), 34,       55 ]
 ];
 
-export const KAUFMANN_ANIM_INFOS: AnimInfo = [ 
-  [ /* Anim_BlendLinear,  ANIM_STATUS(0,  false), false, ANIM_STATUS(0,  false),  */ Q12(0.0),   NO_VALUE, 0,   ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(0,  true),  false, NO_VALUE,                */ Q12(30.0),  NO_VALUE, 1,   ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(1,  false), false, ANIM_STATUS(1,  true),   */ Q12(5.0),   NO_VALUE, 0,   ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(1,  true),  false, NO_VALUE,                */ Q12(5.0),   0,        15,  ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(2,  false), false, ANIM_STATUS(2,  true),   */ Q12(10.0),  NO_VALUE, 16,  ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(2,  true),  false, ANIM_STATUS(2,  true),   */ Q12(10.0),  16,       36,  ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(3,  false), false, ANIM_STATUS(3,  true),   */ Q12(5.0),   NO_VALUE, 37,  ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(3,  true),  false, NO_VALUE,                */ Q12(12.0),  37,       59   ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(4,  false), false, ANIM_STATUS(4,  true),   */ Q12(10.0),  NO_VALUE, 60,  ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(4,  true),  false, ANIM_STATUS(4,  true),   */ Q12(20.0),  60,       89,  ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(5,  false), false, ANIM_STATUS(5,  true),   */ Q12(5.0),   NO_VALUE, 90,  ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(5,  true),  false, ANIM_STATUS(5,  true),   */ Q12(4.0),   90,       104, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(6,  false), false, ANIM_STATUS(6,  true),   */ Q12(10.0),  NO_VALUE, 105, ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(6,  true),  false, ANIM_STATUS(6,  true),   */ Q12(5.0),   105,      115, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(7,  false), false, ANIM_STATUS(7,  true),   */ Q12(10.0),  NO_VALUE, 116, ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(7,  true),  false, ANIM_STATUS(7,  true),   */ Q12(15.0),  116,      181, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(8,  false), false, ANIM_STATUS(8,  true),   */ Q12(10.0),  NO_VALUE, 182, ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(8,  true),  false, ANIM_STATUS(8,  true),   */ Q12(15.0),  182,      202, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(9,  false), false, ANIM_STATUS(9,  true),   */ Q12(10.0),  NO_VALUE, 203, ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(9,  true),  false, ANIM_STATUS(9,  true),   */ Q12(10.0),  203,      290, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(10, false), false, ANIM_STATUS(10, true),   */ Q12(10.0),  NO_VALUE, 291, ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(10, true),  false, ANIM_STATUS(10, true),   */ Q12(10.0),  291,      321, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(11, false), false, ANIM_STATUS(11, true),   */ Q12(10.0),  NO_VALUE, 322, ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(11, true),  false, ANIM_STATUS(11, true),   */ Q12(10.0),  322,      346, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(12, false), false, ANIM_STATUS(12, true),   */ Q12(10.0),  NO_VALUE, 347, ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(12, true),  false, ANIM_STATUS(12, true),   */ Q12(10.0),  347,      383, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(13, false), false, ANIM_STATUS(13, true),   */ Q12(10.0),  NO_VALUE, 384, ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(13, true),  false, ANIM_STATUS(13, true),   */ Q12(15.0),  384,      404, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(14, false), false, ANIM_STATUS(14, true),   */ Q12(5.0),   NO_VALUE, 405, ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(14, true),  false, NO_VALUE,                */ Q12(5.0),   405,      420, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(15, false), false, ANIM_STATUS(15, true),   */ Q12(10.0),  NO_VALUE, 0,   ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(15, true),  false, ANIM_STATUS(15, true),   */ Q12(10.0),  0,        62,  ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(16, false), false, ANIM_STATUS(16, true),   */ Q12(10.0),  NO_VALUE, 63,  ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(16, true),  false, ANIM_STATUS(16, true),   */ Q12(10.0),  63,       85,  ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(17, false), false, ANIM_STATUS(17, true),   */ Q12(10.0),  NO_VALUE, 86,  ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(17, true),  false, NO_VALUE,                */ Q12(10.0),  86,       101, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(18, false), false, ANIM_STATUS(18, true),   */ Q12(10.0),  NO_VALUE, 102, ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(18, true),  false, ANIM_STATUS(18, true),   */ Q12(10.0),  102,      201, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(19, false), false, ANIM_STATUS(19, true),   */ Q12(10.0),  NO_VALUE, 202, ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(19, true),  false, ANIM_STATUS(19, true),   */ Q12(10.0),  202,      225, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(20, false), false, ANIM_STATUS(20, true),   */ Q12(5.0),   NO_VALUE, 226, ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(20, true),  false, NO_VALUE,                */ Q12(5.0),   226,      241, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(21, false), false, ANIM_STATUS(21, true),   */ Q12(10.0),  NO_VALUE, 242, ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(21, true),  false, ANIM_STATUS(21, true),   */ Q12(10.0),  242,      262, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(22, false), false, ANIM_STATUS(22, true),   */ Q12(10.0),  NO_VALUE, 208, ],
+export const KAUFMANN_ANIM_INFOS: FullAnimInfo[] = [ 
+  [  Anim_BlendLinear,  ANIM_STATUS(0,  false), false, ANIM_STATUS(0,  false),  Q12(0.0),   NO_VALUE, 0,   ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(0,  true),  false, NO_VALUE,                Q12(30.0),  NO_VALUE, 1,   ],
+  [  Anim_BlendLinear,  ANIM_STATUS(1,  false), false, ANIM_STATUS(1,  true),   Q12(5.0),   NO_VALUE, 0,   ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(1,  true),  false, NO_VALUE,                Q12(5.0),   0,        15,  ],
+  [  Anim_BlendLinear,  ANIM_STATUS(2,  false), false, ANIM_STATUS(2,  true),   Q12(10.0),  NO_VALUE, 16,  ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(2,  true),  false, ANIM_STATUS(2,  true),   Q12(10.0),  16,       36,  ],
+  [  Anim_BlendLinear,  ANIM_STATUS(3,  false), false, ANIM_STATUS(3,  true),   Q12(5.0),   NO_VALUE, 37,  ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(3,  true),  false, NO_VALUE,                Q12(12.0),  37,       59   ],
+  [  Anim_BlendLinear,  ANIM_STATUS(4,  false), false, ANIM_STATUS(4,  true),   Q12(10.0),  NO_VALUE, 60,  ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(4,  true),  false, ANIM_STATUS(4,  true),   Q12(20.0),  60,       89,  ],
+  [  Anim_BlendLinear,  ANIM_STATUS(5,  false), false, ANIM_STATUS(5,  true),   Q12(5.0),   NO_VALUE, 90,  ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(5,  true),  false, ANIM_STATUS(5,  true),   Q12(4.0),   90,       104, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(6,  false), false, ANIM_STATUS(6,  true),   Q12(10.0),  NO_VALUE, 105, ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(6,  true),  false, ANIM_STATUS(6,  true),   Q12(5.0),   105,      115, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(7,  false), false, ANIM_STATUS(7,  true),   Q12(10.0),  NO_VALUE, 116, ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(7,  true),  false, ANIM_STATUS(7,  true),   Q12(15.0),  116,      181, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(8,  false), false, ANIM_STATUS(8,  true),   Q12(10.0),  NO_VALUE, 182, ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(8,  true),  false, ANIM_STATUS(8,  true),   Q12(15.0),  182,      202, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(9,  false), false, ANIM_STATUS(9,  true),   Q12(10.0),  NO_VALUE, 203, ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(9,  true),  false, ANIM_STATUS(9,  true),   Q12(10.0),  203,      290, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(10, false), false, ANIM_STATUS(10, true),   Q12(10.0),  NO_VALUE, 291, ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(10, true),  false, ANIM_STATUS(10, true),   Q12(10.0),  291,      321, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(11, false), false, ANIM_STATUS(11, true),   Q12(10.0),  NO_VALUE, 322, ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(11, true),  false, ANIM_STATUS(11, true),   Q12(10.0),  322,      346, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(12, false), false, ANIM_STATUS(12, true),   Q12(10.0),  NO_VALUE, 347, ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(12, true),  false, ANIM_STATUS(12, true),   Q12(10.0),  347,      383, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(13, false), false, ANIM_STATUS(13, true),   Q12(10.0),  NO_VALUE, 384, ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(13, true),  false, ANIM_STATUS(13, true),   Q12(15.0),  384,      404, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(14, false), false, ANIM_STATUS(14, true),   Q12(5.0),   NO_VALUE, 405, ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(14, true),  false, NO_VALUE,                Q12(5.0),   405,      420, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(15, false), false, ANIM_STATUS(15, true),   Q12(10.0),  NO_VALUE, 0,   ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(15, true),  false, ANIM_STATUS(15, true),   Q12(10.0),  0,        62,  ],
+  [  Anim_BlendLinear,  ANIM_STATUS(16, false), false, ANIM_STATUS(16, true),   Q12(10.0),  NO_VALUE, 63,  ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(16, true),  false, ANIM_STATUS(16, true),   Q12(10.0),  63,       85,  ],
+  [  Anim_BlendLinear,  ANIM_STATUS(17, false), false, ANIM_STATUS(17, true),   Q12(10.0),  NO_VALUE, 86,  ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(17, true),  false, NO_VALUE,                Q12(10.0),  86,       101, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(18, false), false, ANIM_STATUS(18, true),   Q12(10.0),  NO_VALUE, 102, ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(18, true),  false, ANIM_STATUS(18, true),   Q12(10.0),  102,      201, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(19, false), false, ANIM_STATUS(19, true),   Q12(10.0),  NO_VALUE, 202, ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(19, true),  false, ANIM_STATUS(19, true),   Q12(10.0),  202,      225, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(20, false), false, ANIM_STATUS(20, true),   Q12(5.0),   NO_VALUE, 226, ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(20, true),  false, NO_VALUE,                Q12(5.0),   226,      241, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(21, false), false, ANIM_STATUS(21, true),   Q12(10.0),  NO_VALUE, 242, ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(21, true),  false, ANIM_STATUS(21, true),   Q12(10.0),  242,      262, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(22, false), false, ANIM_STATUS(22, true),   Q12(10.0),  NO_VALUE, 208, ],
 ];
 
-export const TWINFEELER_ANIM_INFOS: AnimInfo = [ 
-  [ /* Anim_BlendLinear,  NO_VALUE,               false, ANIM_STATUS(0, false),   */ Q12(0.0),  NO_VALUE, 0,   ],
-  [ /* NULL,              ANIM_STATUS(0,  false), false, ANIM_STATUS(0,  false),  */ Q12(0.0),  0,        0,   ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(1,  false), false, ANIM_STATUS(1,  true),   */ Q12(20.0), NO_VALUE, 0,   ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(1,  true),  false, ANIM_STATUS(18, false),  */ Q12(16.0), 0,        31,  ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(2,  false), false, ANIM_STATUS(2,  true),   */ Q12(8.0),  NO_VALUE, 32,  ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(2,  true),  false, ANIM_STATUS(18, false),  */ Q12(14.0), 32,       72,  ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(3,  false), false, ANIM_STATUS(3,  true),   */ Q12(20.0), NO_VALUE, 73,  ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(3,  true),  false, ANIM_STATUS(19, false),  */ Q12(14.0), 73,       104, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(4,  false), false, ANIM_STATUS(4,  true),   */ Q12(20.0), NO_VALUE, 105, ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(4,  true),  false, ANIM_STATUS(19, false),  */ Q12(14.0), 105,      130, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(5,  false), false, ANIM_STATUS(5,  true),   */ Q12(20.0), NO_VALUE, 131, ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(5,  true),  false, NO_VALUE,                */ Q12(14.0), 131,      162, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(6,  false), false, ANIM_STATUS(6,  true),   */ Q12(20.0), NO_VALUE, 163, ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(6,  true),  false, NO_VALUE,                */ Q12(14.0), 163,      194, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(7,  false), false, ANIM_STATUS(7,  true),   */ Q12(20.0), NO_VALUE, 195, ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(7,  true),  false, ANIM_STATUS(20, false),  */ Q12(14.0), 195,      226, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(8,  false), false, ANIM_STATUS(8,  true),   */ Q12(10.0), NO_VALUE, 227, ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(8,  true),  false, NO_VALUE,                */ Q12(14.0), 227,      258, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(9,  false), false, ANIM_STATUS(9,  true),   */ Q12(20.0), NO_VALUE, 259, ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(9,  true),  false, ANIM_STATUS(18, false),  */ Q12(14.0), 259,      290, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(10, false), false, ANIM_STATUS(10, true),   */ Q12(20.0), NO_VALUE, 291, ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(10, true),  false, ANIM_STATUS(18, false),  */ Q12(14.0), 291,      322, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(11, false), false, ANIM_STATUS(11, true),   */ Q12(20.0), NO_VALUE, 323, ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(11, true),  false, ANIM_STATUS(18, false),  */ Q12(14.0), 323,      354, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(12, false), false, ANIM_STATUS(12, true),   */ Q12(20.0), NO_VALUE, 355, ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(12, true),  false, ANIM_STATUS(18, false),  */ Q12(14.0), 355,      386, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(13, false), false, ANIM_STATUS(13, true),   */ Q12(20.0), NO_VALUE, 387, ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(13, true),  false, ANIM_STATUS(18, false),  */ Q12(14.0), 387,      407, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(14, false), false, ANIM_STATUS(14, true),   */ Q12(20.0), NO_VALUE, 408, ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(14, true),  false, ANIM_STATUS(18, false),  */ Q12(14.0), 408,      428, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(15, false), false, ANIM_STATUS(15, true),   */ Q12(20.0), NO_VALUE, 429, ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(15, true),  false, ANIM_STATUS(21, false),  */ Q12(14.0), 429,      459, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(16, false), false, ANIM_STATUS(16, true),   */ Q12(20.0), NO_VALUE, 460, ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(16, true),  false, ANIM_STATUS(22, false),  */ Q12(14.0), 460,      490, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(17, false), false, ANIM_STATUS(17, true),   */ Q12(20.0), NO_VALUE, 491, ],
-  [ /* Anim_PlaybackOnce, ANIM_STATUS(17, true),  false, ANIM_STATUS(18, false),  */ Q12(30.0), 491,      521, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(18, false), false, ANIM_STATUS(18, true),   */ Q12(60.0), NO_VALUE, 258, ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(18, true),  false, NO_VALUE,                */ Q12(0.0),  258,      258, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(19, false), false, ANIM_STATUS(19, true),   */ Q12(60.0), NO_VALUE, 104, ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(19, true),  false, NO_VALUE,                */ Q12(0.0),  104,      104, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(20, false), false, ANIM_STATUS(20, true),   */ Q12(60.0), NO_VALUE, 226, ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(20, true),  false, NO_VALUE,                */ Q12(0.0),  226,      226, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(21, false), false, ANIM_STATUS(21, true),   */ Q12(60.0), NO_VALUE, 459, ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(21, true),  false, NO_VALUE,                */ Q12(0.0),  459,      459, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(22, false), false, ANIM_STATUS(22, true),   */ Q12(60.0), NO_VALUE, 490, ],
-  [ /* Anim_PlaybackLoop, ANIM_STATUS(22, true),  false, NO_VALUE,                */ Q12(0.0),  490,      490, ],
-  [ /* Anim_BlendLinear,  ANIM_STATUS(23, false), false, ANIM_STATUS(23, true),   */ Q12(20.0), NO_VALUE, 0,   ],
+export const TWINFEELER_ANIM_INFOS: FullAnimInfo[] = [ 
+  [  Anim_BlendLinear,  NO_VALUE,               false, ANIM_STATUS(0, false),   Q12(0.0),  NO_VALUE, 0,   ],
+  [  NULL,              ANIM_STATUS(0,  false), false, ANIM_STATUS(0,  false),  Q12(0.0),  0,        0,   ],
+  [  Anim_BlendLinear,  ANIM_STATUS(1,  false), false, ANIM_STATUS(1,  true),   Q12(20.0), NO_VALUE, 0,   ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(1,  true),  false, ANIM_STATUS(18, false),  Q12(16.0), 0,        31,  ],
+  [  Anim_BlendLinear,  ANIM_STATUS(2,  false), false, ANIM_STATUS(2,  true),   Q12(8.0),  NO_VALUE, 32,  ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(2,  true),  false, ANIM_STATUS(18, false),  Q12(14.0), 32,       72,  ],
+  [  Anim_BlendLinear,  ANIM_STATUS(3,  false), false, ANIM_STATUS(3,  true),   Q12(20.0), NO_VALUE, 73,  ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(3,  true),  false, ANIM_STATUS(19, false),  Q12(14.0), 73,       104, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(4,  false), false, ANIM_STATUS(4,  true),   Q12(20.0), NO_VALUE, 105, ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(4,  true),  false, ANIM_STATUS(19, false),  Q12(14.0), 105,      130, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(5,  false), false, ANIM_STATUS(5,  true),   Q12(20.0), NO_VALUE, 131, ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(5,  true),  false, NO_VALUE,                Q12(14.0), 131,      162, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(6,  false), false, ANIM_STATUS(6,  true),   Q12(20.0), NO_VALUE, 163, ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(6,  true),  false, NO_VALUE,                Q12(14.0), 163,      194, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(7,  false), false, ANIM_STATUS(7,  true),   Q12(20.0), NO_VALUE, 195, ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(7,  true),  false, ANIM_STATUS(20, false),  Q12(14.0), 195,      226, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(8,  false), false, ANIM_STATUS(8,  true),   Q12(10.0), NO_VALUE, 227, ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(8,  true),  false, NO_VALUE,                Q12(14.0), 227,      258, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(9,  false), false, ANIM_STATUS(9,  true),   Q12(20.0), NO_VALUE, 259, ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(9,  true),  false, ANIM_STATUS(18, false),  Q12(14.0), 259,      290, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(10, false), false, ANIM_STATUS(10, true),   Q12(20.0), NO_VALUE, 291, ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(10, true),  false, ANIM_STATUS(18, false),  Q12(14.0), 291,      322, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(11, false), false, ANIM_STATUS(11, true),   Q12(20.0), NO_VALUE, 323, ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(11, true),  false, ANIM_STATUS(18, false),  Q12(14.0), 323,      354, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(12, false), false, ANIM_STATUS(12, true),   Q12(20.0), NO_VALUE, 355, ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(12, true),  false, ANIM_STATUS(18, false),  Q12(14.0), 355,      386, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(13, false), false, ANIM_STATUS(13, true),   Q12(20.0), NO_VALUE, 387, ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(13, true),  false, ANIM_STATUS(18, false),  Q12(14.0), 387,      407, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(14, false), false, ANIM_STATUS(14, true),   Q12(20.0), NO_VALUE, 408, ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(14, true),  false, ANIM_STATUS(18, false),  Q12(14.0), 408,      428, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(15, false), false, ANIM_STATUS(15, true),   Q12(20.0), NO_VALUE, 429, ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(15, true),  false, ANIM_STATUS(21, false),  Q12(14.0), 429,      459, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(16, false), false, ANIM_STATUS(16, true),   Q12(20.0), NO_VALUE, 460, ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(16, true),  false, ANIM_STATUS(22, false),  Q12(14.0), 460,      490, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(17, false), false, ANIM_STATUS(17, true),   Q12(20.0), NO_VALUE, 491, ],
+  [  Anim_PlaybackOnce, ANIM_STATUS(17, true),  false, ANIM_STATUS(18, false),  Q12(30.0), 491,      521, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(18, false), false, ANIM_STATUS(18, true),   Q12(60.0), NO_VALUE, 258, ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(18, true),  false, NO_VALUE,                Q12(0.0),  258,      258, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(19, false), false, ANIM_STATUS(19, true),   Q12(60.0), NO_VALUE, 104, ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(19, true),  false, NO_VALUE,                Q12(0.0),  104,      104, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(20, false), false, ANIM_STATUS(20, true),   Q12(60.0), NO_VALUE, 226, ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(20, true),  false, NO_VALUE,                Q12(0.0),  226,      226, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(21, false), false, ANIM_STATUS(21, true),   Q12(60.0), NO_VALUE, 459, ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(21, true),  false, NO_VALUE,                Q12(0.0),  459,      459, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(22, false), false, ANIM_STATUS(22, true),   Q12(60.0), NO_VALUE, 490, ],
+  [  Anim_PlaybackLoop, ANIM_STATUS(22, true),  false, NO_VALUE,                Q12(0.0),  490,      490, ],
+  [  Anim_BlendLinear,  ANIM_STATUS(23, false), false, ANIM_STATUS(23, true),   Q12(20.0), NO_VALUE, 0,   ],
 ];
 
 
@@ -2166,7 +2172,7 @@ export const Sh1AnimInfo = {
   DG2: null,
   DOB: null,
   DOC: null,
-  DOG: null,
+  DOG: GROANER_ANIM_INFOS,
   // DUMMY: null,
   EI: null,
   FAT: null,
@@ -2193,15 +2199,45 @@ export const Sh1AnimInfo = {
   TAR: null,
   TDRA: null,
   WORM: TWINFEELER_ANIM_INFOS,
-} satisfies Record<string, null | AnimInfo>;
+} satisfies Record<string, null | AnimInfo[] | FullAnimInfo[]>;
 
-type AnimInfo = ReadonlyArray<
-  readonly [
-    /* duration */
-    number | (() => number),
-    /* start keyframe */
-    number,
-    /* end keyframe */
-    number
-  ]
->;
+type AnimInfo = readonly [
+  /* duration */
+  number | (() => number),
+  /* start keyframe */
+  number,
+  /* end keyframe */
+  number
+];
+
+type AnimPlaybackFunc = 
+  | typeof Anim_BlendLinear
+  | typeof Anim_PlaybackLoop 
+  | typeof Anim_PlaybackOnce
+type AnimStatus = number
+ 
+type FullAnimInfo = readonly [
+  /* playback functions */
+  AnimPlaybackFunc | typeof NULL,
+
+  /* status */
+  AnimStatus,
+
+  /* has variable duration? */
+  boolean,
+
+  /* link status */
+  number,
+
+  /* duration */
+  number | (() => number),
+
+  /* start keyframe */
+  number,
+
+  /* end keyframe */
+  number
+];
+
+export const isLegacyAnimInfoFormat = (info: unknown): info is AnimInfo =>
+  Array.isArray(info) ? info.length === 3 : false

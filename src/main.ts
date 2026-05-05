@@ -128,7 +128,9 @@ import {
 } from "./sh1/sh1";
 import PsxTim from "./kaitai/PsxTim";
 import {
+  Anim_PlaybackLoop,
   HB_BASE_FRAMES_OFFSET,
+  isLegacyAnimInfoFormat,
   NO_VALUE,
   Sh1AnimInfo,
 } from "./sh1/sh1-animinfo";
@@ -1296,8 +1298,16 @@ const renderSh1 = async () => {
 
     for (let i = 1; i < animInfos.length; i += 2) {
       const animInfo = animInfos[i];
-      let animStart = animInfo[1];
-      let animEnd = animInfo[2];
+
+      let animStart, animEnd;
+
+      if (isLegacyAnimInfoFormat(animInfo)) {
+        animStart = animInfo[1];
+        animEnd = animInfo[2];
+      } else {
+        animStart = animInfo[5];
+        animEnd = animInfo[6];
+      }
 
       let type = "animation";
       if (animStart === NO_VALUE || animEnd === NO_VALUE) {
@@ -1323,6 +1333,7 @@ const renderSh1 = async () => {
       const key = `${type} ${n}`;
       animMap[key] = () => {
         mixer.stopAllAction();
+        animationLooped = animInfo[0] === Anim_PlaybackLoop;
         configureAction(clipAction).play();
       };
     }
