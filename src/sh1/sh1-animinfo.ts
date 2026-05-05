@@ -2199,7 +2199,9 @@ export const Sh1AnimInfo = {
   TAR: null,
   TDRA: null,
   WORM: TWINFEELER_ANIM_INFOS,
-} satisfies Record<string, null | AnimInfo[] | FullAnimInfo[]>;
+} satisfies Record<string, MaybeSh1AnimInfoArray>;
+export type MaybeSh1AnimInfoArray = null | AnimInfo[] | FullAnimInfo[];
+export type SomeAnimInfo = AnimInfo | FullAnimInfo
 
 type AnimInfo = readonly [
   /* duration */
@@ -2241,3 +2243,6 @@ type FullAnimInfo = readonly [
 
 export const isLegacyAnimInfoFormat = (info: unknown): info is AnimInfo =>
   Array.isArray(info) ? info.length === 3 : false
+
+export const isCursedAnimInfo = (animInfos: MaybeSh1AnimInfoArray, animInfo: SomeAnimInfo) =>
+  animInfos === GROANER_ANIM_INFOS && animInfo === GROANER_ANIM_INFOS[39] /* why is it looped */;

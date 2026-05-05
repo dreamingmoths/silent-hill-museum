@@ -130,6 +130,7 @@ import PsxTim from "./kaitai/PsxTim";
 import {
   Anim_PlaybackLoop,
   HB_BASE_FRAMES_OFFSET,
+  isCursedAnimInfo,
   isLegacyAnimInfoFormat,
   NO_VALUE,
   Sh1AnimInfo,
@@ -1298,15 +1299,19 @@ const renderSh1 = async () => {
 
     for (let i = 1; i < animInfos.length; i += 2) {
       const animInfo = animInfos[i];
-
-      let animStart, animEnd;
-
+      const animInfoIsCursed = isCursedAnimInfo(animInfos, animInfo);
+      const animInfoShouldBeBanished = prefersReducedMotion && animInfoIsCursed;
+    
+      let animStart, animEnd,
+          animLoop = true;
+      
       if (isLegacyAnimInfoFormat(animInfo)) {
         animStart = animInfo[1];
         animEnd = animInfo[2];
       } else {
         animStart = animInfo[5];
         animEnd = animInfo[6];
+        animLoop = animInfo[0] === Anim_PlaybackLoop;
       }
 
       let type = "animation";
@@ -1331,9 +1336,13 @@ const renderSh1 = async () => {
 
       const n = i >> 1;
       const key = `${type} ${n}`;
+
       animMap[key] = () => {
+        const reallyLoop = !animInfoShouldBeBanished && animLoop;
+        animationLooped = reallyLoop; 
+        animationLoopButton.setValue(reallyLoop);
+        
         mixer.stopAllAction();
-        animationLooped = animInfo[0] === Anim_PlaybackLoop;
         configureAction(clipAction).play();
       };
     }
